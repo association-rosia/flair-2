@@ -9,7 +9,7 @@ import src.constants as cst
 import rasterio
 
 
-def read_image(path_file):
+def read_aerial(path_file):
     with rasterio.open(path_file) as f:
         image = f.read()
         image = torch.from_numpy(image)
@@ -23,10 +23,11 @@ def read_centroids(path_file):
 
     return centroids
 
+
 class Flair2Dataset(Dataset):
-    def __init__(self, test=False):
-        self.test = test
-        self.path = cst.PATH_DATA_TRAIN if not test else cst.PATH_DATA_TEST
+    def __init__(self, is_test):
+        self.is_test = is_test
+        self.path = cst.PATH_DATA_TRAIN if not is_test else cst.PATH_DATA_TEST
         self.centroids = read_centroids(os.path.join(cst.PATH_DATA, 'centroids_sp_to_patch.json'))
         self.list_images = self.get_list_images()
 
@@ -45,12 +46,13 @@ class Flair2Dataset(Dataset):
         return len(self.list_images)
 
     def __getitem__(self, idx):
-        image = read_image(self.list_images[idx])
+        aerial = read_aerial(self.list_images[idx])
+
         image_id = self.list_images[idx].split('/')[-1]
         centroid = self.centroids[image_id]
         return None
 
 
 if __name__ == '__main__':
-    dataset_train = Flair2Dataset()
+    dataset_train = Flair2Dataset(is_test=False)
     test = dataset_train[0]
