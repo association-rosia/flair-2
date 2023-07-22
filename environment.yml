@@ -1,0 +1,13 @@
+name: flair-2-env
+dependencies:
+  - python=3.10.*
+  - pip
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pip:
+    - jupyter
+    - pytorch-lightning # Numpy error using conda
+    - opencv-python
+    - scikit-learn
+    - wandb
+    - segmentation-models-pytorch
