@@ -1,26 +1,29 @@
-import os
-from glob import glob
 import json
+import os
+from datetime import datetime
+from glob import glob
 
+import numpy as np
+import rasterio
 import torch
 from torch.utils.data import Dataset
 
 import src.constants as cst
-import rasterio
-
-import numpy as np
 
 
 class FLAIR2Dataset(Dataset):
-    def __init__(self, list_images, sen_size, is_test):
+    def __init__(self, list_images, sen_size, is_test=False, use_augmentation=None):
         self.list_images = list_images
         self.sen_size = sen_size
         self.is_test = is_test
+        self.use_augmentation = use_augmentation
+
         self.path = cst.PATH_DATA_TRAIN if not is_test else cst.PATH_DATA_TEST
         self.path_centroids = os.path.join(cst.PATH_DATA, 'centroids_sp_to_patch.json')
         self.centroids = self.read_centroids(self.path_centroids)
 
-    def path_aerial_to_labels(self, path_aerial):
+    @staticmethod
+    def path_aerial_to_labels(path_aerial):
         path_labels = path_aerial.replace('aerial', 'labels')
         path_labels = path_labels.replace('img', 'msk')
         path_labels = path_labels.replace('IMG', 'MSK')
@@ -36,7 +39,8 @@ class FLAIR2Dataset(Dataset):
 
         return path_aerial, path_sen, path_labels, image_id
 
-    def read_tif(self, path_file):
+    @staticmethod
+    def read_tif(path_file):
         with rasterio.open(path_file) as f:
             image = f.read()
             image = torch.from_numpy(image)
@@ -44,15 +48,16 @@ class FLAIR2Dataset(Dataset):
 
         return image
 
-    def read_centroids(self, path_file):
+    @staticmethod
+    def read_centroids(path_file):
         with open(path_file) as f:
             centroids = json.load(f)
 
         return centroids
 
-    def read_sen(self, path_sen, file_name, centroid):
-        path_data = os.path.join(path_sen, file_name)
-        data = np.load(path_data, mmap_mode='r').astype(np.int16)
+    def read_sen_npy(self, path_sen, file_name, centroid):
+        path_file = os.path.join(path_sen, file_name)
+        data = np.load(path_file, mmap_mode='r').astype(np.int16)
 
         sp_len = int(self.sen_size / 2)
         data = data[:, :, centroid[0] - sp_len:centroid[0] + sp_len, centroid[1] - sp_len:centroid[1] + sp_len]
@@ -60,32 +65,92 @@ class FLAIR2Dataset(Dataset):
 
         return data
 
+    @staticmethod
+    def read_sen_txt(path_sen, file_name):
+        path_file = os.path.join(path_sen, file_name)
+        with open(path_file, 'r') as f:
+            sen_products = [line for line in f.readlines()]
+
+        return sen_products
+
     def read_sens(self, image_id, path_sen):
         centroid = self.centroids[image_id]
         sen_ids = path_sen.split('/')[-3:-1]
 
         file_data = f'SEN2_sp_{sen_ids[0]}-{sen_ids[1]}_data.npy'
-        sen_data = self.read_sen(path_sen, file_data, centroid)
+        sen_data = self.read_sen_npy(path_sen, file_data, centroid)
 
         file_masks = f'SEN2_sp_{sen_ids[0]}-{sen_ids[1]}_masks.npy'
-        sen_masks = self.read_sen(path_sen, file_masks, centroid)
+        sen_masks = self.read_sen_npy(path_sen, file_masks, centroid)
 
-        return sen_data, sen_masks
+        file_products = f'SEN2_sp_{sen_ids[0]}-{sen_ids[1]}_products.txt'
+        sen_products = self.read_sen_txt(path_sen, file_products)
+
+        return sen_data, sen_masks, sen_products
+
+    def get_aerial(self, path_aerial):
+        aerial = self.read_tif(path_aerial)
+        aerial = aerial / 255.0
+
+        return aerial
+
+    @staticmethod
+    def extract_sen_months(sen_products):
+        sen_dates = [datetime.strptime(product.split('_')[2], '%Y%m%dT%H%M%S') for product in sen_products]
+        sen_months = [date.month for date in sen_dates]
+
+        return sen_months
+
+    @staticmethod
+    def masks_filtering(sen_data, sen_masks, sen_months, thr_cover=60, thr_rate=0.5):
+        times = []
+
+        for t in range(len(sen_masks)):
+            # TODO: verify this (cf. filter_dates in ils_dataset.py from FLAIR project)
+            cover = np.count_nonzero((sen_masks[t, 0, :, :] >= thr_cover) + (sen_masks[t, 1, :, :] >= thr_cover))
+            rate = cover / (sen_masks.shape[2] * sen_masks.shape[3])
+            sen_per_months = sen_months.count(sen_months[t])
+
+            if rate < thr_rate or sen_per_months == 1:
+                times.append(t)
+            else:
+                sen_months[t] = -1
+
+        sen_data = sen_data[times, :, :, :]
+        sen_months = [sen_month for sen_month in sen_months if sen_month != -1]
+
+        return sen_data, sen_months
+
+    @staticmethod
+    def months_averaging(sen_data, sen_months):
+        sen_shape = list(sen_data.shape)
+        sen_shape[0] = 12
+        sen = torch.zeros(sen_shape)
+
+        for m in range(12):
+            indexes = [i for i in range(len(sen_months)) if sen_months[i] == m + 1]
+            sen[m, :, :, :] = torch.mean(sen_data[indexes, :, :, :].float(), dim=0)
+
+        return sen
+
+    def get_sen(self, image_id, path_sen):
+        sen_data, sen_masks, sen_products = self.read_sens(image_id, path_sen)
+        sen_months = self.extract_sen_months(sen_products)
+        sen_data, sen_months = self.masks_filtering(sen_data, sen_masks, sen_months)
+        sen = self.months_averaging(sen_data, sen_months)
+        sen = sen / 19779.0  # founded maximum value (minimum = 0)
+
+        return sen
 
     def __len__(self):
         return len(self.list_images)
 
     def __getitem__(self, idx):
         path_aerial, path_sen, path_labels, image_id = self.get_paths(idx)
-        aerial = self.read_tif(path_aerial) / 255.0
-        sen_data, sen_masks = self.read_sens(image_id, path_sen)
+        aerial = self.get_aerial(path_aerial)
+        sen = self.get_sen(image_id, path_sen)
         labels = self.read_tif(path_labels)
-
-        sen = sen_data  # TODO: process using sen_masks
-        # TODO: remove data with to many cloud or snow (if > 20)
-        # TODO: process labels 1 dim to 13
-        # TODO: select sen_data & sen_masks using metadata or products (date)
-        # TODO: data augmentation
+        # TODO: data augmentation and TTA
 
         return aerial, sen, labels
 
@@ -98,11 +163,15 @@ def get_list_images(path):
 
 
 if __name__ == '__main__':
-    # sen_temp_len_min = 20
-    # sen_temp_len_max = 100
-
     path_train = cst.PATH_DATA_TRAIN
     list_images_train = get_list_images(path_train)
-    dataset_train = FLAIR2Dataset(list_images=list_images_train, sen_size=40, is_test=False)
+
+    dataset_train = FLAIR2Dataset(
+        list_images=list_images_train,
+        sen_size=40,
+        is_test=False,
+        use_augmentation=False,
+    )
+
     aerial, sen, labels = dataset_train[0]
     print()
