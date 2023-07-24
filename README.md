@@ -1,3 +1,3 @@
-# flair-2
+# FLAIR #2
 
 <img src="assets/bandeau.jpg">
