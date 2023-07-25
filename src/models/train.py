@@ -18,9 +18,8 @@ import src.constants as cst
 
 def main():
     wandb.init(
-        entity='urgellbapt',
-        project='developpement',
-        group='FLAIR2',
+        entity='association-rosia',
+        project='FLAIR-2',
         config={
             'architecture': 'Unet',
             'encoder_name': 'tu-efficientnetv2_xl',
@@ -81,11 +80,11 @@ def main():
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
         callbacks=[checkpoint_callback],
-        # accelerator='gpu',
-        accelerator='cpu',
-        limit_train_batches=3,
-        limit_val_batches=3,
-        limit_test_batches=3,
+        accelerator='gpu',
+        # accelerator='cpu',
+        # limit_train_batches=3,
+        # limit_val_batches=3,
+        # limit_test_batches=3,
     )
     
     trainer.fit(
