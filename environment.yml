@@ -12,3 +12,4 @@ dependencies:
     - wandb
     - segmentation-models-pytorch
     - rasterio
+    - pandas
