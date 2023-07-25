@@ -142,6 +142,12 @@ class FLAIR2Dataset(Dataset):
 
         return sen
 
+    def get_labels(self, path_labels):
+        labels = self.read_tif(path_labels)
+        labels = labels - 1
+
+        return labels
+
     def __len__(self):
         return len(self.list_images)
 
@@ -149,7 +155,7 @@ class FLAIR2Dataset(Dataset):
         path_aerial, path_sen, path_labels, image_id = self.get_paths(idx)
         aerial = self.get_aerial(path_aerial)
         sen = self.get_sen(image_id, path_sen)
-        labels = self.read_tif(path_labels)
+        labels = self.get_labels(path_labels)
         # TODO: data augmentation and TTA
 
         return aerial, sen, labels
