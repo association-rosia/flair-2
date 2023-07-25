@@ -70,7 +70,7 @@ def main():
         monitor='val/loss',
         mode='min',
         dirpath=cst.PATH_MODELS,
-        filename=f'{wandb.config.architecture}-{wandb.config.encoder_name}-{wandb.run.name}-{wandb.run.id}',
+        filename=f'{wandb.run.name}-{wandb.run.id}',
         auto_insert_metric_name=False,
         verbose=True
     )

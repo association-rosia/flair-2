@@ -68,10 +68,14 @@ class FLAIR2Lightning(pl.LightningModule):
         return loss
 
     def on_validation_epoch_end(self) -> None:
+        # Compute metrics
         metrics = self.metrics.compute()
         
+        # Split 1d array tensor IoU metrics to value tensor
+        # Add class name and associate value into the formatted metrics dict
         formatted_metrics = {}
         for key, value in metrics.items():
+            # Metrics that return 1d array tensor 
             spe_key = "val/IoU"
             if key == spe_key:
                 for i, class_name in enumerate(self.classes):
@@ -79,7 +83,9 @@ class FLAIR2Lightning(pl.LightningModule):
                 continue
             formatted_metrics[key] = value
         
+        # Confusion matrix need a special method to be logged
         self.logger.experiment.log(formatted_metrics)
+        # Reset metrics
         self.metrics.reset()
 
         return metrics
