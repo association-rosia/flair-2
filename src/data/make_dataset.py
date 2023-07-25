@@ -1,5 +1,7 @@
 import json
 import os
+import sys 
+sys.path.insert(0, os.path.join('.'))
 from datetime import datetime
 from glob import glob
 
@@ -174,4 +176,4 @@ if __name__ == '__main__':
     )
 
     aerial, sen, labels = dataset_train[0]
-    print()
+    print(aerial.shape, sen.shape, labels.shape)
