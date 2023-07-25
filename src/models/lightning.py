@@ -59,8 +59,8 @@ class FLAIR2Lightning(pl.LightningModule):
         # if batch_idx == 0:
         #     prediction = torch.argmax(outputs[0], dim=2)
         #     self.logger.log_image(key="val/prediction", images=[prediction])
-        target = torch.squeeze(labels).to(dtype=torch.int64)
-        loss = self.criterion(outputs, target)
+        labels = torch.squeeze(labels).to(dtype=torch.int64)
+        loss = self.criterion(outputs, labels)
         
         self.log('val/loss', loss, on_epoch=True)
         self.metrics.update(outputs, labels)
@@ -79,7 +79,7 @@ class FLAIR2Lightning(pl.LightningModule):
                 continue
             formatted_metrics[key] = value
         
-        self.log_dict(formatted_metrics, on_epoch=True)
+        self.logger.experiment.log(formatted_metrics)
         self.metrics.reset()
 
         return metrics

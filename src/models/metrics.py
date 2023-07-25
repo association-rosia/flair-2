@@ -23,9 +23,9 @@ class ConfusionMatrix(torchmetrics.Metric):
         target = target.tolist()
         
         preds = torch.cat(self.preds, dim=0)
-        # preds = torch.argmax(preds, dim=3)
+        preds = torch.argmax(preds, dim=1)
         preds = torch.flatten(preds)
-        preds = preds
+        preds = preds.tolist()
         
         return wandb.plot.confusion_matrix(preds=preds, y_true=target, class_names=self.classes, title='Confusion matrix by pixel')
         
