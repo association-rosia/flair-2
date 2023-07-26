@@ -5,11 +5,6 @@ import sys
 sys.path.insert(0, os.path.join('.'))
 from datetime import datetime
 from glob import glob
-from tqdm import tqdm
-
-import collections
-from skmultilearn.model_selection import iterative_train_test_split
-from sklearn.model_selection import train_test_split
 
 import numpy as np
 import rasterio

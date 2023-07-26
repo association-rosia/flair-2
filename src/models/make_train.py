@@ -18,18 +18,18 @@ import src.constants as cst
 
 
 def main():
-    sen_size = 40
-    use_augmentation = False
-    batch_size = 16
 
     wandb.init(
         entity='association-rosia',
         project='FLAIR-2',
         config={
             'architecture': 'Unet',
-            'encoder_name': 'tu-efficientnetv2_m',  # TODO: try different size
+            'encoder_name': 'tu-efficientnetv2_xl',  # TODO: try different size
             'encoder_weight': None,
             'learning_rate': 1e-4,
+            'sen_size': 40,
+            'use_augmentation': False,
+            'batch_size': 16
         }
     )
 
@@ -40,28 +40,28 @@ def main():
 
     dataset_train = FLAIR2Dataset(
         list_images=list_images_train,
-        sen_size=sen_size,
+        sen_size=wandb.config.sen_size,
         is_test=False,
-        use_augmentation=use_augmentation,
+        use_augmentation=wandb.config.use_augmentation,
     )
 
     dataset_val = FLAIR2Dataset(
         list_images=list_images_val,
-        sen_size=sen_size,
+        sen_size=wandb.config.sen_size,
         is_test=False,
-        use_augmentation=use_augmentation,
+        use_augmentation=wandb.config.use_augmentation,
     )
 
     dataloader_train = DataLoader(
         dataset=dataset_train,
-        batch_size=batch_size,
+        batch_size=wandb.config.batch_size,
         shuffle=True,
         drop_last=True
     )
 
     dataloader_val = DataLoader(
         dataset=dataset_val,
-        batch_size=batch_size,
+        batch_size=wandb.config.batch_size,
         shuffle=False,
         drop_last=True
     )

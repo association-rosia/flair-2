@@ -13,4 +13,3 @@ dependencies:
     - segmentation-models-pytorch
     - rasterio
     - pandas
-    - scikit-multilearn
