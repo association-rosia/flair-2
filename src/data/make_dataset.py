@@ -26,7 +26,7 @@ class FLAIR2Dataset(Dataset):
         self.centroids = self.read_centroids(self.path_centroids)
 
     @staticmethod
-    def img_to_mask(path_image):
+    def img_to_msk(path_image):
         path_mask = path_image.replace('aerial', 'labels')
         path_mask = path_mask.replace('img', 'msk')
         path_mask = path_mask.replace('IMG', 'MSK')
@@ -37,7 +37,7 @@ class FLAIR2Dataset(Dataset):
         path_aerial = self.list_images[idx]
         sen_id = '/'.join(path_aerial.split('/')[-4:-2])
         path_sen = os.path.join(self.path, 'sen', sen_id, 'sen')
-        path_labels = self.img_to_mask(path_aerial)
+        path_labels = self.img_to_msk(path_aerial)
         image_id = path_aerial.split('/')[-1]
 
         return path_aerial, path_sen, path_labels, image_id
