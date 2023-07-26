@@ -1,6 +1,7 @@
 import json
 import os
-import sys 
+import sys
+
 sys.path.insert(0, os.path.join('.'))
 from datetime import datetime
 from glob import glob
@@ -25,18 +26,18 @@ class FLAIR2Dataset(Dataset):
         self.centroids = self.read_centroids(self.path_centroids)
 
     @staticmethod
-    def path_aerial_to_labels(path_aerial):
-        path_labels = path_aerial.replace('aerial', 'labels')
-        path_labels = path_labels.replace('img', 'msk')
-        path_labels = path_labels.replace('IMG', 'MSK')
+    def img_to_msk(path_image):
+        path_mask = path_image.replace('aerial', 'labels')
+        path_mask = path_mask.replace('img', 'msk')
+        path_mask = path_mask.replace('IMG', 'MSK')
 
-        return path_labels
+        return path_mask
 
     def get_paths(self, idx):
         path_aerial = self.list_images[idx]
         sen_id = '/'.join(path_aerial.split('/')[-4:-2])
         path_sen = os.path.join(self.path, 'sen', sen_id, 'sen')
-        path_labels = self.path_aerial_to_labels(path_aerial)
+        path_labels = self.img_to_msk(path_aerial)
         image_id = path_aerial.split('/')[-1]
 
         return path_aerial, path_sen, path_labels, image_id
