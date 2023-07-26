@@ -6,8 +6,9 @@ import sys
 sys.path.append('.')
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
 from src.data.make_dataset import FLAIR2Dataset, get_list_images
 
 from src.models.lightning import FLAIR2Lightning
@@ -17,44 +18,54 @@ import src.constants as cst
 
 
 def main():
+    sen_size = 40
+    use_augmentation = False
+    batch_size = 16
+
     wandb.init(
         entity='association-rosia',
         project='FLAIR-2',
         config={
             'architecture': 'Unet',
-            'encoder_name': 'tu-efficientnetv2_xl',
+            'encoder_name': 'tu-efficientnetv2_m',  # TODO: try different size
             'encoder_weight': None,
             'learning_rate': 1e-4,
         }
     )
-    
+
     df = pd.read_csv(os.path.join(cst.PATH_DATA, 'labels-statistics.csv'))
-    
-    path_train = cst.PATH_DATA_TRAIN
-    list_images_train = get_list_images(path_train)
-    dataset = FLAIR2Dataset(
+    # TODO: Implement a smarter splitting strategy
+    list_images_train = get_list_images(cst.PATH_DATA_TRAIN)
+    list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=42)
+
+    dataset_train = FLAIR2Dataset(
         list_images=list_images_train,
-        sen_size=40,
+        sen_size=sen_size,
         is_test=False,
-        use_augmentation=False,
+        use_augmentation=use_augmentation,
     )
-    
-    # TODO: Implement a smarter spliting strategy
-    split_index = int(len(dataset) * 0.9)
+
+    dataset_val = FLAIR2Dataset(
+        list_images=list_images_val,
+        sen_size=sen_size,
+        is_test=False,
+        use_augmentation=use_augmentation,
+    )
+
     dataloader_train = DataLoader(
-        dataset=Subset(dataset, range(split_index)),
-        batch_size=16, 
-        shuffle=True, 
+        dataset=dataset_train,
+        batch_size=batch_size,
+        shuffle=True,
         drop_last=True
     )
-    
+
     dataloader_val = DataLoader(
-        dataset=Subset(dataset, range(split_index, len(dataset))),
-        batch_size=16, 
-        shuffle=False, 
+        dataset=dataset_val,
+        batch_size=batch_size,
+        shuffle=False,
         drop_last=True
     )
-    
+
     lightning_model = FLAIR2Lightning(
         architecture=wandb.config.architecture,
         encoder_name=wandb.config.encoder_name,
@@ -63,7 +74,7 @@ def main():
         learning_rate=wandb.config.learning_rate,
         criterion_weight=df['Freq.-train (%)']
     )
-    
+
     os.makedirs(cst.PATH_MODELS, exist_ok=True)
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
         save_top_k=1,
@@ -75,7 +86,7 @@ def main():
         verbose=True
     )
 
-    n_epochs = 3#0
+    n_epochs = 3  # 0
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
@@ -86,12 +97,13 @@ def main():
         # limit_val_batches=3,
         # limit_test_batches=3,
     )
-    
+
     trainer.fit(
         model=lightning_model,
         train_dataloaders=dataloader_train,
         val_dataloaders=dataloader_val,
     )
-    
+
+
 if __name__ == '__main__':
     main()
