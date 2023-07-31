@@ -161,7 +161,7 @@ class FLAIR2Dataset(Dataset):
         labels = self.get_labels(path_labels)
         # TODO: data augmentation and TTA
 
-        return aerial, sen, labels
+        return image_id, aerial, sen, labels
 
 
 def get_list_images(path):
