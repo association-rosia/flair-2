@@ -182,5 +182,4 @@ if __name__ == '__main__':
         use_augmentation=False,
     )
 
-    aerial, sen, labels = dataset_train[0]
-    print(aerial.shape, sen.shape, labels.shape)
+    image_id, aerial, sen, labels = dataset_train[0]

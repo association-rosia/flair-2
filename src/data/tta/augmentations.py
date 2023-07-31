@@ -8,10 +8,10 @@ class Augmentation:
         super().__init__()
         self.params = params
 
-    def apply(self, inputs, *args, **params):  # TODO: change inputs to {'input1': value, 'input2': value, ...}
+    def apply(self, inputs: dict, *args, **params):
         raise NotImplementedError
 
-    def de_apply(self, output, *args, **params):  # TODO: change output to {'output': value}
+    def de_apply(self, output, *args, **params):
         raise NotImplementedError
 
 
@@ -28,15 +28,13 @@ class HorizontalFlip(Augmentation):
     def __init__(self):
         super().__init__([True, False])  # apply
 
-    def apply(self, inputs, apply=False, **kwargs):  # TODO: change inputs to {'input1': value, 'input2': value, ...}
-        augmented_inputs = []
-        for input in inputs:
-            input = F.hflip(input)
-            augmented_inputs.append(input)
+    def apply(self, inputs: dict, apply=False, **kwargs):
+        for key in inputs.keys():
+            inputs[key] = F.hflip(inputs[key])
 
-        return augmented_inputs
+        return inputs
 
-    def de_apply(self, output, apply=False, **kwargs):  # TODO: change output to {'output': value}
+    def de_apply(self, output, apply=False, **kwargs):
         output = F.hflip(output)
 
         return output
@@ -46,15 +44,13 @@ class VerticalFlip(Augmentation):
     def __init__(self):
         super().__init__([True, False])  # apply
 
-    def apply(self, inputs, apply=False, **kwargs):  # TODO: change inputs to {'input1': value, 'input2': value, ...}
-        augmented_inputs = []
-        for input in inputs:
-            input = F.vflip(input)
-            augmented_inputs.append(input)
+    def apply(self, inputs: dict, apply=False, **kwargs):
+        for key in inputs.keys():
+            inputs[key] = F.vflip(inputs[key])
 
-        return augmented_inputs
+        return inputs
 
-    def de_apply(self, output, apply=False, **kwargs):  # TODO: change output to {'output': value}
+    def de_apply(self, output, apply=False, **kwargs):
         output = F.vflip(output)
 
         return output
@@ -70,16 +66,14 @@ class Rotate(Augmentation):
             if angle not in self.allowed_angles:
                 raise ValueError(f'angles must be equal to 0, 90, 180 or 270')
 
-    def apply(self, inputs, angle=0, **kwargs):  # TODO: change inputs to {'input1': value, 'input2': value, ...}
-        augmented_inputs = []
-        for input in inputs:
-            input = F.rotate(input, angle=angle)
-            augmented_inputs.append(input)
+    def apply(self, inputs: dict, angle=0, **kwargs):
+        for key in inputs.keys():
+            inputs[key] = F.rotate(inputs[key], angle=angle)
 
-        return augmented_inputs
+        return inputs
 
-    def de_apply(self, output, angle=0, **kwargs):  # TODO: change output to {'output': value}
-        output = F.rotate(input, angle=-angle)
+    def de_apply(self, output, angle=0, **kwargs):
+        output = F.rotate(output, angle=-angle)
 
         return output
 
@@ -89,14 +83,12 @@ class Solarize(Augmentation):
         super().__init__(thresholds)
         self.thresholds = list(set(thresholds + [1]))  # threshold = 1 is not change
 
-    def apply(self, inputs, threshold=1, **kwargs):  # TODO: change inputs to {'input1': value, 'input2': value, ...}
-        augmented_inputs = []
-        for input in inputs:
-            input = F.solarize(input, threshold=threshold)
-            augmented_inputs.append(input)
+    def apply(self, inputs: dict, threshold=1, **kwargs):
+        for key in inputs.keys():
+            inputs[key] = F.solarize(inputs[key], threshold=threshold)
 
-        return augmented_inputs
+        return inputs
 
-    def de_apply(self, output, threshold=1, **kwargs):  # TODO: change output to {'output': value}
+    def de_apply(self, output: dict, threshold=1, **kwargs):
         # this transformation do not "destruct" the inputs
         return output

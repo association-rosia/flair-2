@@ -1,44 +1,58 @@
+import torch
 from torch import nn
 import random
+import matplotlib.pyplot as plt
 
 
 class SegmentationWrapper(nn.Module):
     def __init__(self, model, augmentations):
-        super().__init__(model, augmentations)
+        super().__init__()
         self.model = model
-        self.augmentations = augmentations
+        self.product = augmentations.product
+        self.list = augmentations.list
+        self.de_product = augmentations.de_product
+        self.de_list = augmentations.de_list
+        # self.aggregation = aggregation
 
-    def forward(self, inputs, step, limit=None):  # limit the number of augmentations for TTA
+    def forward(self, inputs, step, limit=None):
         # step can be 'train', 'val, 'test'
 
         if step == 'train':
-            params = random.choice(self.augmentations.product)
-            augmentations = self.augmentations.list
+            params = random.choice(self.product)
 
-            augmented_inputs = []
-            for input in inputs:
-                for augmentation, param in zip(augmentations, params):
-                    augmented_input = augmentation.apply(input, param)
-                    augmented_inputs.append(augmented_input)
+            # plt.imshow(inputs['aerial'][:3, :, :].permute(1, 2, 0))
+            # plt.show()
 
-            output = self.model(*augmented_inputs)
+            for augmentation, param in zip(self.list, params):
+                inputs = augmentation.apply(inputs, param)
+
+            output = self.model(**inputs)
+
+            # plt.imshow(output[:3, :, :].permute(1, 2, 0))
+            # plt.show()
+
+            de_params = params[::-1]
+            for de_augmentation, de_param in zip(self.de_list, de_params):
+                output = de_augmentation.de_apply(output, de_param)
+
+            # plt.imshow(output[:3, :, :].permute(1, 2, 0))
+            # plt.show()
 
         elif step == 'val' or step == 'test':
-            if limit is not None:
-                product = random.choices(self.augmentations.product, k=limit)
-            else:
-                product = self.augmentations.product
+            product = self.product if limit is None else random.choices(self.product, k=limit)
 
-            augmentations = self.augmentations.list
+            tta_inputs = {key: [] for key in inputs.keys()}
+            for params in product:
+                for augmentation, param in zip(self.list, params):
+                    inputs = augmentation.apply(inputs, param)
 
-            # TODO: do a better approach
-            augmented_inputs = []
-            for input in inputs:
-                for params in product:
-                    for augmentation, param in zip(augmentations, params):
-                        augmented_input = augmentation.apply(input, param)
-                        augmented_inputs.append(augmented_input)
+                    for key in inputs.keys():
+                        tta_inputs[key].append(inputs[key])
 
+            for key in tta_inputs.keys():
+                tta_inputs[key] = torch.stack(tta_inputs[key])
+
+            output = self.model(**tta_inputs)
 
         else:
             raise ValueError('step must be \'train\', \'val\' or \'test\'')
