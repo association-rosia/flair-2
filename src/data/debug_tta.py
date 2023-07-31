@@ -34,4 +34,4 @@ dataset_train = FLAIR2Dataset(
 
 image_id, aerial, sen, labels = dataset_train[0]
 
-output = wrapper(inputs={'aerial': aerial, 'sen': sen}, step='train')  # use as model in the loop
+output = wrapper(inputs={'aerial': aerial, 'sen': sen}, step='test')  # use as model in the loop
