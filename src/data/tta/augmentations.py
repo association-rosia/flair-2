@@ -5,13 +5,15 @@ import itertools
 
 class Augmentation:
     def __init__(self, params):
-        super().__init__()
         self.params = params
+        # TODO: add identity param value to reconstruct be sure to get the original inputs even if we are using the
+        #  limit parameter
+        super().__init__()
 
-    def apply(self, inputs: dict, *args, **params):
+    def augment(self, inputs: dict, *args, **params):
         raise NotImplementedError
 
-    def de_apply(self, output, *args, **params):
+    def deaugment(self, output, *args, **params):
         raise NotImplementedError
 
 
@@ -20,22 +22,21 @@ class Augmentations:
         self.list = augmentations
         self.params = [t.params for t in self.list]
         self.product = list(itertools.product(*self.params))
-        self.de_list = self.list[::-1]
-        self.de_product = [p[::-1] for p in self.product]
+        self.delist = self.list[::-1]
 
 
 class HorizontalFlip(Augmentation):
     def __init__(self):
         super().__init__([True, False])  # apply
 
-    def apply(self, inputs: dict, apply=False, **kwargs):
+    def augment(self, inputs: dict, apply=False, **kwargs):
         if apply:
             for key in inputs.keys():
                 inputs[key] = F.hflip(inputs[key])
 
         return inputs
 
-    def de_apply(self, output, apply=False, **kwargs):
+    def deaugment(self, output, apply=False, **kwargs):
         if apply:
             output = F.hflip(output)
 
@@ -46,14 +47,14 @@ class VerticalFlip(Augmentation):
     def __init__(self):
         super().__init__([True, False])  # apply
 
-    def apply(self, inputs: dict, apply=False, **kwargs):
+    def augment(self, inputs: dict, apply=False, **kwargs):
         if apply:
             for key in inputs.keys():
                 inputs[key] = F.vflip(inputs[key])
 
         return inputs
 
-    def de_apply(self, output, apply=False, **kwargs):
+    def deaugment(self, output, apply=False, **kwargs):
         if apply:
             output = F.vflip(output)
 
@@ -61,38 +62,39 @@ class VerticalFlip(Augmentation):
 
 
 class Rotate(Augmentation):
-    def __init__(self, angles):
-        super().__init__(angles)
-        self.allowed_angles = [0, 90, 180, 270]
-        self.angles = list(set([0] + angles))  # angle = 0 is not change
+    def __init__(self, angles: List):
+        allowed_angles = [0, 90, 180, 270]
+        angles = list(set([0] + angles))  # angle = 0 is not change
 
         for angle in angles:
-            if angle not in self.allowed_angles:
+            if angle not in allowed_angles:
                 raise ValueError(f'angles must be equal to 0, 90, 180 or 270')
 
-    def apply(self, inputs: dict, angle=0, **kwargs):
+        super().__init__(angles)
+
+    def augment(self, inputs: dict, angle=0, **kwargs):
         for key in inputs.keys():
             inputs[key] = F.rotate(inputs[key], angle=angle)
 
         return inputs
 
-    def de_apply(self, output, angle=0, **kwargs):
+    def deaugment(self, output, angle=0, **kwargs):
         output = F.rotate(output, angle=-angle)
 
         return output
 
 
 class Solarize(Augmentation):
-    def __init__(self, thresholds):
+    def __init__(self, thresholds: List):
+        thresholds = list(set([1] + thresholds))  # threshold = 1 is not change
         super().__init__(thresholds)
-        self.thresholds = list(set(thresholds + [1]))  # threshold = 1 is not change
 
-    def apply(self, inputs: dict, threshold=1, **kwargs):
+    def augment(self, inputs: dict, threshold=1, **kwargs):
         for key in inputs.keys():
             inputs[key] = F.solarize(inputs[key], threshold=threshold)
 
         return inputs
 
-    def de_apply(self, output: dict, threshold=1, **kwargs):
+    def deaugment(self, output: dict, threshold=1, **kwargs):
         # this transformation do not "destruct" the inputs
         return output

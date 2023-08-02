@@ -9,28 +9,28 @@ class SegmentationWrapper(nn.Module):
         self.model = model
         self.product = augmentations.product
         self.list = augmentations.list
-        self.de_product = augmentations.de_product
-        self.de_list = augmentations.de_list
+        self.delist = augmentations.delist
         # self.aggregation = aggregation
 
-    def forward(self, inputs, step, batch_size, limit=None):  # TODO : manage batch augmentation
-        # step can be 'train', 'val, 'test'
+    def forward(self, inputs, step, batch_size, limit=None, random_seed=42):  # TODO : manage batch size
+        # step can be "training", "validation", "test" or "predict"
+        random.seed(random_seed)
 
-        if step == 'train':
+        if step == 'training':
             params = random.choice(self.product)
 
             for augmentation, param in zip(self.list, params):
-                inputs = augmentation.apply(inputs, param)
+                inputs = augmentation.augment(inputs, param)
 
             output = self.model(**inputs)
 
-            de_params = params[::-1]
-            for de_augmentation, de_param in zip(self.de_list, de_params):
-                output = de_augmentation.de_apply(output, de_param)
+            deparams = params[::-1]
+            for deaugmentation, de_param in zip(self.delist, deparams):
+                output = deaugmentation.deaugment(output, de_param)
 
-        elif step == 'val' or step == 'test':
+        elif step == 'validation' or step == 'test' or step == 'predict':
             product = self.product if limit is None else random.choices(self.product, k=limit)
-            de_product = [p[::-1] for p in self.product]
+            deproduct = [p[::-1] for p in self.product]
 
             tta_inputs = {key: [] for key in inputs.keys()}
             for params in product:
@@ -38,7 +38,7 @@ class SegmentationWrapper(nn.Module):
                 augmented_inputs = inputs.copy()
 
                 for augmentation, param in zip(self.list, params):
-                    augmented_inputs = augmentation.apply(augmented_inputs, param)
+                    augmented_inputs = augmentation.augment(augmented_inputs, param)
 
                 for key in inputs.keys():
                     tta_inputs[key].append(augmented_inputs[key])
@@ -48,14 +48,15 @@ class SegmentationWrapper(nn.Module):
 
             tta_output = self.model(**tta_inputs)
 
-            for i, de_params in enumerate(de_product):
+            for i, deparams in enumerate(deproduct):
 
-                for de_augmentation, de_param in zip(self.de_list, de_params):
-                    tta_output[i] = de_augmentation.de_apply(tta_output[i], de_param)
+                for deaugmentation, de_param in zip(self.delist, deparams):
+                    tta_output[i] = deaugmentation.deaugment(tta_output[i], de_param)
 
             output = torch.sum(tta_output, dim=0) / len(tta_output)  # = average/mean aggregation
+            # TODO: add more aggregation possibilities
 
         else:
-            raise ValueError('step must be \'train\', \'val\' or \'test\'')
+            raise ValueError('step must be "training", "validation", "test" or "predict"')
 
         return output

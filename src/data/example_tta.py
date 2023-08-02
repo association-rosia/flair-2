@@ -1,4 +1,5 @@
 from torch import nn
+from torch.utils.data import DataLoader
 
 from src.data.tta import augmentations, wrappers
 from src.data.make_dataset import get_list_images, FLAIR2Dataset
@@ -20,7 +21,7 @@ augmentations = augmentations.Augmentations([
     # augmentations.Solarize([0, 0.25, 0.5, 0.75])
 ])
 
-wrapper = wrappers.SegmentationWrapper(model, augmentations)
+tta_wrapper = wrappers.SegmentationWrapper(model, augmentations)
 
 path_train = cst.PATH_DATA_TRAIN
 list_images_train = get_list_images(path_train)
@@ -31,8 +32,16 @@ dataset_train = FLAIR2Dataset(
     is_test=False,
 )
 
+batch_size = 4
+dataloader_train = DataLoader(
+    dataset=dataset_train,
+    batch_size=batch_size,
+    shuffle=True,
+    drop_last=True
+)
+
 image_id, aerial, sen, labels = dataset_train[0]
 
 # TODO: add dataloader to test batch_size
 
-output = wrapper(inputs={'aerial': aerial, 'sen': sen}, step='train', batch_size=4)  # use as model in the loop
+output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size)  # use as model in the loop
