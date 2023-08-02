@@ -29,9 +29,10 @@ dataset_train = FLAIR2Dataset(
     list_images=list_images_train,
     sen_size=40,
     is_test=False,
-    use_augmentation=False,
 )
 
 image_id, aerial, sen, labels = dataset_train[0]
 
-output = wrapper(inputs={'aerial': aerial, 'sen': sen}, step='train')  # use as model in the loop
+# TODO: add dataloader to test batch_size
+
+output = wrapper(inputs={'aerial': aerial, 'sen': sen}, step='train', batch_size=4)  # use as model in the loop

@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 import random
-import matplotlib.pyplot as plt
 
 
 class SegmentationWrapper(nn.Module):
@@ -14,7 +13,7 @@ class SegmentationWrapper(nn.Module):
         self.de_list = augmentations.de_list
         # self.aggregation = aggregation
 
-    def forward(self, inputs, step, limit=None):
+    def forward(self, inputs, step, batch_size, limit=None):  # TODO : manage batch augmentation
         # step can be 'train', 'val, 'test'
 
         if step == 'train':
