@@ -29,13 +29,15 @@ class HorizontalFlip(Augmentation):
         super().__init__([True, False])  # apply
 
     def apply(self, inputs: dict, apply=False, **kwargs):
-        for key in inputs.keys():
-            inputs[key] = F.hflip(inputs[key])
+        if apply:
+            for key in inputs.keys():
+                inputs[key] = F.hflip(inputs[key])
 
         return inputs
 
     def de_apply(self, output, apply=False, **kwargs):
-        output = F.hflip(output)
+        if apply:
+            output = F.hflip(output)
 
         return output
 
@@ -45,13 +47,15 @@ class VerticalFlip(Augmentation):
         super().__init__([True, False])  # apply
 
     def apply(self, inputs: dict, apply=False, **kwargs):
-        for key in inputs.keys():
-            inputs[key] = F.vflip(inputs[key])
+        if apply:
+            for key in inputs.keys():
+                inputs[key] = F.vflip(inputs[key])
 
         return inputs
 
     def de_apply(self, output, apply=False, **kwargs):
-        output = F.vflip(output)
+        if apply:
+            output = F.vflip(output)
 
         return output
 
