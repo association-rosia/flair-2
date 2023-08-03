@@ -13,3 +13,4 @@ dependencies:
     - segmentation-models-pytorch
     - rasterio
     - pandas
+    - matplotlib

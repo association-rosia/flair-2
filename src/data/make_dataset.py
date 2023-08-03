@@ -17,11 +17,10 @@ cst = get_constants()
 
 
 class FLAIR2Dataset(Dataset):
-    def __init__(self, list_images, sen_size, is_test=False, use_augmentation=None):
+    def __init__(self, list_images, sen_size, is_test=False):
         self.list_images = list_images
         self.sen_size = sen_size
         self.is_test = is_test
-        self.use_augmentation = use_augmentation
 
         self.path = cst.path_data_train if not self.is_test else cst.path_data_test
         self.path_centroids = os.path.join(cst.path_data, 'centroids_sp_to_patch.json')
@@ -160,8 +159,11 @@ class FLAIR2Dataset(Dataset):
         path_aerial, path_sen, path_labels, image_id = self.get_paths(idx)
         aerial = self.get_aerial(path_aerial)
         sen = self.get_sen(image_id, path_sen)
-        labels = self.get_labels(path_labels)
-        # TODO: data augmentation and TTA
+
+        if self.is_test:
+            labels = None
+        else:
+            labels = self.get_labels(path_labels)
 
         return image_id, aerial, sen, labels
 
@@ -180,9 +182,8 @@ if __name__ == '__main__':
     dataset = FLAIR2Dataset(
         list_images=list_images,
         sen_size=40,
-        is_test=True,
-        use_augmentation=False,
+        is_test=False,
     )
 
     image_id, aerial, sen, labels = dataset[0]
-    print(image_id.shape, aerial.shape, sen.shape, labels.shape)
+    print(image_id, aerial, sen, labels)
