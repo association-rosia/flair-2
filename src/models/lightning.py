@@ -53,7 +53,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.sen_size = sen_size
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
-        self.path_submissions = None
+        self.path_predictions = None
         self.apply_tta = None
 
         self.model = AerialModel(
@@ -159,7 +159,7 @@ class FLAIR2Lightning(pl.LightningModule):
         for pred_label, img_id in zip(pred_labels, image_ids):
             img: np.ndarray = pred_label.numpy(force=True)
             img = img.astype(np.uint8)
-            img_path = os.path.join(self.path_submissions, f"PRED_{img_id}.tif")
+            img_path = os.path.join(self.path_predictions, f"PRED_{img_id}.tif")
             tiff.imwrite(img_path, img)
 
         return pred_labels
@@ -204,7 +204,7 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_size=self.sen_size,
             is_test=True,
         )
-
+        
         return DataLoader(
             dataset=dataset_test,
             batch_size=self.batch_size,

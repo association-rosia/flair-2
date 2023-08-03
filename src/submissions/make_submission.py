@@ -1,6 +1,5 @@
 import os
 import sys
-import datetime as dt
 
 sys.path.append('.')
 
@@ -9,8 +8,6 @@ import torch.distributed as dist
 
 from src.models.lightning import FLAIR2Lightning
 import pytorch_lightning as pl
-
-import ttach as tta
 
 from src.constants import get_constants
 
@@ -28,57 +25,57 @@ class FLAIR2Submission():
             fast_dev_run=3
         )
         self.baseline_inference_time = cst.baseline_inference_time
-        
-        self.lightning_ckpt = None
-        self.path_submissions = None
+        self.path_models = cst.path_models
+        self.path_submissions = cst.path_submissions
         
     def update_variables(self, run_name):
-        self.lightning_ckpt = os.path.join(cst.path_models, f'{run_name}.ckpt')
-        self.path_submissions = os.path.join(cst.path_submissions, run_name)
-        os.makedirs(self.path_submissions, exist_ok=False)
+        path_predictions = os.path.join(self.path_submissions, run_name)
+        os.makedirs(path_predictions, exist_ok=True)
         
-    def reset_variables(self):
-        self.lightning_ckpt = None
-        self.path_submissions = None
+        return path_predictions
         
-    def load_lightning_model(self, apply_tta)->FLAIR2Lightning:
-        lightning_model = FLAIR2Lightning.load_from_checkpoint(self.lightning_ckpt)
-        lightning_model.apply_tta = apply_tta
-        lightning_model.path_submissions = os.path.join(self.path_submissions, 'not_confirmed')
+    def load_lightning_model(self, path_predictions)->FLAIR2Lightning:
+        lightning_ckpt = os.path.join(self.path_models, f'{run_name}.ckpt')
+        lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
+        lightning_model.path_predictions = os.path.join(path_predictions, 'not_confirmed')
+        
         return lightning_model
     
-    def __call__(self, run_name, apply_tta):
-        self.run_name = run_name
-        self.update_variables(run_name)
-        lightning_model = self.load_lightning_model(apply_tta)
-        
-        starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-        starter.record()
-    
-        self.trainer.test(
-            model=lightning_model,
-            return_predictions=False
-        )
-    
-        dist.barrier() # ensures synchronization among distributed processes
-        torch.cuda.synchronize() # ensures synchronization between the CPU and GPU
-        ender.record() # end time
-        
-        inference_time_seconds = (starter.elapsed_time(ender) / 1000.0) * (self.nodes * self.gpus_per_nodes)
-        submission_inference_time = f'{inference_time_seconds // 60}-{inference_time_seconds % 60}'
-        name_of_your_approach = f'{lightning_model.architecture}-{lightning_model.encoder_name}'
-        name_of_your_approach = 'tta-' + name_of_your_approach if apply_tta else name_of_your_approach
+    def rename_submissions_dir(self, run_name, submission_inference_time, path_predicitons):
+        # name_of_your_approach = f'{lightning_model.architecture}-{lightning_model.encoder_name}'
+        name_of_your_approach = run_name
+        i = 0
         name_submission = f'{name_of_your_approach}_{self.baseline_inference_time}_{submission_inference_time}'
-        new_path_submission = os.path.join(self.path_submissions, name_submission)
-        old_path_submission = os.path.join(self.path_submissions, 'not_confirmed')
+        new_path_submission = os.path.join(path_predicitons, name_submission)
+        old_path_submission = os.path.join(path_predicitons, 'not_confirmed')
         os.rename(old_path_submission, new_path_submission)
         
-        self.reset_variables()
+        return os.path.exists(new_path_submission)
+    
+    def __call__(self, run_name):
+        path_predictions = self.update_variables(run_name)
+        lightning_model = self.load_lightning_model(path_predictions)
         
-        return True
+        # starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+        # starter.record()
+    
+        self.trainer.test(model=lightning_model)
+    
+        # dist.barrier() # ensures synchronization among distributed processes
+        # torch.cuda.synchronize() # ensures synchronization between the CPU and GPU
+        # ender.record() # end time
+        
+        # inference_time_seconds = (starter.elapsed_time(ender) / 1000.0) * (self.nodes * self.gpus_per_nodes)
+        inference_time_seconds = 100000
+        submission_inference_time = f'{inference_time_seconds // 60}-{inference_time_seconds % 60}'
+        
+        return self.rename_submissions_dir(
+            run_name=run_name,
+            submission_inference_time=submission_inference_time,
+            path_predicitons=path_predictions
+        )
     
 if __name__ == '__main__':
-    run_name = 'curious-wildflower-25-jt9j1xnb'
     sub = FLAIR2Submission()
-    sub(run_name=run_name, apply_tta=False)
-    sub(run_name=run_name, apply_tta=True)
+    run_name = 'curious-wildflower-25-jt9j1xnb'
+    sub(run_name=run_name)

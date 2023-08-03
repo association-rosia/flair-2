@@ -176,14 +176,26 @@ def get_list_images(path):
 
 
 if __name__ == '__main__':
+    from torch.utils.data import DataLoader
+    
     path_data = cst.path_data_test
     list_images = get_list_images(path_data)
 
     dataset = FLAIR2Dataset(
         list_images=list_images,
         sen_size=40,
-        is_test=False,
+        is_test=True,
+    )
+    
+    dataloader = DataLoader(
+        dataset=dataset,
+        batch_size=1,
+        shuffle=False,
     )
 
     image_id, aerial, sen, labels = dataset[0]
     print(image_id, aerial, sen, labels)
+    
+    for image_id, aerial, sen, labels in dataloader:
+        print(image_id, aerial, sen, labels)
+        break
