@@ -9,7 +9,7 @@ class FLAIR2Constants():
 
     path_submissions = 'submissions'
     
-    baseline_inference_time = ''
+    baseline_inference_time = 'a_definir'
     
     
 def get_constants() -> FLAIR2Constants:

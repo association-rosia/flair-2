@@ -8,8 +8,7 @@ sys.path.append('.')
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from torch.utils.data import DataLoader
-from src.data.make_dataset import FLAIR2Dataset, get_list_images
+from src.data.make_dataset import get_list_images
 
 from src.models.lightning import FLAIR2Lightning
 import pytorch_lightning as pl
