@@ -10,8 +10,9 @@ from torchmetrics.classification import MulticlassJaccardIndex
 from torchmetrics import MetricCollection
 from src.models.metrics import ConfusionMatrix
 
-import segmentation_models_pytorch as smp
-import ttach as tta
+import src.data.tta.augmentations as agm
+from src.data.tta.wrappers import SegmentationWrapper
+from src.models.aerial_model import AerialModel
 
 import tifffile as tiff
 
@@ -55,14 +56,24 @@ class FLAIR2Lightning(pl.LightningModule):
         self.path_submissions = None
         self.apply_tta = None
 
-        self.model = getattr(smp, self.architecture)(
+        model = AerialModel(
+            architecture=self.architecture,
             encoder_name=self.encoder_name,
-            encoder_weights=self.encoder_weight,
-            in_channels=5,
-            activation="softmax",
-            classes=self.num_classes,
+            encoder_weight=self.encoder_weight,
+            num_classes=self.num_classes
         )
-
+        
+        augmentations = agm.Augmentations(
+            [
+                agm.HorizontalFlip(),
+                agm.VerticalFlip(),
+                agm.Rotate(angles=[0, 90, 180, 270]),
+                agm.Solarize(thresholds=[0,5, 1, 1,5])
+            ]
+        )
+        
+        self.model = SegmentationWrapper(model=model, augmentations=augmentations)
+        
         self.metrics = MetricCollection(
             {
                 "MIoU": MulticlassJaccardIndex(self.num_classes, average="macro"),
@@ -71,33 +82,28 @@ class FLAIR2Lightning(pl.LightningModule):
             }
         )
 
-        self.tta_transforms = tta.Compose(
-            [
-                # ! Comment next line if classes include Left / Right position
-                tta.HorizontalFlip(),
-                tta.VerticalFlip(),
-                # tta.FiveCrops(crop_height=5, crop_width=5),
-                tta.Rotate90([0, 90, 180, 270]),
-            ]
-        )
-
     def forward(self, inputs):
-        x = self.model(inputs)
-
+        x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size)
         return x
+    
+    def on_train_start(self) -> None:
+        self.step = 'training'
 
     def training_step(self, batch):
-        aerial, sen, labels = batch
-        outputs = self.forward(aerial)
+        _, aerial, sen, labels = batch
+        outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
         labels = torch.squeeze(labels).to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
         self.log("train/loss", loss, on_step=True, on_epoch=True)
 
         return loss
+    
+    def on_validation_start(self) -> None:
+        self.step = 'validation'
 
     def validation_step(self, batch, batch_idx):
-        aerial, sen, labels = batch
-        outputs = self.forward(aerial)
+        _, aerial, sen, labels = batch
+        outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
 
         labels = torch.squeeze(labels).to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
@@ -130,11 +136,14 @@ class FLAIR2Lightning(pl.LightningModule):
 
     #     # Confusion matrix need a special method to be logged
     #     self.logger.experiment.log(formatted_metrics)
+    
+    def on_test_start(self) -> None:
+        self.step = 'test'
 
     def test_step(self, batch):
         image_ids, aerial, sen, _ = batch
 
-        outputs = self.forward(aerial)
+        outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
         pred_labels = torch.argmax(outputs, dim=1)
 
         # * Challenge rule: set the data type of the image files as Byte (uint8)
@@ -150,24 +159,18 @@ class FLAIR2Lightning(pl.LightningModule):
             tiff.imwrite(img_path, img)
 
         return pred_labels
+    
+    def on_predict_start(self) -> None:
+        self.step = 'predict'
 
     def configure_optimizers(self):
         return AdamW(self.parameters(), lr=self.learning_rate)
-
-    def setup(self, stage: str):
-        if stage == "test":
-            # If apply tta, wrappe the model to use tta
-            if self.apply_tta:
-                self.model = tta.ClassificationTTAWrapper(
-                    self.model, merge_mode="mean", transforms=self.tta_transforms
-                )
 
     def train_dataloader(self):
         dataset_train = FLAIR2Dataset(
             list_images=self.list_images_train,
             sen_size=self.sen_size,
             is_test=False,
-            use_augmentation=self.use_augmentation,
         )
 
         return DataLoader(
@@ -182,7 +185,6 @@ class FLAIR2Lightning(pl.LightningModule):
             list_images=self.list_images_val,
             sen_size=self.sen_size,
             is_test=False,
-            use_augmentation=self.use_augmentation,
         )
 
         return DataLoader(
@@ -197,7 +199,6 @@ class FLAIR2Lightning(pl.LightningModule):
             list_images=self.list_images_test,
             sen_size=self.sen_size,
             is_test=True,
-            use_augmentation=False,
         )
 
         return DataLoader(

@@ -27,7 +27,8 @@ def main():
             'encoder_weight': None,
             'learning_rate': 1e-4,
             'sen_size': 40,
-            'batch_size': 16
+            'batch_size': 16,
+            'use_augmentation': False
         }
     )
 
@@ -35,6 +36,7 @@ def main():
     # TODO: Implement a smarter splitting strategy
     list_images_train = get_list_images(cst.path_data_train)
     list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=42)
+    list_images_test = get_list_images(cst.path_data_test)
 
     lightning_model = FLAIR2Lightning(
         architecture=wandb.config.architecture,
@@ -45,6 +47,7 @@ def main():
         criterion_weight=df['Freq.-train (%)'],
         list_images_train=list_images_train,
         list_images_val=list_images_val,
+        list_images_test=list_images_test,
         sen_size=wandb.config.sen_size,
         use_augmentation=wandb.config.use_augmentation,
         batch_size=wandb.config.batch_size,
