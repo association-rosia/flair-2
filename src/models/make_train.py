@@ -28,7 +28,6 @@ def main():
             'encoder_weight': None,
             'learning_rate': 1e-4,
             'sen_size': 40,
-            'use_augmentation': False,
             'batch_size': 16
         }
     )
@@ -42,14 +41,12 @@ def main():
         list_images=list_images_train,
         sen_size=wandb.config.sen_size,
         is_test=False,
-        use_augmentation=wandb.config.use_augmentation,
     )
 
     dataset_val = FLAIR2Dataset(
         list_images=list_images_val,
         sen_size=wandb.config.sen_size,
         is_test=False,
-        use_augmentation=wandb.config.use_augmentation,
     )
 
     dataloader_train = DataLoader(
