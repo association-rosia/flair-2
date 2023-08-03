@@ -56,7 +56,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.path_submissions = None
         self.apply_tta = None
 
-        model = AerialModel(
+        self.model = AerialModel(
             architecture=self.architecture,
             encoder_name=self.encoder_name,
             encoder_weight=self.encoder_weight,
@@ -72,7 +72,8 @@ class FLAIR2Lightning(pl.LightningModule):
             ]
         )
         
-        self.model = SegmentationWrapper(model=model, augmentations=augmentations)
+        if use_augmentation:
+            self.model = SegmentationWrapper(model=self.model, augmentations=augmentations)
         
         self.metrics = MetricCollection(
             {
@@ -83,7 +84,10 @@ class FLAIR2Lightning(pl.LightningModule):
         )
 
     def forward(self, inputs):
-        x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size)
+        if self.use_augmentation:
+            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size)
+        else:
+            x = self.model(**inputs)
         return x
     
     def on_train_start(self) -> None:

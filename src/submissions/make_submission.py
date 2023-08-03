@@ -6,8 +6,6 @@ sys.path.append('.')
 
 import torch
 import torch.distributed as dist
-from torch.utils.data import DataLoader
-from src.data.make_dataset import FLAIR2Dataset, get_list_images
 
 from src.models.lightning import FLAIR2Lightning
 import pytorch_lightning as pl
@@ -35,7 +33,7 @@ class FLAIR2Submission():
         self.path_submissions = None
         
     def update_variables(self, run_name):
-        self.lightning_ckpt = f'{run_name}.ckpt'
+        self.lightning_ckpt = os.path.join(cst.path_models, f'{run_name}.ckpt')
         self.path_submissions = os.path.join(cst.path_submissions, run_name)
         os.makedirs(self.path_submissions, exist_ok=False)
         
@@ -47,7 +45,6 @@ class FLAIR2Submission():
         lightning_model = FLAIR2Lightning.load_from_checkpoint(self.lightning_ckpt)
         lightning_model.apply_tta = apply_tta
         lightning_model.path_submissions = os.path.join(self.path_submissions, 'not_confirmed')
-        os.makedirs(self.path_submissions, exist_ok=False)
         return lightning_model
     
     def __call__(self, run_name, apply_tta):
@@ -81,7 +78,7 @@ class FLAIR2Submission():
         return True
     
 if __name__ == '__main__':
-    run_name = 'amber-morning-43-ibxuw5qk'
+    run_name = 'curious-wildflower-25-jt9j1xnb'
     sub = FLAIR2Submission()
     sub(run_name=run_name, apply_tta=False)
     sub(run_name=run_name, apply_tta=True)
