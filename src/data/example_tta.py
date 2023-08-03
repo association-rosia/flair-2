@@ -40,8 +40,5 @@ dataloader_train = DataLoader(
     drop_last=True
 )
 
-image_id, aerial, sen, labels = dataset_train[0]
-
-# TODO: add dataloader to test batch_size
-
-output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size)  # use as model in the loop
+image_id, aerial, sen, labels = next(iter(dataloader_train))
+output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='training', batch_size=batch_size)  # use as model in the loop

@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 import random
+import matplotlib.pyplot as plt
 
 
 class SegmentationWrapper(nn.Module):
@@ -10,23 +11,55 @@ class SegmentationWrapper(nn.Module):
         self.product = augmentations.product
         self.list = augmentations.list
         self.delist = augmentations.delist
-        # self.aggregation = aggregation
+
+    def augment_inputs_batch(self, inputs, params_batch):
+        augmented_inputs = {key: [] for key in inputs.keys()}
+
+        for i, params in enumerate(params_batch):
+
+            inputs_i = {key: inputs[key][i] for key in inputs.keys()}
+
+            plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
+            plt.show()
+
+            for augmentation, param in zip(self.list, params):
+                inputs_i = augmentation.augment(inputs_i, param)
+
+            # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
+            # plt.show()
+
+            augmented_inputs = {key: augmented_inputs[key] + [inputs_i[key]] for key in inputs.keys()}
+
+        augmented_inputs = {key: torch.stack(augmented_inputs[key]) for key in inputs.keys()}
+
+        return augmented_inputs
+
+    def deaugment_output_batch(self, output, deparams_batch):
+        for i, deparams in enumerate(deparams_batch):
+
+            # plt.imshow(output[i][:3].permute(1, 2, 0))
+            # plt.show()
+
+            for deaugmentation, de_param in zip(self.delist, deparams):
+                output[i] = deaugmentation.deaugment(output[i], de_param)
+
+            plt.imshow(output[i][:3].permute(1, 2, 0))
+            plt.show()
+
+        return output
 
     def forward(self, inputs, step, batch_size, limit=None, random_seed=42):  # TODO : manage batch size
         # step can be "training", "validation", "test" or "predict"
         random.seed(random_seed)
 
         if step == 'training':
-            params = random.choice(self.product)
-
-            for augmentation, param in zip(self.list, params):
-                inputs = augmentation.augment(inputs, param)
+            params_batch = [random.choice(self.product) for _ in range(batch_size)]
+            inputs = self.augment_inputs_batch(inputs, params_batch)
 
             output = self.model(**inputs)
 
-            deparams = params[::-1]
-            for deaugmentation, de_param in zip(self.delist, deparams):
-                output = deaugmentation.deaugment(output, de_param)
+            deparams_batch = [params[::-1] for params in params_batch]
+            output = self.deaugment_output_batch(output, deparams_batch)
 
         elif step == 'validation' or step == 'test' or step == 'predict':
             product = self.product if limit is None else random.choices(self.product, k=limit)
