@@ -3,8 +3,9 @@ from torch.utils.data import DataLoader
 
 from src.data.tta import augmentations, wrappers
 from src.data.make_dataset import get_list_images, FLAIR2Dataset
-import src.constants as cst
+from src.constants import get_constants
 
+cst = get_constants()
 
 class FakeModel(nn.Module):
 
@@ -22,7 +23,7 @@ augmentations = augmentations.Augmentations([
 
 tta_wrapper = wrappers.SegmentationWrapper(model, augmentations)
 
-path_train = cst.PATH_DATA_TRAIN
+path_train = cst.path_data_train
 list_images_train = get_list_images(path_train)
 
 dataset_train = FLAIR2Dataset(
