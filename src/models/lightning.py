@@ -144,7 +144,7 @@ class FLAIR2Lightning(pl.LightningModule):
     def on_test_start(self) -> None:
         self.step = 'test'
 
-    def test_step(self, batch):
+    def test_step(self, batch, batch_idx):
         image_ids, aerial, sen, _ = batch
 
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})

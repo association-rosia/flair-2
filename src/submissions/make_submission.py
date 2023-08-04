@@ -34,27 +34,28 @@ class FLAIR2Submission():
         
         return path_predictions
         
-    def load_lightning_model(self, path_predictions)->FLAIR2Lightning:
+    def load_lightning_model(self, path_run)->FLAIR2Lightning:
         lightning_ckpt = os.path.join(self.path_models, f'{run_name}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
-        lightning_model.path_predictions = os.path.join(path_predictions, 'not_confirmed')
+        path_predictions = os.path.join(path_run, 'not_confirmed')
+        lightning_model.path_predictions = path_predictions
+        os.makedirs(path_predictions, exist_ok=False)
         
         return lightning_model
     
-    def rename_submissions_dir(self, run_name, submission_inference_time, path_predicitons):
+    def rename_submissions_dir(self, run_name, submission_inference_time, path_run):
         # name_of_your_approach = f'{lightning_model.architecture}-{lightning_model.encoder_name}'
         name_of_your_approach = run_name
-        i = 0
         name_submission = f'{name_of_your_approach}_{self.baseline_inference_time}_{submission_inference_time}'
-        new_path_submission = os.path.join(path_predicitons, name_submission)
-        old_path_submission = os.path.join(path_predicitons, 'not_confirmed')
+        new_path_submission = os.path.join(path_run, name_submission)
+        old_path_submission = os.path.join(path_run, 'not_confirmed')
         os.rename(old_path_submission, new_path_submission)
         
         return os.path.exists(new_path_submission)
     
     def __call__(self, run_name):
-        path_predictions = self.update_variables(run_name)
-        lightning_model = self.load_lightning_model(path_predictions)
+        path_run = self.update_variables(run_name)
+        lightning_model = self.load_lightning_model(path_run)
         
         # starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
         # starter.record()
@@ -72,7 +73,7 @@ class FLAIR2Submission():
         return self.rename_submissions_dir(
             run_name=run_name,
             submission_inference_time=submission_inference_time,
-            path_predicitons=path_predictions
+            path_run=path_run
         )
     
 if __name__ == '__main__':
