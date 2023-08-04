@@ -31,7 +31,7 @@ dataset_train = FLAIR2Dataset(
     is_test=False,
 )
 
-batch_size = 4
+batch_size = 16
 dataloader_train = DataLoader(
     dataset=dataset_train,
     batch_size=batch_size,
@@ -40,4 +40,4 @@ dataloader_train = DataLoader(
 )
 
 image_id, aerial, sen, labels = next(iter(dataloader_train))
-output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='training', batch_size=batch_size)  # use as model in the loop
+output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size)
