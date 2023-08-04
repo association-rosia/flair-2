@@ -18,7 +18,6 @@ augmentations = augmentations.Augmentations([
     augmentations.HorizontalFlip(),
     augmentations.VerticalFlip(),
     augmentations.Rotate([90, 180, 270]),
-    augmentations.Solarize([0, 0.25, 0.5, 0.75])
 ])
 
 tta_wrapper = wrappers.SegmentationWrapper(model, augmentations)

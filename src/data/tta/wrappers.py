@@ -53,11 +53,14 @@ class SegmentationWrapper(nn.Module):
         random.seed(random_seed)
 
         if step == 'training':
+            # augment the inputs
             params_batch = [random.choice(self.product) for _ in range(batch_size)]
             inputs = self.augment_inputs_batch(inputs, params_batch)
 
+            # process the inputs in the model
             output = self.model(**inputs)
 
+            # deaugment the model output
             deparams_batch = [params[::-1] for params in params_batch]
             output = self.deaugment_output_batch(output, deparams_batch)
 

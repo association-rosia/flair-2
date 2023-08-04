@@ -159,7 +159,7 @@ class FLAIR2Dataset(Dataset):
         sen = self.get_sen(image_id, path_sen)
 
         if self.is_test:
-            labels = None
+            labels = torch.ByteTensor()
         else:
             labels = self.get_labels(path_labels)
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     dataset_train = FLAIR2Dataset(
         list_images=list_images_train,
         sen_size=40,
-        is_test=False,
+        is_test=True,
     )
 
     image_id, aerial, sen, labels = dataset_train[0]
