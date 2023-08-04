@@ -11,7 +11,9 @@ import rasterio
 import torch
 from torch.utils.data import Dataset
 
-import src.constants as cst
+from src.constants import get_constants
+
+cst = get_constants()
 
 
 class FLAIR2Dataset(Dataset):
@@ -20,8 +22,8 @@ class FLAIR2Dataset(Dataset):
         self.sen_size = sen_size
         self.is_test = is_test
 
-        self.path = cst.PATH_DATA_TRAIN if not is_test else cst.PATH_DATA_TEST
-        self.path_centroids = os.path.join(cst.PATH_DATA, 'centroids_sp_to_patch.json')
+        self.path = cst.path_data_train if not self.is_test else cst.path_data_test
+        self.path_centroids = os.path.join(cst.path_data, 'centroids_sp_to_patch.json')
         self.centroids = self.read_centroids(self.path_centroids)
 
     @staticmethod
@@ -174,14 +176,26 @@ def get_list_images(path):
 
 
 if __name__ == '__main__':
-    path_train = cst.PATH_DATA_TRAIN
-    list_images_train = get_list_images(path_train)
+    from torch.utils.data import DataLoader
+    
+    path_data = cst.path_data_test
+    list_images = get_list_images(path_data)
 
-    dataset_train = FLAIR2Dataset(
-        list_images=list_images_train,
+    dataset = FLAIR2Dataset(
+        list_images=list_images,
         sen_size=40,
-        is_test=False,
+        is_test=True,
+    )
+    
+    dataloader = DataLoader(
+        dataset=dataset,
+        batch_size=1,
+        shuffle=False,
     )
 
-    image_id, aerial, sen, labels = dataset_train[0]
+    image_id, aerial, sen, labels = dataset[0]
     print(image_id, aerial, sen, labels)
+    
+    for image_id, aerial, sen, labels in dataloader:
+        print(image_id, aerial, sen, labels)
+        break

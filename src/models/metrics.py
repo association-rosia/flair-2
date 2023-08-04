@@ -1,6 +1,5 @@
 import torch
 import torchmetrics
-from torchmetrics.classification import MulticlassJaccardIndex
 
 import wandb
 
