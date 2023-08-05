@@ -84,17 +84,4 @@ class Rotate(Augmentation):
         return output
 
 
-class Solarize(Augmentation):
-    def __init__(self, thresholds: List):
-        thresholds = list(set([1] + thresholds))  # threshold = 1 is not change
-        super().__init__(thresholds)
-
-    def augment(self, inputs: dict, threshold=1, **kwargs):
-        for key in inputs.keys():
-            inputs[key] = F.solarize(inputs[key], threshold=threshold)
-
-        return inputs
-
-    def deaugment(self, output: dict, threshold=1, **kwargs):
-        # this transformation do not "destruct" the inputs
-        return output
+# class Solarize(Augmentation) # working only for RGB or grayscale images (1 or 3 channels only)

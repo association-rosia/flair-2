@@ -19,7 +19,6 @@ augmentations = augmentations.Augmentations([
     augmentations.HorizontalFlip(),
     augmentations.VerticalFlip(),
     augmentations.Rotate([90, 180, 270]),
-    # augmentations.Solarize([0, 0.25, 0.5, 0.75])
 ])
 
 tta_wrapper = wrappers.SegmentationWrapper(model, augmentations)
@@ -33,7 +32,7 @@ dataset_train = FLAIR2Dataset(
     is_test=False,
 )
 
-batch_size = 4
+batch_size = 16
 dataloader_train = DataLoader(
     dataset=dataset_train,
     batch_size=batch_size,
@@ -41,8 +40,5 @@ dataloader_train = DataLoader(
     drop_last=True
 )
 
-image_id, aerial, sen, labels = dataset_train[0]
-
-# TODO: add dataloader to test batch_size
-
-output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size)  # use as model in the loop
+image_id, aerial, sen, labels = next(iter(dataloader_train))
+output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size)
