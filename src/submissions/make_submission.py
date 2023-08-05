@@ -19,10 +19,10 @@ class FLAIR2Submission():
         self.nodes = 1
         self.gpus_per_nodes = 1
         self.trainer = pl.Trainer(
-            # accelerator='gpu',
-            accelerator='cpu',
+            accelerator='gpu',
+            # accelerator='cpu',
             num_nodes=self.nodes,
-            fast_dev_run=3
+            # fast_dev_run=3
         )
         self.baseline_inference_time = cst.baseline_inference_time
         self.path_models = cst.path_models
