@@ -36,12 +36,13 @@ class FLAIR2Dataset(Dataset):
 
     def get_paths(self, idx):
         path_aerial = self.list_images[idx]
-        sen_id = '/'.join(path_aerial.split('/')[-4:-2])
-        path_sen = os.path.join(self.path, 'sen', sen_id, 'sen')
+        path_aerial = os.path.normpath(path_aerial)
+        list_dir_aerial = path_aerial.split(os.sep)[-4:-2]
+        path_sen = os.path.join(self.path, 'sen', *list_dir_aerial, 'sen')
         path_labels = self.img_to_msk(path_aerial)
-        image_id = path_aerial.split('/')[-1]
+        name_image = os.path.basename(path_aerial)
 
-        return path_aerial, path_sen, path_labels, image_id
+        return path_aerial, path_sen, path_labels, name_image
 
     @staticmethod
     def read_tif(path_file):
@@ -77,9 +78,10 @@ class FLAIR2Dataset(Dataset):
 
         return sen_products
 
-    def read_sens(self, image_id, path_sen):
-        centroid = self.centroids[image_id]
-        sen_ids = path_sen.split('/')[-3:-1]
+    def read_sens(self, name_image, path_sen):
+        centroid = self.centroids[name_image]
+        path_sen = os.path.normpath(path_sen)
+        sen_ids = path_sen.split(os.sep)[-3:-1]
 
         file_data = f'SEN2_sp_{sen_ids[0]}-{sen_ids[1]}_data.npy'
         sen_data = self.read_sen_npy(path_sen, file_data, centroid)
@@ -137,8 +139,8 @@ class FLAIR2Dataset(Dataset):
 
         return sen
 
-    def get_sen(self, image_id, path_sen):
-        sen_data, sen_masks, sen_products = self.read_sens(image_id, path_sen)
+    def get_sen(self, name_image, path_sen):
+        sen_data, sen_masks, sen_products = self.read_sens(name_image, path_sen)
         sen_months = self.extract_sen_months(sen_products)
         sen_data, sen_months = self.masks_filtering(sen_data, sen_masks, sen_months)
         sen = self.months_averaging(sen_data, sen_months)
@@ -156,16 +158,16 @@ class FLAIR2Dataset(Dataset):
         return len(self.list_images)
 
     def __getitem__(self, idx):
-        path_aerial, path_sen, path_labels, image_id = self.get_paths(idx)
+        path_aerial, path_sen, path_labels, name_image = self.get_paths(idx)
         aerial = self.get_aerial(path_aerial)
-        sen = self.get_sen(image_id, path_sen)
+        sen = self.get_sen(name_image, path_sen)
 
         if self.is_test:
-            labels = None
+            labels = torch.ByteTensor()
         else:
             labels = self.get_labels(path_labels)
 
-        return image_id, aerial, sen, labels
+        return name_image, aerial, sen, labels
 
 
 def get_list_images(path):
@@ -178,13 +180,13 @@ def get_list_images(path):
 if __name__ == '__main__':
     from torch.utils.data import DataLoader
     
-    path_data = cst.path_data_test
+    path_data = cst.path_data_train
     list_images = get_list_images(path_data)
 
     dataset = FLAIR2Dataset(
         list_images=list_images,
         sen_size=40,
-        is_test=True,
+        is_test=False,
     )
     
     dataloader = DataLoader(
@@ -193,9 +195,9 @@ if __name__ == '__main__':
         shuffle=False,
     )
 
-    image_id, aerial, sen, labels = dataset[0]
-    print(image_id, aerial, sen, labels)
+    name_image, aerial, sen, labels = dataset[0]
+    print(name_image, aerial.shape, sen.shape, labels.shape)
     
-    for image_id, aerial, sen, labels in dataloader:
-        print(image_id, aerial, sen, labels)
+    for name_image, aerial, sen, labels in dataloader:
+        print(name_image, aerial.shape, sen.shape, labels.shape)
         break
