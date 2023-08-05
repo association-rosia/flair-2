@@ -42,7 +42,7 @@ class SegmentationWrapper(nn.Module):
 
         if step == 'training':
             # augment the inputs
-            params_batch = [random.choice(self.product) for _ in range(batch_size)]
+            params_batch = random.choices(self.product, k=batch_size)
             inputs = self.augment_inputs_batch(inputs, params_batch)
 
             # process the inputs in the model
