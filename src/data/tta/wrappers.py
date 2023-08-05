@@ -28,13 +28,13 @@ class SegmentationWrapper(nn.Module):
 
         return augmented_inputs
 
-    def deaugment_output_batch(self, output, deparams_batch):
+    def deaugment_outputs_batch(self, outputs, deparams_batch):
         for i, deparams in enumerate(deparams_batch):
 
             for deaugmentation, de_param in zip(self.delist, deparams):
-                output[i] = deaugmentation.deaugment(output[i], de_param)
+                outputs[i] = deaugmentation.deaugment(outputs[i], de_param)
 
-        return output
+        return outputs
 
     def forward(self, inputs, step, batch_size, limit=None, random_seed=42):
         # step can be "training", "validation", "test" or "predict"
@@ -46,16 +46,16 @@ class SegmentationWrapper(nn.Module):
             inputs = self.augment_inputs_batch(inputs, params_batch)
 
             # process the inputs in the model
-            output = self.model(**inputs)
+            outputs = self.model(**inputs)
 
-            # deaugment the model output
+            # deaugment the model outputs
             deparams_batch = [params[::-1] for params in params_batch]
-            output = self.deaugment_output_batch(output, deparams_batch)
+            outputs = self.deaugment_outputs_batch(outputs, deparams_batch)
 
         elif step == 'validation' or step == 'test' or step == 'predict':
             tta_params = self.product if limit is None else random.choices(self.product, k=limit)
             tta_deparams = [p[::-1] for p in self.product]
-            output = []
+            outputs = []
 
             for i in range(batch_size):
                 inputs_i = {key: inputs[key][i] for key in inputs.keys()}
@@ -73,18 +73,18 @@ class SegmentationWrapper(nn.Module):
                 for key in tta_inputs_i.keys():
                     tta_inputs_i[key] = torch.stack(tta_inputs_i[key], dim=0)
 
-                tta_output_i = self.model(**tta_inputs_i)
+                tta_outputs_i = self.model(**tta_inputs_i)
 
                 for i, deparams in enumerate(tta_deparams):
                     for deaugmentation, de_param in zip(self.delist, deparams):
-                        tta_output_i[i] = deaugmentation.deaugment(tta_output_i[i], de_param)
+                        tta_outputs_i[i] = deaugmentation.deaugment(tta_outputs_i[i], de_param)
 
-                output_i = torch.sum(tta_output_i, dim=0) / len(tta_output_i)
-                output.append(output_i)
+                outputs_i = torch.sum(tta_outputs_i, dim=0) / len(tta_outputs_i)
+                outputs.append(outputs_i)
 
-            output = torch.stack(output)
+            outputs = torch.stack(outputs)
 
         else:
             raise ValueError('step must be "training", "validation", "test" or "predict"')
 
-        return output
+        return outputs
