@@ -95,7 +95,7 @@ class FLAIR2Lightning(pl.LightningModule):
     def training_step(self, batch):
         _, aerial, sen, labels = batch
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
-        labels = torch.squeeze(labels).to(dtype=torch.int64)
+        labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
         self.log("train/loss", loss, on_step=True, on_epoch=True)
 
@@ -108,7 +108,7 @@ class FLAIR2Lightning(pl.LightningModule):
         _, aerial, sen, labels = batch
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
 
-        labels = torch.squeeze(labels).to(dtype=torch.int64)
+        labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
 
         self.log("val/loss", loss, on_epoch=True)

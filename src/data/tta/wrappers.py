@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 import random
-import matplotlib.pyplot as plt
 
 
 class SegmentationWrapper(nn.Module):
