@@ -19,14 +19,8 @@ class SegmentationWrapper(nn.Module):
 
             inputs_i = {key: inputs[key][i] for key in inputs.keys()}
 
-            plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
-            plt.show()
-
             for augmentation, param in zip(self.list, params):
                 inputs_i = augmentation.augment(inputs_i, param)
-
-            # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
-            # plt.show()
 
             augmented_inputs = {key: augmented_inputs[key] + [inputs_i[key]] for key in inputs.keys()}
 
@@ -37,14 +31,8 @@ class SegmentationWrapper(nn.Module):
     def deaugment_output_batch(self, output, deparams_batch):
         for i, deparams in enumerate(deparams_batch):
 
-            # plt.imshow(output[i][:3].permute(1, 2, 0))
-            # plt.show()
-
             for deaugmentation, de_param in zip(self.delist, deparams):
                 output[i] = deaugmentation.deaugment(output[i], de_param)
-
-            plt.imshow(output[i][:3].permute(1, 2, 0))
-            plt.show()
 
         return output
 
@@ -95,10 +83,6 @@ class SegmentationWrapper(nn.Module):
                 output.append(output_i)
 
             output = torch.stack(output)
-
-            for i in range(batch_size):
-                plt.imshow(output[i][:3].permute(1, 2, 0))
-                plt.show()
 
         else:
             raise ValueError('step must be "training", "validation", "test" or "predict"')
