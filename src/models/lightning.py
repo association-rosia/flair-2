@@ -68,7 +68,6 @@ class FLAIR2Lightning(pl.LightningModule):
                 agm.HorizontalFlip(),
                 agm.VerticalFlip(),
                 agm.Rotate(angles=[0, 90, 180, 270]),
-                agm.Solarize(thresholds=[0,5, 1, 1,5])
             ]
         )
         
@@ -78,8 +77,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.metrics = MetricCollection(
             {
                 "MIoU": MulticlassJaccardIndex(self.num_classes, average="macro"),
-                "IoU": MulticlassJaccardIndex(self.num_classes, average="none"),
-                "confusion_matrix": ConfusionMatrix(self.classes),
+                # "IoU": MulticlassJaccardIndex(self.num_classes, average="none"),
+                # "confusion_matrix": ConfusionMatrix(self.classes),
             }
         )
 
@@ -90,7 +89,7 @@ class FLAIR2Lightning(pl.LightningModule):
             x = self.model(**inputs)
         return x
     
-    def on_train_start(self) -> None:
+    def on_train_epoch_start(self) -> None:
         self.step = 'training'
 
     def training_step(self, batch):
@@ -102,7 +101,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return loss
     
-    def on_validation_start(self) -> None:
+    def on_validation_epoch_start(self) -> None:
         self.step = 'validation'
 
     def validation_step(self, batch, batch_idx):
@@ -141,7 +140,7 @@ class FLAIR2Lightning(pl.LightningModule):
     #     # Confusion matrix need a special method to be logged
     #     self.logger.experiment.log(formatted_metrics)
     
-    def on_test_start(self) -> None:
+    def on_test_epoch_start(self) -> None:
         self.step = 'test'
 
     def test_step(self, batch, batch_idx):
@@ -159,12 +158,12 @@ class FLAIR2Lightning(pl.LightningModule):
         for pred_label, img_id in zip(pred_labels, image_ids):
             img: np.ndarray = pred_label.numpy(force=True)
             img = img.astype(np.uint8)
-            img_path = os.path.join(self.path_predictions, f"PRED_{img_id}.tif")
+            img_path = os.path.join(self.path_predictions, f"PRED_{img_id}")
             tiff.imwrite(img_path, img)
 
         return pred_labels
     
-    def on_predict_start(self) -> None:
+    def on_predict_epoch_start(self) -> None:
         self.step = 'predict'
 
     def configure_optimizers(self):

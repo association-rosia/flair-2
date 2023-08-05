@@ -3,7 +3,7 @@ import wandb
 import os
 import sys
 
-sys.path.append('.')
+sys.path.append(os.curdir)
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
