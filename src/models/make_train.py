@@ -17,10 +17,11 @@ from src.constants import get_constants
 
 cst = get_constants()
 
+
 def main():
     wandb.init(
         entity='association-rosia',
-        project='FLAIR-2',
+        project='flair-2',
         config={
             'architecture': 'Unet',
             'encoder_name': 'tu-efficientnetv2_xl',  # TODO: try different size
@@ -77,8 +78,9 @@ def main():
     )
 
     trainer.fit(model=lightning_model)
-    
+
     wandb.finish()
+
 
 if __name__ == '__main__':
     main()
