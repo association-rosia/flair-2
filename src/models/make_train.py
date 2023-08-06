@@ -32,7 +32,7 @@ def main():
         }
     )
 
-    df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics.csv'))
+    df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
     # TODO: Implement a smarter splitting strategy
     list_images_train = get_list_images(cst.path_data_train)
     list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=42)

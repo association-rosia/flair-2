@@ -151,8 +151,9 @@ class FLAIR2Dataset(Dataset):
     def get_labels(self, path_labels):
         labels = self.read_tif(path_labels)
         labels = labels - 1
+        labels.where(labels > 12, 12)
 
-        return labels
+        return torch.squeeze(labels)
 
     def __len__(self):
         return len(self.list_images)
@@ -180,7 +181,7 @@ def get_list_images(path):
 if __name__ == '__main__':
     from torch.utils.data import DataLoader
     
-    path_data = cst.path_data_test
+    path_data = cst.path_data_train
     list_images = get_list_images(path_data)
 
     dataset = FLAIR2Dataset(
@@ -196,8 +197,8 @@ if __name__ == '__main__':
     )
 
     image_id, aerial, sen, labels = dataset[0]
-    print(image_id, aerial, sen, labels)
+    print(image_id, aerial.shape, sen.shape, labels.shape)
     
     for image_id, aerial, sen, labels in dataloader:
-        print(image_id, aerial, sen, labels)
+        print(image_id, aerial.shape, sen.shape, labels.shape)
         break
