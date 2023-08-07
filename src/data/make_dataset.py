@@ -151,7 +151,7 @@ class FLAIR2Dataset(Dataset):
     def get_labels(self, path_labels):
         labels = self.read_tif(path_labels)
         labels = labels - 1
-        labels.where(labels > 12, 12)
+        labels = torch.where(labels < 13, labels, 12)
 
         return torch.squeeze(labels)
 

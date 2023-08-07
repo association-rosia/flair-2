@@ -156,10 +156,10 @@ class FLAIR2Lightning(pl.LightningModule):
         # pred_labels += 1
 
         for pred_label, img_id in zip(pred_labels, image_ids):
-            img: np.ndarray = pred_label.numpy(force=True)
+            img = pred_label.numpy(force=True)
             img = img.astype(np.uint8)
             img_path = os.path.join(self.path_predictions, f"PRED_{img_id}")
-            tiff.imwrite(img_path, img)
+            tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
         return pred_labels
     
