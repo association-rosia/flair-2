@@ -112,7 +112,7 @@ class FLAIR2Dataset(Dataset):
         times = []
 
         for t in range(len(sen_masks)):
-            # TODO: verify this (cf. filter_dates in ils_dataset.py from FLAIR project)
+            # TODO: verify this (cf. filter_dates in utils_dataset.py from FLAIR project)
             cover = np.count_nonzero((sen_masks[t, 0, :, :] >= thr_cover) + (sen_masks[t, 1, :, :] >= thr_cover))
             rate = cover / (sen_masks.shape[2] * sen_masks.shape[3])
             sen_per_months = sen_months.count(sen_months[t])
@@ -180,7 +180,7 @@ def get_list_images(path):
 
 if __name__ == '__main__':
     from torch.utils.data import DataLoader
-    
+
     path_data = cst.path_data_train
     list_images = get_list_images(path_data)
 
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         sen_size=40,
         is_test=False,
     )
-    
+
     dataloader = DataLoader(
         dataset=dataset,
         batch_size=1,
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
     image_id, aerial, sen, labels = dataset[0]
     print(image_id, aerial.shape, sen.shape, labels.shape)
-    
+
     for image_id, aerial, sen, labels in dataloader:
         print(image_id, aerial.shape, sen.shape, labels.shape)
         break

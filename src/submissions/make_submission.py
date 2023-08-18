@@ -22,7 +22,7 @@ class FLAIR2Submission():
             accelerator='gpu',
             # accelerator='cpu',
             num_nodes=self.nodes,
-            fast_dev_run=3
+            # fast_dev_run=3
         )
         self.baseline_inference_time = cst.baseline_inference_time
         self.path_models = cst.path_models
@@ -79,5 +79,5 @@ class FLAIR2Submission():
 
 if __name__ == '__main__':
     sub = FLAIR2Submission()
-    run_name = 'sandy-night-27-krtk1bo0'
+    run_name = 'peach-yogurt-30-33vegq7n'
     sub(run_name=run_name)

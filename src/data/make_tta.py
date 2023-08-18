@@ -1,11 +1,13 @@
 from torch import nn
 from torch.utils.data import DataLoader
 
-from src.data.tta import augmentations, wrappers
+from src.data.tta import augmentations as agms
+from src.data.tta import wrappers as wrps
 from src.data.make_dataset import get_list_images, FLAIR2Dataset
 from src.constants import get_constants
 
 cst = get_constants()
+
 
 class FakeModel(nn.Module):
 
@@ -15,13 +17,14 @@ class FakeModel(nn.Module):
 
 model = FakeModel()
 
-augmentations = augmentations.Augmentations([
-    augmentations.HorizontalFlip(),
-    augmentations.VerticalFlip(),
-    augmentations.Rotate([90, 180, 270]),
+augmentations = agms.Augmentations([
+    agms.HorizontalFlip(),
+    agms.VerticalFlip(),
+    agms.Rotate([90, 180, 270]),
+    # agms.Solarize([0.25, 0.5, 0.75])  # can't be use because number of channels must be 1 or 3
 ])
 
-tta_wrapper = wrappers.SegmentationWrapper(model, augmentations)
+tta_wrapper = wrps.SegmentationWrapper(model, augmentations)
 
 path_train = cst.path_data_train
 list_images_train = get_list_images(path_train)
