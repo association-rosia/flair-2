@@ -8,7 +8,7 @@ class FLAIR2Constants():
     path_models = 'models'
     path_submissions = 'submissions'
     baseline_inference_time = 'a_definir'
-    num_workers = 96
+    num_workers = 8
 
 
 def get_constants() -> FLAIR2Constants:
