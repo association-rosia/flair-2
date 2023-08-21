@@ -24,11 +24,11 @@ def main():
         project='flair-2',
         config={
             'architecture': 'Unet',
-            'encoder_name': 'tu-efficientnetv2_xl',  # TODO: try different size
+            'encoder_name': 'tu-efficientnetv2_m',
             'encoder_weight': None,
             'learning_rate': 1e-4,
             'sen_size': 40,
-            'batch_size': 2,
+            'batch_size': 32,
             'use_augmentation': False
         }
     )
