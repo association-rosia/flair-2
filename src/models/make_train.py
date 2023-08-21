@@ -65,20 +65,18 @@ def main():
         verbose=True
     )
 
-    n_epochs = 2  # 0
+    n_epochs = 10
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
         callbacks=[checkpoint_callback],
         accelerator='gpu',
-        # accelerator='cpu',
         # fast_dev_run=3,
-        limit_train_batches=3,
-        limit_val_batches=3,
+        # limit_train_batches=3,
+        # limit_val_batches=3,
     )
 
     trainer.fit(model=lightning_model)
-
     wandb.finish()
 
 
