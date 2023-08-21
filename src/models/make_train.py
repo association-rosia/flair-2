@@ -14,7 +14,6 @@ from src.models.lightning import FLAIR2Lightning
 import pytorch_lightning as pl
 
 from src.constants import get_constants
-
 cst = get_constants()
 
 

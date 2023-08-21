@@ -19,6 +19,9 @@ import tifffile as tiff
 from src.data.make_dataset import FLAIR2Dataset
 from torch.utils.data import DataLoader
 
+from src.constants import get_constants
+cst = get_constants()
+
 
 class FLAIR2Lightning(pl.LightningModule):
     def __init__(
@@ -179,6 +182,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_train,
             batch_size=self.batch_size,
+            num_workers=cst.num_workers,
             shuffle=True,
             drop_last=True,
         )
@@ -193,6 +197,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_val,
             batch_size=self.batch_size,
+            num_workers=cst.num_workers,
             shuffle=False,
             drop_last=True,
         )
@@ -207,6 +212,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_test,
             batch_size=self.batch_size,
+            num_workers=cst.num_workers,
             shuffle=False,
             drop_last=False,
         )
