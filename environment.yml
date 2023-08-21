@@ -4,7 +4,7 @@ dependencies:
   - pip
   - pytorch::pytorch
   - pytorch::torchvision
-  - pytorch::cudatoolkit
+  - conda-forge::cudatoolkit==11.8.0
   - pip:
     - jupyter
     - pytorch-lightning # Numpy error using conda
