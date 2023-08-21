@@ -4,6 +4,7 @@ dependencies:
   - pip
   - pytorch::pytorch
   - pytorch::torchvision
+  - pytorch::cudatoolkit
   - pip:
     - jupyter
     - pytorch-lightning # Numpy error using conda
@@ -13,4 +14,4 @@ dependencies:
     - segmentation-models-pytorch
     - rasterio
     - pandas
-    - matplotlib
+    - matplotlibs
