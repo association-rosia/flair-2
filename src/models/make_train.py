@@ -28,7 +28,7 @@ def main():
             'encoder_weight': None,
             'learning_rate': 1e-4,
             'sen_size': 40,
-            'batch_size': 32,
+            'batch_size': 16,
             'use_augmentation': False
         }
     )
