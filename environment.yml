@@ -2,9 +2,9 @@ name: flair-2-env
 dependencies:
   - python=3.10.*
   - pip
-  - pytorch::pytorch
-  - pytorch::torchvision
-  - conda-forge::cudatoolkit==11.8.0
+#  - pytorch::pytorch
+#  - pytorch::torchvision
+#  - pytorch::pytorch-cuda==11.8
   - pip:
     - jupyter
     - pytorch-lightning # Numpy error using conda
