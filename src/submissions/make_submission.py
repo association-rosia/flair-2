@@ -11,7 +11,7 @@ from src.constants import get_constants
 cst = get_constants()
 
 
-class FLAIR2Submission():
+class FLAIR2Submission:
     def __init__(self):
         self.nodes = 1
         self.gpus_per_nodes = 1
