@@ -69,7 +69,7 @@ def main():
         verbose=True
     )
 
-    n_epochs = 10
+    n_epochs = 30
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
