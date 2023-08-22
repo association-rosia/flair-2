@@ -25,7 +25,7 @@ def main():
             'architecture': 'Unet',
             'encoder_name': 'tu-efficientnetv2_m',
             'encoder_weight': None,
-            'learning_rate': 1e-4,
+            'learning_rate': 1e-3,
             'sen_size': 40,
             'batch_size': 16,
             'use_augmentation': False
