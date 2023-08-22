@@ -5,6 +5,8 @@ import sys
 
 sys.path.append(os.curdir)
 
+import torch
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -14,7 +16,10 @@ from src.models.lightning import FLAIR2Lightning
 import pytorch_lightning as pl
 
 from src.constants import get_constants
+
 cst = get_constants()
+
+torch.set_float32_matmul_precision('medium')  # try 'high'
 
 
 def main():
