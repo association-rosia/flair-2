@@ -1,6 +1,7 @@
-import torchvision.transforms.functional as F
-from typing import List
 import itertools
+from typing import List
+
+import torchvision.transforms.functional as F
 
 
 class Augmentation:
@@ -82,6 +83,5 @@ class Rotate(Augmentation):
         output = F.rotate(output, angle=-angle)
 
         return output
-
 
 # class Solarize(Augmentation) # working only for RGB or grayscale images (1 or 3 channels only)

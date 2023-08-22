@@ -1,7 +1,7 @@
-import wandb
-
 import os
 import sys
+
+import wandb
 
 sys.path.append(os.curdir)
 

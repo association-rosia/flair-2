@@ -1,11 +1,12 @@
 from torch import nn
 from torch.utils.data import DataLoader
 
-from src.data.tta import augmentations, wrappers
-from src.data.make_dataset import get_list_images, FLAIR2Dataset
 from src.constants import get_constants
+from src.data.make_dataset import get_list_images, FLAIR2Dataset
+from src.data.tta import augmentations, wrappers
 
 cst = get_constants()
+
 
 class FakeModel(nn.Module):
 

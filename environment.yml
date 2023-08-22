@@ -3,14 +3,14 @@ dependencies:
   - python=3.10.*
   - pip
   - pip:
-    - jupyter
-    - pytorch-lightning
-    - opencv-python
-    - scikit-learn
-    - wandb
-    - segmentation-models-pytorch
-    - rasterio
-    - pandas
-    - matplotlibs
-    - chardet
-    - tifffile
+      - jupyter
+      - pytorch-lightning
+      - opencv-python
+      - scikit-learn
+      - wandb
+      - segmentation-models-pytorch
+      - rasterio
+      - pandas
+      - matplotlibs
+      - chardet
+      - tifffile
