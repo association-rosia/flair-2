@@ -1,9 +1,11 @@
-import wandb
-
 import os
 import sys
 
+import wandb
+
 sys.path.append(os.curdir)
+
+import torch
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -17,6 +19,8 @@ from src.constants import get_constants
 
 cst = get_constants()
 
+torch.set_float32_matmul_precision('medium')  # try 'high'
+
 
 def main():
     wandb.init(
@@ -24,11 +28,11 @@ def main():
         project='flair-2',
         config={
             'architecture': 'Unet',
-            'encoder_name': 'tu-efficientnetv2_xl',  # TODO: try different size
+            'encoder_name': 'tu-efficientnetv2_m',
             'encoder_weight': None,
-            'learning_rate': 1e-4,
+            'learning_rate': 1e-3,
             'sen_size': 40,
-            'batch_size': 2,
+            'batch_size': 16,
             'use_augmentation': False
         }
     )
@@ -65,20 +69,18 @@ def main():
         verbose=True
     )
 
-    n_epochs = 2  # 0
+    n_epochs = 10
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
         callbacks=[checkpoint_callback],
         accelerator='gpu',
-        # accelerator='cpu',
         # fast_dev_run=3,
-        limit_train_batches=3,
-        limit_val_batches=3,
+        # limit_train_batches=3,
+        # limit_val_batches=3,
     )
 
     trainer.fit(model=lightning_model)
-
     wandb.finish()
 
 
