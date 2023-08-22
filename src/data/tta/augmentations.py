@@ -84,30 +84,10 @@ class Rotate(Augmentation):
         return output
 
 
-# class Solarize(Augmentation):
-#     def __init__(self, thresholds: List):
-#         self.thresholds = thresholds
-#         thresholds = list(set([1] + thresholds))  # threshold = 1 is not change
-#
-#         for threshold in thresholds:
-#             if threshold < 0 or threshold > 1:
-#                 raise ValueError(f'thresholds must be between 0 and 1')
-#
-#         super().__init__(thresholds)
-#
-#     def augment(self, inputs: dict, threshold=1, **kwargs):
-#         for key in inputs.keys():
-#             inputs[key] = F.solarize(inputs[key], threshold=threshold)
-#
-#         return inputs
-#
-#     def deaugment(self, output, threshold=1, **kwargs):
-#         return output
-
-class Augmentation:
-    def __init__(self, params):
-        self.params = params
-        super().__init__()
+class Perspective:
+    def __init__(self, distortion_scale: List):
+        distortion_scale = list(set([0] + distortion_scale))
+        super().__init__(distortion_scale)
 
     def augment(self, inputs: dict, *args, **params):
         raise NotImplementedError
