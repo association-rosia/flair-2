@@ -1,6 +1,7 @@
+import random
+
 import torch
 from torch import nn
-import random
 
 # uncomment to debug
 # import matplotlib.pyplot as plt

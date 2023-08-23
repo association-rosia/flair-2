@@ -1,40 +1,39 @@
 import os
 
 import numpy as np
-
+import pytorch_lightning as pl
+import tifffile as tiff
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
-import pytorch_lightning as pl
-from torchmetrics.classification import MulticlassJaccardIndex
+from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
-from src.models.metrics import ConfusionMatrix
+from torchmetrics.classification import MulticlassJaccardIndex
 
 import src.data.tta.augmentations as agm
+from src.constants import get_constants
+from src.data.make_dataset import FLAIR2Dataset
 from src.data.tta.wrappers import SegmentationWrapper
 from src.models.aerial_model import AerialModel
 
-import tifffile as tiff
-
-from src.data.make_dataset import FLAIR2Dataset
-from torch.utils.data import DataLoader
+cst = get_constants()
 
 
 class FLAIR2Lightning(pl.LightningModule):
     def __init__(
-        self,
-        architecture,
-        encoder_name,
-        encoder_weight,
-        classes,
-        learning_rate,
-        criterion_weight,
-        list_images_train,
-        list_images_val,
-        list_images_test,
-        sen_size,
-        use_augmentation,
-        batch_size,
+            self,
+            architecture,
+            encoder_name,
+            encoder_weight,
+            classes,
+            learning_rate,
+            criterion_weight,
+            list_images_train,
+            list_images_val,
+            list_images_test,
+            sen_size,
+            use_augmentation,
+            batch_size,
     ):
         super(FLAIR2Lightning, self).__init__()
         self.save_hyperparameters()
@@ -62,7 +61,7 @@ class FLAIR2Lightning(pl.LightningModule):
             encoder_weight=self.encoder_weight,
             num_classes=self.num_classes
         )
-        
+
         augmentations = agm.Augmentations(
             [
                 agm.HorizontalFlip(),
@@ -70,10 +69,10 @@ class FLAIR2Lightning(pl.LightningModule):
                 agm.Rotate(angles=[0, 90, 180, 270]),
             ]
         )
-        
+
         if use_augmentation:
             self.model = SegmentationWrapper(model=self.model, augmentations=augmentations)
-        
+
         self.metrics = MetricCollection(
             {
                 "MIoU": MulticlassJaccardIndex(self.num_classes, average="macro"),
@@ -88,7 +87,7 @@ class FLAIR2Lightning(pl.LightningModule):
         else:
             x = self.model(**inputs)
         return x
-    
+
     def on_train_epoch_start(self) -> None:
         self.step = 'training'
 
@@ -100,7 +99,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.log("train/loss", loss, on_step=True, on_epoch=True)
 
         return loss
-    
+
     def on_validation_epoch_start(self) -> None:
         self.step = 'validation'
 
@@ -139,7 +138,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
     #     # Confusion matrix need a special method to be logged
     #     self.logger.experiment.log(formatted_metrics)
-    
+
     def on_test_epoch_start(self) -> None:
         self.step = 'test'
 
@@ -156,13 +155,13 @@ class FLAIR2Lightning(pl.LightningModule):
         # pred_labels += 1
 
         for pred_label, img_id in zip(pred_labels, image_ids):
-            img: np.ndarray = pred_label.numpy(force=True)
+            img = pred_label.numpy(force=True)
             img = img.astype(np.uint8)
             img_path = os.path.join(self.path_predictions, f"PRED_{img_id}")
-            tiff.imwrite(img_path, img)
+            tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
         return pred_labels
-    
+
     def on_predict_epoch_start(self) -> None:
         self.step = 'predict'
 
@@ -179,6 +178,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_train,
             batch_size=self.batch_size,
+            num_workers=cst.num_workers,
             shuffle=True,
             drop_last=True,
         )
@@ -193,6 +193,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_val,
             batch_size=self.batch_size,
+            num_workers=cst.num_workers,
             shuffle=False,
             drop_last=True,
         )
@@ -203,10 +204,11 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_size=self.sen_size,
             is_test=True,
         )
-        
+
         return DataLoader(
             dataset=dataset_test,
             batch_size=self.batch_size,
+            num_workers=cst.num_workers,
             shuffle=False,
             drop_last=False,
         )
