@@ -21,7 +21,7 @@ augmentations = agms.Augmentations([
     agms.HorizontalFlip(),
     agms.VerticalFlip(),
     agms.Rotate([90, 180, 270]),
-    # agms.Solarize([0.25, 0.5, 0.75])  # can't be use because number of channels must be 1 or 3
+    agms.Perspective([0.25, 0.5, 0.75])
 ])
 
 tta_wrapper = wrps.SegmentationWrapper(model, augmentations)
