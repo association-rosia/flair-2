@@ -19,7 +19,7 @@ from src.constants import get_constants
 
 cst = get_constants()
 
-torch.set_float32_matmul_precision('medium')  # try 'high'
+torch.set_float32_matmul_precision('high')
 
 
 def main():
