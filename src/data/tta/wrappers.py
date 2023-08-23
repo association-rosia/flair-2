@@ -2,6 +2,9 @@ import torch
 from torch import nn
 import random
 
+# uncomment to debug
+# import matplotlib.pyplot as plt
+
 
 class SegmentationWrapper(nn.Module):
     def __init__(self, model, augmentations):
@@ -18,6 +21,10 @@ class SegmentationWrapper(nn.Module):
 
             inputs_i = {key: inputs[key][i] for key in inputs.keys()}
 
+            # uncomment to debug
+            # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
+            # plt.show()
+
             for augmentation, param in zip(self.list, params):
                 inputs_i = augmentation.augment(inputs_i, param)
 
@@ -32,6 +39,10 @@ class SegmentationWrapper(nn.Module):
 
             for deaugmentation, de_param in zip(self.delist, deparams):
                 outputs[i] = deaugmentation.deaugment(outputs[i], de_param)
+
+            # uncomment to debug
+            # plt.imshow(outputs[i][:3].permute(1, 2, 0))
+            # plt.show()
 
         return outputs
 
@@ -60,6 +71,10 @@ class SegmentationWrapper(nn.Module):
                 inputs_i = {key: inputs[key][i] for key in inputs.keys()}
                 tta_inputs_i = {key: [] for key in inputs_i.keys()}
 
+                # uncomment to debug
+                # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
+                # plt.show()
+
                 for params in tta_params:
                     augmented_inputs_i = inputs_i.copy()
 
@@ -79,6 +94,11 @@ class SegmentationWrapper(nn.Module):
                         tta_outputs_i[i] = deaugmentation.deaugment(tta_outputs_i[i], de_param)
 
                 outputs_i = torch.sum(tta_outputs_i, dim=0) / len(tta_outputs_i)
+
+                # uncomment to debug
+                # plt.imshow(outputs_i[:3].permute(1, 2, 0))
+                # plt.show()
+
                 outputs.append(outputs_i)
 
             outputs = torch.stack(outputs)
