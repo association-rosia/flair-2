@@ -62,7 +62,7 @@ class FLAIR2Lightning(pl.LightningModule):
             num_classes=self.num_classes
         )
 
-        augmentations = agm.Augmentations([
+        augmentations = agms.Augmentations([
             agms.HorizontalFlip(),
             agms.VerticalFlip(),
             agms.Rotate([90, 180, 270]),
