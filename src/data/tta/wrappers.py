@@ -42,7 +42,7 @@ class SegmentationWrapper(nn.Module):
             output_i = outputs[i].clone()
 
             for deaugmentation, de_param in zip(self.delist, deparams):
-                output_i = deaugmentation.deaugment(output_i, de_param.clone())
+                output_i = deaugmentation.deaugment(output_i, de_param)
 
             deaugmented_outputs.append(output_i)
 
