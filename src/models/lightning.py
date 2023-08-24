@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassJaccardIndex
 
-import src.data.tta.augmentations as agm
+import src.data.tta.augmentations as agms
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.data.tta.wrappers import SegmentationWrapper
@@ -62,13 +62,12 @@ class FLAIR2Lightning(pl.LightningModule):
             num_classes=self.num_classes
         )
 
-        augmentations = agm.Augmentations(
-            [
-                agm.HorizontalFlip(),
-                agm.VerticalFlip(),
-                agm.Rotate(angles=[0, 90, 180, 270]),
-            ]
-        )
+        augmentations = agm.Augmentations([
+            agms.HorizontalFlip(),
+            agms.VerticalFlip(),
+            agms.Rotate([90, 180, 270]),
+            agms.Perspective([0.25, 0.5, 0.75])
+        ])
 
         if use_augmentation:
             self.model = SegmentationWrapper(model=self.model, augmentations=augmentations)
