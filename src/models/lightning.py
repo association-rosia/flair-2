@@ -64,9 +64,9 @@ class FLAIR2Lightning(pl.LightningModule):
 
         augmentations = agms.Augmentations([
             agms.HorizontalFlip(),
-            # agms.VerticalFlip(),
-            # agms.Rotate([90, 180, 270]),
-            # agms.Perspective([0.25, 0.5, 0.75])
+            agms.VerticalFlip(),
+            agms.Rotate([90, 180, 270]),
+            agms.Perspective([0.25, 0.5, 0.75])
         ])
 
         if use_augmentation:
@@ -93,6 +93,11 @@ class FLAIR2Lightning(pl.LightningModule):
     def training_step(self, batch):
         _, aerial, sen, labels = batch
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
+
+        print()
+        print(outputs.shape)
+        print()
+
         labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
         self.log("train/loss", loss, on_step=True, on_epoch=True)
