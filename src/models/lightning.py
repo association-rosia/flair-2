@@ -64,9 +64,9 @@ class FLAIR2Lightning(pl.LightningModule):
 
         augmentations = agms.Augmentations([
             agms.HorizontalFlip(),
-            agms.VerticalFlip(),
-            agms.Rotate([90, 180, 270]),
-            agms.Perspective([0.25, 0.5, 0.75])
+            # agms.VerticalFlip(),
+            # agms.Rotate([90, 180, 270]),
+            # agms.Perspective([0.25, 0.5, 0.75])
         ])
 
         if use_augmentation:
