@@ -20,7 +20,7 @@ from src.constants import get_constants
 cst = get_constants()
 
 torch.set_float32_matmul_precision('high')
-torch.autograd.set_detect_anomaly(True)
+
 
 def main():
     wandb.init(
@@ -33,7 +33,7 @@ def main():
             'learning_rate': 1e-5,
             'sen_size': 40,
             'batch_size': 16,
-            'use_augmentation': True
+            'use_augmentation': False
         }
     )
 
