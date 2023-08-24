@@ -112,7 +112,7 @@ class FLAIR2Dataset(Dataset):
         times = []
 
         for t in range(len(sen_masks)):
-            # TODO: verify this (cf. filter_dates in ils_dataset.py from FLAIR project)
+            # TODO: verify this (cf. filter_dates in utils_dataset.py from FLAIR project)
             cover = np.count_nonzero((sen_masks[t, 0, :, :] >= thr_cover) + (sen_masks[t, 1, :, :] >= thr_cover))
             rate = cover / (sen_masks.shape[2] * sen_masks.shape[3])
             sen_per_months = sen_months.count(sen_months[t])
