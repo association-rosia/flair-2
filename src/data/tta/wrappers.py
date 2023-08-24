@@ -20,7 +20,7 @@ class SegmentationWrapper(nn.Module):
 
         for i, params in enumerate(params_batch):
 
-            inputs_i = {key: inputs[key][i] for key in inputs.keys()}
+            inputs_i = {key: inputs[key][i].clone() for key in inputs.keys()}
 
             # uncomment to debug
             # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
@@ -37,9 +37,10 @@ class SegmentationWrapper(nn.Module):
 
     def deaugment_outputs_batch(self, outputs, deparams_batch):
         for i, deparams in enumerate(deparams_batch):
+            output_i = outputs[i].clone()
 
             for deaugmentation, de_param in zip(self.delist, deparams):
-                outputs[i] = deaugmentation.deaugment(outputs[i], de_param)
+                outputs[i] = deaugmentation.deaugment(output_i, de_param)
 
             # uncomment to debug
             # plt.imshow(outputs[i][:3].permute(1, 2, 0))
@@ -62,6 +63,8 @@ class SegmentationWrapper(nn.Module):
             # deaugment the model outputs
             deparams_batch = [params[::-1] for params in params_batch]
             outputs = self.deaugment_outputs_batch(outputs, deparams_batch)
+
+            print()
 
         elif step == 'validation' or step == 'test' or step == 'predict':
             tta_params = self.product if limit is None else random.choices(self.product, k=limit)
