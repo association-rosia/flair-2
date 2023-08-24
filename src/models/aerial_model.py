@@ -10,7 +10,7 @@ class AerialModel(nn.Module):
             encoder_name=encoder_name,
             encoder_weights=encoder_weight,
             in_channels=5,
-            activation="softmax",
+            activation='softmax',
             classes=num_classes,
         )
 

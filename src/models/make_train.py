@@ -27,13 +27,13 @@ def main():
         entity='association-rosia',
         project='flair-2',
         config={
-            'architecture': 'Unet',
-            'encoder_name': 'tu-efficientnetv2_m',
+            'architecture': 'unet',
+            'encoder_name': 'resnet34',
             'encoder_weight': None,
-            'learning_rate': 1e-3,
+            'learning_rate': 1e-5,
             'sen_size': 40,
             'batch_size': 16,
-            'use_augmentation': False
+            'use_augmentation': True
         }
     )
 
