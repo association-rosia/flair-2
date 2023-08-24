@@ -27,7 +27,7 @@ def main():
         entity='association-rosia',
         project='flair-2',
         config={
-            'architecture': 'unet',
+            'architecture': 'Unet',
             'encoder_name': 'resnet34',
             'encoder_weight': None,
             'learning_rate': 1e-5,
