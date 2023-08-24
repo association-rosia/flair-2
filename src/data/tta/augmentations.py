@@ -120,9 +120,7 @@ class Perspective(Augmentation):
             int(torch.randint(height - int(distortion_scale * half_height) - 1, height, size=(1,)).item()),
         ]
 
-        endpoints = [top_left, top_right, bot_right, bot_left]
-
-        return endpoints
+        return [top_left, top_right, bot_right, bot_left]
 
     def augment(self, inputs: dict, distortion_scale=0, **kwargs):
         startendpoints = {}
