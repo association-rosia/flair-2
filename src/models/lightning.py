@@ -83,7 +83,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def forward(self, inputs):
         if self.use_augmentation:
-            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size)
+            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=10)
         else:
             x = self.model(**inputs)
         return x
