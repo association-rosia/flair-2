@@ -54,7 +54,6 @@ class FLAIR2Lightning(pl.LightningModule):
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
         self.path_predictions = None
-        self.apply_tta = None
 
         self.model = AerialModel(
             architecture=self.architecture,
