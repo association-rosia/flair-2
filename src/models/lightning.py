@@ -23,9 +23,8 @@ cst = get_constants()
 class FLAIR2Lightning(pl.LightningModule):
     def __init__(
             self,
-            architecture,
+            arch,
             encoder_name,
-            encoder_weight,
             classes,
             learning_rate,
             criterion_weight,
@@ -39,9 +38,8 @@ class FLAIR2Lightning(pl.LightningModule):
         super(FLAIR2Lightning, self).__init__()
         self.save_hyperparameters()
 
-        self.architecture = architecture
+        self.arch = arch
         self.encoder_name = encoder_name
-        self.encoder_weight = encoder_weight
         self.classes = classes
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
@@ -56,9 +54,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.path_predictions = None
 
         self.model = AerialModel(
-            architecture=self.architecture,
+            arch=self.arch,
             encoder_name=self.encoder_name,
-            encoder_weight=self.encoder_weight,
             num_classes=self.num_classes
         )
 

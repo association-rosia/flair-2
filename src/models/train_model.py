@@ -28,10 +28,10 @@ def main():
         entity='association-rosia',
         project='flair-2',
         config={
-            'architecture': 'Unet',
+            'arch': 'unet',
             'encoder_name': 'resnet34',
             'encoder_weight': None,
-            'learning_rate': 1e-5,
+            'learning_rate': 0.02,
             'sen_size': 40,
             'batch_size': 16,
             'use_augmentation': True
@@ -44,9 +44,8 @@ def main():
     list_images_test = get_list_images(cst.path_data_test)
 
     lightning_model = FLAIR2Lightning(
-        architecture=wandb.config.architecture,
+        arch=wandb.config.arch,
         encoder_name=wandb.config.encoder_name,
-        encoder_weight=wandb.config.encoder_weight,
         classes=df['Class'],
         learning_rate=wandb.config.learning_rate,
         criterion_weight=df['Freq.-train (%)'],
@@ -69,15 +68,12 @@ def main():
         verbose=True
     )
 
-    n_epochs = 30
+    n_epochs = 15
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
         callbacks=[checkpoint_callback],
         accelerator='gpu',
-        # fast_dev_run=3,
-        # limit_train_batches=3,
-        # limit_val_batches=3,
     )
 
     trainer.fit(model=lightning_model)
