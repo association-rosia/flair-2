@@ -68,7 +68,7 @@ class SegmentationWrapper(nn.Module):
 
         elif step == 'validation' or step == 'test' or step == 'predict':
             tta_params = self.product if limit is None else random.choices(self.product, k=limit)
-            tta_deparams = [p[::-1] for p in self.product]
+            tta_deparams = [p[::-1] for p in tta_params]
             outputs = []
 
             for i in range(batch_size):
