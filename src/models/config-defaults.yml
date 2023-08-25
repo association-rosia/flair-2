@@ -1,0 +1,31 @@
+arch:
+  value: 'unet'
+  desc: Name of the segmentation architecture
+
+encoder_name:
+  value: 'resnet34'
+  desc: Name of the timm encoder
+
+encoder_weight:
+  value: None
+  desc: Name of pretrained configuration of the encoder
+
+learning_rate: 
+  value: 0.02
+  desc: Value of Learning rate
+
+sen_size:
+  value: 40
+  desc: Size of the Sentinel 2 images
+
+batch_size:
+  value: 16
+  desc: Size of each mini-batch
+
+use_augmentation:
+  value: True
+  desc: Use or not data augmentation & tta
+
+dry:
+  value: False
+  desc: Enable or not dry mode pipeline

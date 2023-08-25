@@ -11,7 +11,7 @@ from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassJaccardIndex
 
 import src.data.tta.augmentations as agms
-from src.data.tta import wrappers as wrps
+import src.data.tta.wrappers as wrps
 
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
@@ -21,6 +21,9 @@ cst = get_constants()
 
 
 class FLAIR2Lightning(pl.LightningModule):
+    """
+    Lightning Module for the FLAIR-2 project.
+    """
     def __init__(
             self,
             arch,
@@ -38,6 +41,7 @@ class FLAIR2Lightning(pl.LightningModule):
         super(FLAIR2Lightning, self).__init__()
         self.save_hyperparameters()
 
+        # Initialize hyperparameters and configurations
         self.arch = arch
         self.encoder_name = encoder_name
         self.classes = classes
@@ -53,12 +57,14 @@ class FLAIR2Lightning(pl.LightningModule):
         self.batch_size = batch_size
         self.path_predictions = None
 
+        # Create the AerialModel
         self.model = AerialModel(
             arch=self.arch,
             encoder_name=self.encoder_name,
             num_classes=self.num_classes
         )
 
+        # Initialize augmentations
         augmentations = agms.Augmentations([
             agms.HorizontalFlip(),
             agms.VerticalFlip(),
@@ -69,11 +75,10 @@ class FLAIR2Lightning(pl.LightningModule):
         if use_augmentation:
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
+        # Initialize metrics for evaluation
         self.metrics = MetricCollection(
             {
-                'MIoU': MulticlassJaccardIndex(self.num_classes, average='macro'),
-                # 'IoU': MulticlassJaccardIndex(self.num_classes, average='none'),
-                # 'confusion_matrix': ConfusionMatrix(self.classes),
+                'MIoU': MulticlassJaccardIndex(self.num_classes, average='macro')
             }
         )
 
@@ -121,20 +126,6 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return metrics
 
-    # def log_metrics(self, metrics):
-    #     formatted_metrics = {}
-    #     for key, value in metrics.items():
-    #         # Metrics that return 1d array tensor
-    #         # spe_key = '/IoU'
-    #         # if spe_key in key:
-    #         #     for i, class_name in enumerate(self.classes):
-    #         #         formatted_metrics[spe_key + '-' + class_name] = value[i]
-    #         #     continue
-    #         formatted_metrics[key] = value
-
-    #     # Confusion matrix need a special method to be logged
-    #     self.logger.experiment.log(formatted_metrics)
-
     def on_test_epoch_start(self) -> None:
         self.step = 'test'
 
@@ -165,6 +156,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return AdamW(self.parameters(), lr=self.learning_rate)
 
     def train_dataloader(self):
+        # Initialize training dataset and data loader
         dataset_train = FLAIR2Dataset(
             list_images=self.list_images_train,
             sen_size=self.sen_size,
@@ -180,6 +172,7 @@ class FLAIR2Lightning(pl.LightningModule):
         )
 
     def val_dataloader(self):
+        # Initialize validation dataset and data loader
         dataset_val = FLAIR2Dataset(
             list_images=self.list_images_val,
             sen_size=self.sen_size,
@@ -195,6 +188,7 @@ class FLAIR2Lightning(pl.LightningModule):
         )
 
     def test_dataloader(self):
+        # Initialize test dataset and data loader
         dataset_test = FLAIR2Dataset(
             list_images=self.list_images_test,
             sen_size=self.sen_size,
