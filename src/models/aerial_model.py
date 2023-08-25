@@ -3,15 +3,14 @@ from torch import nn
 
 
 class AerialModel(nn.Module):
-    def __init__(self, architecture, encoder_name, encoder_weight, num_classes) -> None:
+    def __init__(self, arch, encoder_name, num_classes) -> None:
         super().__init__()
 
-        self.model = getattr(smp, architecture)(
+        self.model = smp.create_model(
+            arch=arch,
             encoder_name=encoder_name,
-            encoder_weights=encoder_weight,
-            in_channels=5,
-            activation="softmax",
             classes=num_classes,
+            in_channels=5,
         )
 
     def forward(self, aerial, *args, **kwargs):

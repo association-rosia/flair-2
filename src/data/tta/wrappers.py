@@ -20,7 +20,7 @@ class SegmentationWrapper(nn.Module):
 
         for i, params in enumerate(params_batch):
 
-            inputs_i = {key: inputs[key][i] for key in inputs.keys()}
+            inputs_i = {key: inputs[key][i].clone() for key in inputs.keys()}
 
             # uncomment to debug
             # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
@@ -36,16 +36,19 @@ class SegmentationWrapper(nn.Module):
         return augmented_inputs
 
     def deaugment_outputs_batch(self, outputs, deparams_batch):
+        deaugmented_outputs = []
+
         for i, deparams in enumerate(deparams_batch):
+            output_i = outputs[i].clone()
 
             for deaugmentation, de_param in zip(self.delist, deparams):
-                outputs[i] = deaugmentation.deaugment(outputs[i], de_param)
+                output_i = deaugmentation.deaugment(output_i, de_param)
 
-            # uncomment to debug
-            # plt.imshow(outputs[i][:3].permute(1, 2, 0))
-            # plt.show()
+            deaugmented_outputs.append(output_i)
 
-        return outputs
+        deaugmented_outputs = torch.stack(deaugmented_outputs)
+
+        return deaugmented_outputs
 
     def forward(self, inputs, step, batch_size, limit=None, random_seed=42):
         # step can be "training", "validation", "test" or "predict"
@@ -65,7 +68,7 @@ class SegmentationWrapper(nn.Module):
 
         elif step == 'validation' or step == 'test' or step == 'predict':
             tta_params = self.product if limit is None else random.choices(self.product, k=limit)
-            tta_deparams = [p[::-1] for p in self.product]
+            tta_deparams = [p[::-1] for p in tta_params]
             outputs = []
 
             for i in range(batch_size):

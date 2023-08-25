@@ -10,10 +10,11 @@ from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassJaccardIndex
 
-import src.data.tta.augmentations as agm
+import src.data.tta.augmentations as agms
+from src.data.tta import wrappers as wrps
+
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
-from src.data.tta.wrappers import SegmentationWrapper
 from src.models.aerial_model import AerialModel
 
 cst = get_constants()
@@ -22,9 +23,8 @@ cst = get_constants()
 class FLAIR2Lightning(pl.LightningModule):
     def __init__(
             self,
-            architecture,
+            arch,
             encoder_name,
-            encoder_weight,
             classes,
             learning_rate,
             criterion_weight,
@@ -38,9 +38,8 @@ class FLAIR2Lightning(pl.LightningModule):
         super(FLAIR2Lightning, self).__init__()
         self.save_hyperparameters()
 
-        self.architecture = architecture
+        self.arch = arch
         self.encoder_name = encoder_name
-        self.encoder_weight = encoder_weight
         self.classes = classes
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
@@ -53,37 +52,34 @@ class FLAIR2Lightning(pl.LightningModule):
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
         self.path_predictions = None
-        self.apply_tta = None
 
         self.model = AerialModel(
-            architecture=self.architecture,
+            arch=self.arch,
             encoder_name=self.encoder_name,
-            encoder_weight=self.encoder_weight,
             num_classes=self.num_classes
         )
 
-        augmentations = agm.Augmentations(
-            [
-                agm.HorizontalFlip(),
-                agm.VerticalFlip(),
-                agm.Rotate(angles=[0, 90, 180, 270]),
-            ]
-        )
+        augmentations = agms.Augmentations([
+            agms.HorizontalFlip(),
+            agms.VerticalFlip(),
+            agms.Rotate([90, 180, 270]),
+            agms.Perspective([0.25, 0.5, 0.75])
+        ])
 
         if use_augmentation:
-            self.model = SegmentationWrapper(model=self.model, augmentations=augmentations)
+            self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
         self.metrics = MetricCollection(
             {
-                "MIoU": MulticlassJaccardIndex(self.num_classes, average="macro"),
-                # "IoU": MulticlassJaccardIndex(self.num_classes, average="none"),
-                # "confusion_matrix": ConfusionMatrix(self.classes),
+                'MIoU': MulticlassJaccardIndex(self.num_classes, average='macro'),
+                # 'IoU': MulticlassJaccardIndex(self.num_classes, average='none'),
+                # 'confusion_matrix': ConfusionMatrix(self.classes),
             }
         )
 
     def forward(self, inputs):
         if self.use_augmentation:
-            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size)
+            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=10)
         else:
             x = self.model(**inputs)
         return x
@@ -96,7 +92,7 @@ class FLAIR2Lightning(pl.LightningModule):
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
         labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
-        self.log("train/loss", loss, on_step=True, on_epoch=True)
+        self.log('train/loss', loss, on_step=True, on_epoch=True)
 
         return loss
 
@@ -110,7 +106,7 @@ class FLAIR2Lightning(pl.LightningModule):
         labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
 
-        self.log("val/loss", loss, on_epoch=True)
+        self.log('val/loss', loss, on_epoch=True)
         self.metrics.update(outputs, labels)
 
         return loss
@@ -129,10 +125,10 @@ class FLAIR2Lightning(pl.LightningModule):
     #     formatted_metrics = {}
     #     for key, value in metrics.items():
     #         # Metrics that return 1d array tensor
-    #         # spe_key = "/IoU"
+    #         # spe_key = '/IoU'
     #         # if spe_key in key:
     #         #     for i, class_name in enumerate(self.classes):
-    #         #         formatted_metrics[spe_key + "-" + class_name] = value[i]
+    #         #         formatted_metrics[spe_key + '-' + class_name] = value[i]
     #         #     continue
     #         formatted_metrics[key] = value
 
@@ -157,7 +153,7 @@ class FLAIR2Lightning(pl.LightningModule):
         for pred_label, img_id in zip(pred_labels, image_ids):
             img = pred_label.numpy(force=True)
             img = img.astype(np.uint8)
-            img_path = os.path.join(self.path_predictions, f"PRED_{img_id}")
+            img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
             tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
         return pred_labels

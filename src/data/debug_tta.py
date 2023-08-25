@@ -44,4 +44,4 @@ dataloader_train = DataLoader(
 )
 
 image_id, aerial, sen, labels = next(iter(dataloader_train))
-output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size)
+output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size, limit=10)

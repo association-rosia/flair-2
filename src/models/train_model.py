@@ -20,6 +20,7 @@ from src.constants import get_constants
 cst = get_constants()
 
 torch.set_float32_matmul_precision('high')
+torch.autograd.set_detect_anomaly(True)
 
 
 def main():
@@ -27,25 +28,24 @@ def main():
         entity='association-rosia',
         project='flair-2',
         config={
-            'architecture': 'Unet',
-            'encoder_name': 'tu-efficientnetv2_m',
+            'arch': 'unet',
+            'encoder_name': 'resnet34',
             'encoder_weight': None,
-            'learning_rate': 1e-3,
+            'learning_rate': 0.02,
             'sen_size': 40,
             'batch_size': 16,
-            'use_augmentation': False
+            'use_augmentation': True
         }
     )
 
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
-    list_images_training = get_list_images(cst.path_data_train)
-    list_images_train, list_images_val = train_test_split(list_images_training, test_size=0.1, random_state=42)
+    list_images_train = get_list_images(cst.path_data_train)
+    list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=42)
     list_images_test = get_list_images(cst.path_data_test)
 
     lightning_model = FLAIR2Lightning(
-        architecture=wandb.config.architecture,
+        arch=wandb.config.arch,
         encoder_name=wandb.config.encoder_name,
-        encoder_weight=wandb.config.encoder_weight,
         classes=df['Class'],
         learning_rate=wandb.config.learning_rate,
         criterion_weight=df['Freq.-train (%)'],
@@ -68,15 +68,12 @@ def main():
         verbose=True
     )
 
-    n_epochs = 30
+    n_epochs = 15
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
         callbacks=[checkpoint_callback],
         accelerator='gpu',
-        # fast_dev_run=3,
-        # limit_train_batches=3,
-        # limit_val_batches=3,
     )
 
     trainer.fit(model=lightning_model)
