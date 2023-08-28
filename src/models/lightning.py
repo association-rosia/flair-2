@@ -175,7 +175,7 @@ class FLAIR2Lightning(pl.LightningModule):
             min_lr=1e-7,
         )
 
-        return [optimizer], [lr_scheduler]
+        return {'optimizer': optimizer, 'lr_scheduler': lr_scheduler, 'monitor': 'val/loss'}
 
     def train_dataloader(self):
         dataset_train = FLAIR2Dataset(
