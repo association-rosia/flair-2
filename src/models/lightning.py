@@ -6,6 +6,7 @@ import tifffile as tiff
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassJaccardIndex
@@ -27,7 +28,7 @@ class FLAIR2Lightning(pl.LightningModule):
             encoder_name,
             classes,
             learning_rate,
-            criterion_weight,
+            class_weights,
             list_images_train,
             list_images_val,
             list_images_test,
@@ -36,6 +37,7 @@ class FLAIR2Lightning(pl.LightningModule):
             batch_size,
     ):
         super(FLAIR2Lightning, self).__init__()
+        self.step = None
         self.save_hyperparameters()
 
         self.arch = arch
@@ -43,8 +45,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.classes = classes
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
-        self.criterion_weight = torch.as_tensor(criterion_weight, dtype=torch.float32)
-        self.criterion = nn.CrossEntropyLoss(weight=self.criterion_weight)
+        self.class_weights = torch.as_tensor(class_weights, dtype=torch.float32)
+        self.criterion = nn.CrossEntropyLoss(weight=self.class_weights)
         self.list_images_train = list_images_train
         self.list_images_val = list_images_val
         self.list_images_test = list_images_test
@@ -114,8 +116,8 @@ class FLAIR2Lightning(pl.LightningModule):
     def on_validation_epoch_end(self) -> None:
         # Compute metrics
         metrics = self.metrics.compute()
-
         self.logger.experiment.log(metrics)
+
         # Reset metrics
         self.metrics.reset()
 
@@ -162,7 +164,18 @@ class FLAIR2Lightning(pl.LightningModule):
         self.step = 'predict'
 
     def configure_optimizers(self):
-        return AdamW(self.parameters(), lr=self.learning_rate)
+        optimizer = AdamW(self.parameters(), lr=self.learning_rate)
+
+        lr_scheduler = ReduceLROnPlateau(
+            optimizer=optimizer,
+            mode='min',
+            factor=0.5,
+            patience=5,
+            cooldown=2,
+            min_lr=1e-7,
+        )
+
+        return {'optimizer': optimizer, 'lr_scheduler': lr_scheduler}
 
     def train_dataloader(self):
         dataset_train = FLAIR2Dataset(
