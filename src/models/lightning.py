@@ -166,7 +166,7 @@ class FLAIR2Lightning(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)
 
-        lr_scheduler = ReduceLROnPlateau(
+        scheduler = ReduceLROnPlateau(
             optimizer=optimizer,
             mode='min',
             factor=0.5,
@@ -175,7 +175,7 @@ class FLAIR2Lightning(pl.LightningModule):
             min_lr=1e-7,
         )
 
-        return {'optimizer': optimizer, 'lr_scheduler': lr_scheduler, 'monitor': 'val/loss'}
+        return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, 'monitor': 'val/loss'}}
 
     def train_dataloader(self):
         dataset_train = FLAIR2Dataset(
