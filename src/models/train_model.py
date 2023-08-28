@@ -81,6 +81,7 @@ def main():
         logger=pl.loggers.WandbLogger(),
         callbacks=[checkpoint_callback, early_stopping_callback],
         accelerator='gpu',
+        num_sanity_val_steps=0
     )
 
     trainer.fit(model=lightning_model)
