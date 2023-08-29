@@ -2,7 +2,7 @@
 
 <img src="assets/bandeau.jpg">
 
-## Getting started
+## 🏁 Getting started
 
 1 - Create the conda environment:
 ```bash
@@ -19,7 +19,7 @@ conda activate flair-2-env
 conda install pytorch torchvision pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
 
-## Train a model 
+## ⚙️ Train a model 
 
 1 - Connect to a GPU server using SSH.
 
