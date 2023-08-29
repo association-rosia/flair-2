@@ -42,7 +42,7 @@ def main():
         encoder_name=wandb.config.encoder_name,
         classes=df['Class'],
         learning_rate=wandb.config.learning_rate,
-        class_weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
+        class_weights=wandb.config.class_weights,
         list_images_train=list_images_train,
         list_images_val=list_images_val,
         list_images_test=list_images_test,
