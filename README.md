@@ -33,7 +33,7 @@ cd flair-2
 conda activate flair-2-env
 ```
 
-4 - Launch the training in background:
+4 - Launch the model training in background:
 ```bash
 nohup python src/models/train_model.py </dev/null &>/dev/null &
 ```
