@@ -35,7 +35,7 @@ conda activate flair-2-env
 
 4 - Launch the training in background:
 ```bash
-nohup python src/models/train_model.py </dev/null &>/dev/null &ps a
+nohup python src/models/train_model.py </dev/null &>/dev/null &
 ```
 
 (Bonus) - Kill the background process:
