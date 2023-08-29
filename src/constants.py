@@ -31,13 +31,14 @@ class FLAIR2Constants():
         Initialize device to work with.
         
         Returns:
-            device (str): Device to work with (cpu, gpu, mps).
+            device (str): Device to work with (cpu, gpu).
         """
         device = 'cpu'
         if cuda.is_available():
             device = 'gpu'
-        elif mps.is_available():
-            device = 'mps'
+        # * MPS is not implemented
+        # elif mps.is_available():
+        #     device = 'mps'
         
         return device
 

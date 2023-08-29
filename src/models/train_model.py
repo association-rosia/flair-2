@@ -27,10 +27,13 @@ def main():
     """
     Main function to train the FLAIR-2 model using PyTorch Lightning and WandB.
     """
+    # Initialize WandB logging
+    init_wandb()
+    
     # Load labels and image lists
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
     list_images_train = get_list_images(cst.path_data_train)
-    list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=42)
+    list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=wandb.config.seed)
     list_images_test = get_list_images(cst.path_data_test)
 
     # Initialize FLAIR-2 Lightning model
@@ -102,9 +105,8 @@ def init_trainer() -> Trainer:
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback],
             accelerator=cst.device,
-            limit_train_batches=3,
-            limit_val_batches=3,
-            limit_test_batches=3
+            limit_train_batches=1,
+            limit_val_batches=1,
         )
 
     else:

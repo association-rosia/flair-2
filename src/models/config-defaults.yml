@@ -26,6 +26,10 @@ use_augmentation:
   value: True
   desc: Use or not data augmentation & tta
 
+seed:
+  value: 42
+  desc: Seed for random initialisation
+
 dry:
-  value: False
+  value: True
   desc: Enable or not dry mode pipeline

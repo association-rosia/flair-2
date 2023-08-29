@@ -17,6 +17,8 @@ from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.models.aerial_model import AerialModel
 
+import wandb
+
 cst = get_constants()
 
 
@@ -45,6 +47,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.arch = arch
         self.encoder_name = encoder_name
         self.classes = classes
+        self.class_labels = {id: label for id, label in enumerate(self.classes)}
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
         self.criterion_weight = torch.as_tensor(criterion_weight, dtype=torch.float32)
@@ -113,6 +116,35 @@ class FLAIR2Lightning(pl.LightningModule):
 
         self.log('val/loss', loss, on_epoch=True)
         self.metrics.update(outputs, labels)
+        
+        if batch_idx == 0:
+            image = aerial[0]
+            image = image[:3]
+            image = image.permute(1, 2, 0)
+            image = image.numpy(force=True)
+            image = image.astype(np.uint8)
+            
+            mask_pred = torch.clone(outputs[0])
+            mask_pred = mask_pred.softmax(dim=0)
+            mask_pred = mask_pred.argmax(dim=0)
+            mask_pred = mask_pred.numpy(force=True)
+            mask_pred = mask_pred.astype(np.uint8)
+            
+            mask_target = labels[0].numpy(force=True)
+            mask_target = mask_target.astype(np.uint8)
+            
+            self.logger.experiment.log(
+                {'aerial_image': wandb.Image(
+                    image,
+                    masks={
+                            "predictions": {
+                                "mask_data": mask_pred,
+                                "class_labels": self.class_labels
+                            },
+                            "ground_truth": {
+                                "mask_data": mask_target,
+                                "class_labels": self.class_labels
+            }})})
 
         return loss
 
@@ -120,7 +152,9 @@ class FLAIR2Lightning(pl.LightningModule):
         # Compute metrics
         metrics = self.metrics.compute()
 
-        self.logger.experiment.log(metrics)
+        # Log metrics
+        self.log_dict(metrics)
+        
         # Reset metrics
         self.metrics.reset()
 
