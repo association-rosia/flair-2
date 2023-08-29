@@ -30,11 +30,11 @@ def main():
         config={
             'arch': 'unet',
             'encoder_name': 'resnet34',
-            'encoder_weight': None,
-            'learning_rate': 0.02,
+            'learning_rate': 0.01,
             'sen_size': 40,
-            'batch_size': 16,
-            'use_augmentation': True
+            'use_augmentation': True,
+            'batch_size': 24,
+            'tta_limit': 20
         }
     )
 
@@ -48,16 +48,18 @@ def main():
         encoder_name=wandb.config.encoder_name,
         classes=df['Class'],
         learning_rate=wandb.config.learning_rate,
-        criterion_weight=df['Freq.-train (%)'],
+        class_weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
         list_images_train=list_images_train,
         list_images_val=list_images_val,
         list_images_test=list_images_test,
         sen_size=wandb.config.sen_size,
         use_augmentation=wandb.config.use_augmentation,
         batch_size=wandb.config.batch_size,
+        tta_limit=wandb.config.tta_limit
     )
 
     os.makedirs(cst.path_models, exist_ok=True)
+
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
         save_top_k=1,
         monitor='val/loss',
@@ -68,12 +70,20 @@ def main():
         verbose=True
     )
 
-    n_epochs = 15
+    early_stopping_callback = pl.callbacks.EarlyStopping(
+        monitor='val/loss',
+        mode='min',
+        patience=10,
+        min_delta=0,
+    )
+
+    n_epochs = 100
     trainer = pl.Trainer(
         max_epochs=n_epochs,
         logger=pl.loggers.WandbLogger(),
-        callbacks=[checkpoint_callback],
+        callbacks=[checkpoint_callback, early_stopping_callback],
         accelerator='gpu',
+        num_sanity_val_steps=0
     )
 
     trainer.fit(model=lightning_model)
