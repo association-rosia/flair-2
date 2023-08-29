@@ -2,22 +2,22 @@
 
 <img src="assets/bandeau.jpg">
 
-# Getting started
+## Getting started
 
-Create the conda environment
-
+Create the conda environment:
 ```bash
 conda env create -f environment.yml
 ```
 
-Activate the conda environment
-
+Activate the conda environment:
 ```bash
 conda activate flair-2-env
 ```
 
-Install PyTorch and CUDA libraries
-
+Install PyTorch and CUDA libraries:
 ```bash
 conda install pytorch torchvision pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
+
+## Train a model 
+
