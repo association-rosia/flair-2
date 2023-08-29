@@ -61,6 +61,7 @@ def main():
     # Finish the WandB run
     wandb.finish()
     
+
 def init_wandb():
     """
     Initialize WandB logging and configuration.
@@ -103,13 +104,10 @@ def init_trainer() -> Trainer:
         min_delta=0,
     )
 
-    # Set the number of epochs based on whether the dry run is enabled
     if wandb.config.dry:
-        n_epochs = 1
-
          # Configure Trainer for dry run
         trainer = Trainer(
-            max_epochs=n_epochs,
+            max_epochs=1,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback],
             accelerator=cst.device,
@@ -118,11 +116,9 @@ def init_trainer() -> Trainer:
         )
 
     else:
-        n_epochs = 100
-
-         # Configure Trainer for regular training
+        # Configure Trainer for regular training
         trainer = Trainer(
-            max_epochs=n_epochs,
+            max_epochs=100,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device,
