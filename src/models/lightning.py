@@ -6,6 +6,7 @@ import tifffile as tiff
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassJaccardIndex
@@ -32,15 +33,17 @@ class FLAIR2Lightning(pl.LightningModule):
             encoder_name,
             classes,
             learning_rate,
-            criterion_weight,
+            class_weights,
             list_images_train,
             list_images_val,
             list_images_test,
             sen_size,
             use_augmentation,
             batch_size,
+            tta_limit
     ):
         super(FLAIR2Lightning, self).__init__()
+        self.step = None
         self.save_hyperparameters()
 
         # Initialize hyperparameters and configurations
@@ -50,14 +53,15 @@ class FLAIR2Lightning(pl.LightningModule):
         self.class_labels = {id: label for id, label in enumerate(self.classes)}
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
-        self.criterion_weight = torch.as_tensor(criterion_weight, dtype=torch.float32)
-        self.criterion = nn.CrossEntropyLoss(weight=self.criterion_weight)
+        self.class_weights = torch.as_tensor(class_weights, dtype=torch.float32)
+        self.criterion = nn.CrossEntropyLoss(weight=self.class_weights)
         self.list_images_train = list_images_train
         self.list_images_val = list_images_val
         self.list_images_test = list_images_test
         self.sen_size = sen_size
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
+        self.tta_limit = tta_limit
         self.path_predictions = None
 
         # Create the AerialModel
@@ -87,7 +91,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def forward(self, inputs):
         if self.use_augmentation:
-            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=10)
+            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=self.tta_limit)
         else:
             x = self.model(**inputs)
         return x
@@ -187,7 +191,18 @@ class FLAIR2Lightning(pl.LightningModule):
         self.step = 'predict'
 
     def configure_optimizers(self):
-        return AdamW(self.parameters(), lr=self.learning_rate)
+        optimizer = AdamW(self.parameters(), lr=self.learning_rate)
+
+        scheduler = ReduceLROnPlateau(
+            optimizer=optimizer,
+            mode='min',
+            factor=0.5,
+            patience=5,
+            cooldown=2,
+            min_lr=1e-7,
+        )
+
+        return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, 'monitor': 'val/loss'}}
 
     def train_dataloader(self):
         # Initialize training dataset and data loader

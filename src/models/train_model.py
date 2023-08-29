@@ -42,13 +42,14 @@ def main():
         encoder_name=wandb.config.encoder_name,
         classes=df['Class'],
         learning_rate=wandb.config.learning_rate,
-        criterion_weight=df['Freq.-train (%)'],
+        class_weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
         list_images_train=list_images_train,
         list_images_val=list_images_val,
         list_images_test=list_images_test,
         sen_size=wandb.config.sen_size,
         use_augmentation=wandb.config.use_augmentation,
         batch_size=wandb.config.batch_size,
+        tta_limit=wandb.config.tta_limit
     )
     
     # Initialize the PyTorch Lightning Trainer
@@ -95,6 +96,13 @@ def init_trainer() -> Trainer:
         verbose=True
     )
 
+    early_stopping_callback = callbacks.EarlyStopping(
+        monitor='val/loss',
+        mode='min',
+        patience=10,
+        min_delta=0,
+    )
+
     # Set the number of epochs based on whether the dry run is enabled
     if wandb.config.dry:
         n_epochs = 1
@@ -110,14 +118,15 @@ def init_trainer() -> Trainer:
         )
 
     else:
-        n_epochs = 15
+        n_epochs = 100
 
          # Configure Trainer for regular training
         trainer = Trainer(
             max_epochs=n_epochs,
             logger=loggers.WandbLogger(),
-            callbacks=[checkpoint_callback],
+            callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device,
+            num_sanity_val_steps=0
         )
 
     return trainer
