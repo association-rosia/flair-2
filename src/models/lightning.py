@@ -35,6 +35,7 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_size,
             use_augmentation,
             batch_size,
+            tta_limit
     ):
         super(FLAIR2Lightning, self).__init__()
         self.step = None
@@ -53,6 +54,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.sen_size = sen_size
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
+        self.tta_limit = tta_limit
         self.path_predictions = None
 
         self.model = AerialModel(
@@ -81,7 +83,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def forward(self, inputs):
         if self.use_augmentation:
-            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=10)
+            x = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=self.tta_limit)
         else:
             x = self.model(**inputs)
         return x

@@ -30,10 +30,11 @@ def main():
         config={
             'arch': 'unet',
             'encoder_name': 'resnet34',
-            'learning_rate': 0.02,
+            'learning_rate': 0.01,
             'sen_size': 40,
+            'use_augmentation': True,
             'batch_size': 16,
-            'use_augmentation': True
+            'tta_limit': 20
         }
     )
 
@@ -54,6 +55,7 @@ def main():
         sen_size=wandb.config.sen_size,
         use_augmentation=wandb.config.use_augmentation,
         batch_size=wandb.config.batch_size,
+        tta_limit=wandb.config.tta_limit
     )
 
     os.makedirs(cst.path_models, exist_ok=True)
