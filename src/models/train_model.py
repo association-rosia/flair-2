@@ -33,7 +33,7 @@ def main():
             'learning_rate': 0.01,
             'sen_size': 40,
             'use_augmentation': True,
-            'batch_size': 16,
+            'batch_size': 24,
             'tta_limit': 20
         }
     )
