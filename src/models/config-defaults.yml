@@ -6,7 +6,7 @@ encoder_name:
   value: 'tu-resnet50'
   desc: Name of the timm encoder
 
-learning_rate: 
+learning_rate:
   value: 0.001
   desc: Value of Learning rate
 
