@@ -44,7 +44,7 @@ class FLAIR2Lightning(pl.LightningModule):
     ):
         super(FLAIR2Lightning, self).__init__()
         self.step = None
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=False)
 
         # Initialize hyperparameters and configurations
         self.arch = arch
@@ -85,7 +85,7 @@ class FLAIR2Lightning(pl.LightningModule):
         # Initialize metrics for evaluation
         self.metrics = MetricCollection(
             {
-                'MIoU': MulticlassJaccardIndex(self.num_classes, average='macro')
+                'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
             }
         )
 
