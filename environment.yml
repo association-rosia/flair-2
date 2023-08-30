@@ -11,6 +11,6 @@ dependencies:
       - segmentation-models-pytorch
       - rasterio
       - pandas
-      - matplotlibs
+      - matplotlib
       - chardet
       - tifffile
