@@ -29,11 +29,15 @@ def main():
     """
     # Initialize WandB logging
     init_wandb()
-    
+
     # Load labels and image lists
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
     list_images_train = get_list_images(cst.path_data_train)
-    list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.1, random_state=wandb.config.seed)
+
+    list_images_train, list_images_val = train_test_split(list_images_train,
+                                                          test_size=0.1,
+                                                          random_state=wandb.config.seed)
+
     list_images_test = get_list_images(cst.path_data_test)
 
     # Initialize FLAIR-2 Lightning model
@@ -51,16 +55,16 @@ def main():
         batch_size=wandb.config.batch_size,
         tta_limit=wandb.config.tta_limit
     )
-    
+
     # Initialize the PyTorch Lightning Trainer
     trainer = init_trainer()
 
     # Train the model
     trainer.fit(model=lightning_model)
-    
+
     # Finish the WandB run
     wandb.finish()
-    
+
 
 def init_wandb():
     """
@@ -85,7 +89,7 @@ def init_trainer() -> Trainer:
     """
     # Create checkpoint's directory if it doesn't exist
     os.makedirs(cst.path_models, exist_ok=True)
-    
+
     # Initialize ModelCheckpoint callback to save the best model checkpoint
     checkpoint_callback = callbacks.ModelCheckpoint(
         save_top_k=1,
@@ -105,7 +109,7 @@ def init_trainer() -> Trainer:
     )
 
     if wandb.config.dry:
-         # Configure Trainer for dry run
+        # Configure Trainer for dry run
         trainer = Trainer(
             max_epochs=1,
             logger=loggers.WandbLogger(),

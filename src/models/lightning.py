@@ -50,7 +50,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.arch = arch
         self.encoder_name = encoder_name
         self.classes = classes
-        self.class_labels = {id: label for id, label in enumerate(self.classes)}
+        self.class_labels = {key: label for key, label in enumerate(self.classes)}
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
         self.class_weights = torch.as_tensor(class_weights, dtype=torch.float32)
