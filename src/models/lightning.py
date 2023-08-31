@@ -44,7 +44,7 @@ class FLAIR2Lightning(pl.LightningModule):
     ):
         super(FLAIR2Lightning, self).__init__()
         self.step = None
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=False)
 
         # Initialize hyperparameters and configurations
         self.arch = arch
@@ -85,7 +85,7 @@ class FLAIR2Lightning(pl.LightningModule):
         # Initialize metrics for evaluation
         self.metrics = MetricCollection(
             {
-                'MIoU': MulticlassJaccardIndex(self.num_classes, average='macro')
+                'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
             }
         )
 
@@ -146,7 +146,7 @@ class FLAIR2Lightning(pl.LightningModule):
         labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
 
-        self.log('val/loss', loss, on_epoch=True)
+        self.log('val/loss', loss, on_epoch=True, on_step=True)
         self.metrics.update(outputs, labels)
         
         if batch_idx == 0:
@@ -159,7 +159,7 @@ class FLAIR2Lightning(pl.LightningModule):
         metrics = self.metrics.compute()
 
         # Log metrics
-        self.log_dict(metrics)
+        self.log_dict(metrics, on_epoch=True, on_step=True)
         
         # Reset metrics
         self.metrics.reset()
