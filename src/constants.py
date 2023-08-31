@@ -19,7 +19,7 @@ class FLAIR2Constants:
         self.path_submissions = 'submissions'
 
         # Placeholder for baseline inference time (needs to be defined)
-        self.baseline_inference_time = '14-52'
+        self.baseline_inference_time = '5-57'
 
         # Number of worker threads for data loading
         self.num_workers = 18

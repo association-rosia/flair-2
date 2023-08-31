@@ -3,6 +3,8 @@ import sys
 
 import torch
 
+from time import time
+
 sys.path.append('.')
 
 from src.models.lightning import FLAIR2Lightning
@@ -96,17 +98,12 @@ class FLAIR2Submission:
         path_run = self.update_variables(run_name)
         lightning_model = self.load_lightning_model(path_run)
 
-        # starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-        # starter.record()
-
+        start = time()
         self.trainer.test(model=lightning_model)
-
-        # dist.barrier() # ensures synchronization among distributed processes
-        # torch.cuda.synchronize() # ensures synchronization between the CPU and GPU
-        # ender.record() # end time
+        end = time()
 
         # inference_time_seconds = (starter.elapsed_time(ender) / 1000.0) * (self.nodes * self.gpus_per_nodes)
-        inference_time_seconds = 100000
+        inference_time_seconds = end - start
         submission_inference_time = f'{inference_time_seconds // 60}-{inference_time_seconds % 60}'
 
         return self.rename_submissions_dir(
