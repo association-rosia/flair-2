@@ -1,6 +1,8 @@
 import os
 import sys
 
+import torch
+
 sys.path.append('.')
 
 from src.models.lightning import FLAIR2Lightning
