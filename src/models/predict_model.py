@@ -72,9 +72,7 @@ class FLAIR2Submission:
         Returns:
             success (bool): True if renaming is successful, False otherwise.
         """
-        # name_of_your_approach = f'{lightning_model.architecture}-{lightning_model.encoder_name}'
-        name_of_your_approach = run_name
-        name_submission = f'{name_of_your_approach}_{self.baseline_inference_time}_{submission_inference_time}'
+        name_submission = f'{run_name}_{self.baseline_inference_time}_{submission_inference_time}'
         new_path_submission = os.path.join(path_run, name_submission)
         old_path_submission = os.path.join(path_run, 'not_confirmed')
         os.rename(old_path_submission, new_path_submission)
@@ -116,5 +114,5 @@ class FLAIR2Submission:
 
 if __name__ == '__main__':
     sub = FLAIR2Submission()
-    run_name = 'peach-yogurt-30-33vegq7n'
+    run_name = 'firm-feather-99-k7dzodiy'
     sub(run_name=run_name)

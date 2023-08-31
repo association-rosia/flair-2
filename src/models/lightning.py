@@ -27,6 +27,7 @@ class FLAIR2Lightning(pl.LightningModule):
     """
     Lightning Module for the FLAIR-2 project.
     """
+
     def __init__(
             self,
             arch,
@@ -110,34 +111,34 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def on_validation_epoch_start(self) -> None:
         self.step = 'validation'
-        
+
     def log_aerial_mask(self, aerial, mask_target, mask_pred):
         image = aerial[:3]
         image = image.permute(1, 2, 0)
         image = image.numpy(force=True)
         image = image * 255.0
         image = image.astype(np.uint8)
-        
+
         mask_pred = mask_pred.softmax(dim=0)
         mask_pred = mask_pred.argmax(dim=0)
         mask_pred = mask_pred.numpy(force=True)
         mask_pred = mask_pred.astype(np.uint8)
-        
+
         mask_target = mask_target.numpy(force=True)
         mask_target = mask_target.astype(np.uint8)
-        
+
         self.logger.experiment.log(
             {'aerial_image': wandb.Image(
                 image,
                 masks={
-                        "predictions": {
-                            "mask_data": mask_pred,
-                            "class_labels": self.class_labels
-                        },
-                        "ground_truth": {
-                            "mask_data": mask_target,
-                            "class_labels": self.class_labels
-        }})})
+                    "predictions": {
+                        "mask_data": mask_pred,
+                        "class_labels": self.class_labels
+                    },
+                    "ground_truth": {
+                        "mask_data": mask_target,
+                        "class_labels": self.class_labels
+                    }})})
 
     def validation_step(self, batch, batch_idx):
         _, aerial, sen, labels = batch
@@ -148,10 +149,10 @@ class FLAIR2Lightning(pl.LightningModule):
 
         self.log('val/loss', loss, on_epoch=True)
         self.metrics.update(outputs, labels)
-        
+
         if batch_idx == 0:
             self.log_aerial_mask(aerial[0], labels[0], outputs[0])
-        
+
         return loss
 
     def on_validation_epoch_end(self) -> None:
@@ -160,7 +161,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         # Log metrics
         self.log_dict(metrics)
-        
+
         # Reset metrics
         self.metrics.reset()
 
@@ -247,7 +248,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_test,
             batch_size=self.batch_size,
-            num_workers=cst.num_workers,
+            num_workers=10,  # DO NOT CHANGE: same as during the FLAIR#2 project testing
             shuffle=False,
             drop_last=False,
         )

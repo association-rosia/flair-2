@@ -19,10 +19,10 @@ class FLAIR2Constants:
         self.path_submissions = 'submissions'
 
         # Placeholder for baseline inference time (needs to be defined)
-        self.baseline_inference_time = 'a_definir'
+        self.baseline_inference_time = '14-52'
 
         # Number of worker threads for data loading
-        self.num_workers = 10
+        self.num_workers = 18
 
         # Initialize the device for computation
         self.device = self.init_device()
