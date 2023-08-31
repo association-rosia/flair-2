@@ -118,5 +118,5 @@ class FLAIR2Submission:
 
 if __name__ == '__main__':
     sub = FLAIR2Submission()
-    run_name = 'firm-feather-99-k7dzodiy'
+    run_name = 'olive-bird-4-u9k58i02'
     sub(run_name=run_name)
