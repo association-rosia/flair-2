@@ -26,7 +26,7 @@ dataset_val = FLAIR2Dataset(
     is_test=False,
 )
 
-for num_workers in range(2, mp.cpu_count(), 2):
+for num_workers in range(6, mp.cpu_count(), 2):
     loader_val = DataLoader(
         dataset_val,
         shuffle=True,
