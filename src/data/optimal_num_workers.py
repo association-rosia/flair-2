@@ -31,8 +31,7 @@ for num_workers in range(6, mp.cpu_count(), 2):
         dataset_val,
         shuffle=True,
         num_workers=num_workers,
-        batch_size=24,
-        pin_memory=True
+        batch_size=24
     )
 
     start = time()
