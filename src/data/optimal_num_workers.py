@@ -31,13 +31,13 @@ for num_workers in range(6, mp.cpu_count(), 2):
         dataset_val,
         shuffle=True,
         num_workers=num_workers,
-        batch_size=64,
+        batch_size=24,
         pin_memory=True
     )
 
     start = time()
     for i, data in enumerate(loader_val, 0):
-        print(i)
+        pass
 
     end = time()
     print("Finish with:{} second, num_workers={}".format(end - start, num_workers))
