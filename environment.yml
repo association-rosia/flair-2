@@ -14,3 +14,4 @@ dependencies:
       - matplotlib
       - chardet
       - tifffile
+      - imagecodecs
