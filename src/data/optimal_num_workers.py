@@ -37,7 +37,7 @@ for num_workers in range(2, mp.cpu_count(), 2):
 
     start = time()
     for i, data in enumerate(loader_val, 0):
-        pass
+        print(i)
 
     end = time()
     print("Finish with:{} second, num_workers={}".format(end - start, num_workers))
