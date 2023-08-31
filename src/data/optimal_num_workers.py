@@ -2,11 +2,15 @@ from time import time
 import multiprocessing as mp
 from torch.utils.data import DataLoader
 from src.data.make_dataset import FLAIR2Dataset
-import os
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from src.data.make_dataset import get_list_images
 from src.constants import get_constants
+
+import os
+import sys
+sys.path.append(os.curdir)
 
 cst = get_constants()
 
