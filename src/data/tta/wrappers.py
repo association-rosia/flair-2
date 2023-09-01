@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 # uncomment to debug
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 class SegmentationWrapper(nn.Module):
@@ -72,8 +72,8 @@ class SegmentationWrapper(nn.Module):
             tta_inputs = []
 
             # uncomment to debug
-            # plt.imshow(inputs['aerial'][0, :3].permute(1, 2, 0))
-            # plt.show()
+            plt.imshow(inputs['aerial'][0, :3].permute(1, 2, 0))
+            plt.show()
 
             for params in tta_params:
                 inputs_copy = inputs.copy()
@@ -88,8 +88,16 @@ class SegmentationWrapper(nn.Module):
             #     plt.imshow(tta_inputs[i]['aerial'][0, :3].permute(1, 2, 0))
             #     plt.show()
 
-            tta_inputs = {key: torch.stack([tta_input[key] for tta_input in tta_inputs]) for key in tta_inputs[0]}
+            tta_inputs = {key: [tta_input[key] for tta_input in tta_inputs] for key in tta_inputs[0]}
+            tta_inputs = {key: torch.stack(tta_inputs[key]) for key in tta_inputs}
+
+            shape = None
+            for key in tta_inputs:
+                shape = tta_inputs[key].shape
+                tta_inputs[key] = tta_inputs[key].view(shape[0]*shape[1], *shape[2:])
+
             tta_outputs = self.model(**tta_inputs)
+            tta_outputs = tta_outputs.view(shape[0], shape[1], *tta_outputs.shape[1:])
 
             # tta_outputs = []
             # for i in range(limit):
@@ -102,8 +110,8 @@ class SegmentationWrapper(nn.Module):
             outputs = torch.mean(tta_outputs, dim=0)
 
             # uncomment to debug
-            # plt.imshow(outputs[0, :3].permute(1, 2, 0))
-            # plt.show()
+            plt.imshow(outputs[0, :3].permute(1, 2, 0))
+            plt.show()
 
         else:
             raise ValueError('step must be "training", "validation", "test" or "predict"')
