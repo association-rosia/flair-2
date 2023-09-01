@@ -64,6 +64,9 @@ class FLAIR2Lightning(pl.LightningModule):
         self.tta_limit = tta_limit
         self.path_predictions = None
 
+        self.val_aerial_image_idx = None
+        self.get_val_aerial_image_idx()
+
         # Create the AerialModel
         self.model = AerialModel(
             arch=self.arch,
@@ -111,6 +114,12 @@ class FLAIR2Lightning(pl.LightningModule):
     def on_validation_epoch_start(self) -> None:
         self.step = 'validation'
 
+    def get_val_aerial_image_idx(self):
+        self.val_aerial_image_idx = None
+
+        for item in self.val_dataloader():
+            print(item)
+
     def log_aerial_mask(self, aerial, mask_target, mask_pred):
         image = aerial[:3]
         image = image.permute(1, 2, 0)
@@ -149,8 +158,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.log('val/loss', loss, on_step=True, on_epoch=True)
         self.metrics.update(outputs, labels)
 
-        if batch_idx == 0:
-            self.log_aerial_mask(aerial[0], labels[0], outputs[0])
+        if batch_idx == self.val_aerial_image_idx:
+            self.log_aerial_mask(aerial[batch_idx], labels[batch_idx], outputs[batch_idx])
 
         return loss
 
