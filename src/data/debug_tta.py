@@ -47,7 +47,7 @@ dataloader_train = DataLoader(
 start = time()
 
 for image_id, aerial, sen, labels in dataloader_train:
-    output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='training', batch_size=batch_size, limit=10)
+    output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size, limit=10)
 
 end = time()
 
