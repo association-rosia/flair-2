@@ -76,7 +76,7 @@ def init_wandb():
     )
 
     # Update config with defaults from a YAML file if no sweep is running
-    wandb.config.update(os.path.join('src', 'models', 'config-defaults.yml'))
+    wandb.config.update(os.path.join('src', 'models', 'config.yml'))
 
 
 def init_trainer() -> Trainer:
