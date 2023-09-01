@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 # uncomment to debug
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class SegmentationWrapper(nn.Module):
@@ -72,8 +72,8 @@ class SegmentationWrapper(nn.Module):
             tta_inputs = []
 
             # uncomment to debug
-            plt.imshow(inputs['aerial'][0, :3].permute(1, 2, 0))
-            plt.show()
+            # plt.imshow(inputs['aerial'][0, :3].permute(1, 2, 0))
+            # plt.show()
 
             for params in tta_params:
                 inputs_copy = inputs.copy()
@@ -102,8 +102,8 @@ class SegmentationWrapper(nn.Module):
             outputs = torch.mean(tta_outputs, dim=0)
 
             # uncomment to debug
-            plt.imshow(outputs[0, :3].permute(1, 2, 0))
-            plt.show()
+            # plt.imshow(outputs[0, :3].permute(1, 2, 0))
+            # plt.show()
 
         else:
             raise ValueError('step must be "training", "validation", "test" or "predict"')
