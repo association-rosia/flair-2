@@ -127,18 +127,18 @@ class FLAIR2Lightning(pl.LightningModule):
         mask_target = mask_target.numpy(force=True)
         mask_target = mask_target.astype(np.uint8)
 
-        self.logger.experiment.log(
-            {'aerial_image': wandb.Image(
+        self.log_dict(
+            {'val/aerial_image': wandb.Image(
                 image,
                 masks={
-                    "predictions": {
-                        "mask_data": mask_pred,
-                        "class_labels": self.class_labels
+                    'predictions': {
+                        'mask_data': mask_pred,
+                        'class_labels': self.class_labels
                     },
-                    "ground_truth": {
-                        "mask_data": mask_target,
-                        "class_labels": self.class_labels
-                    }})})
+                    'ground_truth': {
+                        'mask_data': mask_target,
+                        'class_labels': self.class_labels
+                    }})}, on_step=True, on_epoch=True)
 
     def validation_step(self, batch, batch_idx):
         _, aerial, sen, labels = batch
@@ -147,7 +147,7 @@ class FLAIR2Lightning(pl.LightningModule):
         labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
 
-        self.log('val/loss', loss, on_epoch=True)
+        self.log('val/loss', loss, on_step=True, on_epoch=True)
         self.metrics.update(outputs, labels)
 
         if batch_idx == 0:
@@ -160,7 +160,7 @@ class FLAIR2Lightning(pl.LightningModule):
         metrics = self.metrics.compute()
 
         # Log metrics
-        self.log_dict(metrics)
+        self.log_dict(metrics, on_step=True, on_epoch=True)
 
         # Reset metrics
         self.metrics.reset()
@@ -180,7 +180,7 @@ class FLAIR2Lightning(pl.LightningModule):
         # * Challenge rule: set the data type of the image files as Byte (uint8)
         # * with values ranging from 0 to 12
 
-        # ! Do not uncomment the folowing line, read the comment above.
+        # ! Do not uncomment the following line, read the comment above.
         # pred_labels += 1
 
         for pred_label, img_id in zip(outputs, image_ids):
