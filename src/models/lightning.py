@@ -64,7 +64,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.tta_limit = tta_limit
         self.path_predictions = None
 
-        self.val_aerial_image_idx = None
+        # self.val_aerial_image_idx = None
         # self.get_val_aerial_image_idx()
 
         # Create the AerialModel
