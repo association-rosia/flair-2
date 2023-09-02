@@ -135,8 +135,8 @@ class FLAIR2Lightning(pl.LightningModule):
         mask_target = mask_target.numpy(force=True)
         mask_target = mask_target.astype(np.uint8)
 
-        self.log_dict(
-            {'val/aerial_image': wandb.Image(
+        self.logger.experiment.log(
+            {'aerial_image': wandb.Image(
                 image,
                 masks={
                     'predictions': {
@@ -146,7 +146,7 @@ class FLAIR2Lightning(pl.LightningModule):
                     'ground_truth': {
                         'mask_data': mask_target,
                         'class_labels': self.class_labels
-                    }})}, on_step=True, on_epoch=True)
+                    }})})
 
     def validation_step(self, batch, batch_idx):
         _, aerial, sen, labels = batch
