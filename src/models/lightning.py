@@ -168,7 +168,7 @@ class FLAIR2Lightning(pl.LightningModule):
         metrics = self.metrics.compute()
 
         # Log metrics
-        self.log_dict(metrics, on_step=True, on_epoch=True)
+        self.log_dict(metrics, on_epoch=True)
 
         # Reset metrics
         self.metrics.reset()
