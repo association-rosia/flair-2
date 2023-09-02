@@ -14,6 +14,8 @@ from src.constants import get_constants
 
 cst = get_constants()
 
+from math import floor
+
 torch.set_float32_matmul_precision('high')
 
 
@@ -104,7 +106,10 @@ class FLAIR2Submission:
 
         # inference_time_seconds = (starter.elapsed_time(ender) / 1000.0) * (self.nodes * self.gpus_per_nodes)
         inference_time_seconds = end - start
-        submission_inference_time = f'{inference_time_seconds // 60}-{inference_time_seconds % 60}'
+
+        minutes = floor(inference_time_seconds // 60)
+        secondes = floor(inference_time_seconds % 60)
+        submission_inference_time = f'{minutes}-{secondes}'
 
         return self.rename_submissions_dir(
             run_name=run_name,
