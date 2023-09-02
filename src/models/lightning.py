@@ -158,8 +158,11 @@ class FLAIR2Lightning(pl.LightningModule):
         self.log('val/loss', loss, on_step=True, on_epoch=True)
         self.metrics.update(outputs, labels)
 
-        if batch_idx == self.val_aerial_image_idx:
-            self.log_aerial_mask(aerial[batch_idx], labels[batch_idx], outputs[batch_idx])
+        # if batch_idx == self.val_aerial_image_idx:
+        #     self.log_aerial_mask(aerial[batch_idx], labels[batch_idx], outputs[batch_idx])
+
+        if batch_idx == 0:
+            self.log_aerial_mask(aerial[0], labels[0], outputs[0])
 
         return loss
 
