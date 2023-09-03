@@ -115,7 +115,7 @@ def init_trainer() -> Trainer:
             callbacks=[checkpoint_callback],
             accelerator=cst.device,
             limit_train_batches=1,
-            limit_val_batches=1,
+            limit_val_batches=1
         )
 
     else:
@@ -124,8 +124,7 @@ def init_trainer() -> Trainer:
             max_epochs=100,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
-            accelerator=cst.device,
-            num_sanity_val_steps=0
+            accelerator=cst.device
         )
 
     return trainer
