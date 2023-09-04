@@ -1,17 +1,13 @@
 arch:
-  value: 'unet'
+  value: 'DeepLabV3Plus'
   desc: Name of the segmentation architecture
 
 encoder_name:
-  value: 'resnet34'
+  value: 'tu-resnet50'
   desc: Name of the timm encoder
 
-encoder_weight:
-  value: None
-  desc: Name of pretrained configuration of the encoder
-
-learning_rate: 
-  value: 0.02
+learning_rate:
+  value: 0.002
   desc: Value of Learning rate
 
 sen_size:
@@ -19,7 +15,7 @@ sen_size:
   desc: Size of the Sentinel 2 images
 
 batch_size:
-  value: 16
+  value: 24
   desc: Size of each mini-batch
 
 use_augmentation:
@@ -27,7 +23,7 @@ use_augmentation:
   desc: Use or not data augmentation & tta
 
 tta_limit:
-  value: 20
+  value: 7
   desc: Limit of transformed images related to one observation
 
 class_weights:
@@ -39,5 +35,5 @@ seed:
   desc: Seed for random initialisation
 
 dry:
-  value: True
+  value: False
   desc: Enable or not dry mode pipeline

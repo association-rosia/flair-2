@@ -1,6 +1,10 @@
 import os
 import sys
 
+import torch
+
+from time import time
+
 sys.path.append('.')
 
 from src.models.lightning import FLAIR2Lightning
@@ -9,6 +13,10 @@ import pytorch_lightning as pl
 from src.constants import get_constants
 
 cst = get_constants()
+
+from math import floor
+
+torch.set_float32_matmul_precision('high')
 
 
 class FLAIR2Submission:
@@ -72,9 +80,7 @@ class FLAIR2Submission:
         Returns:
             success (bool): True if renaming is successful, False otherwise.
         """
-        # name_of_your_approach = f'{lightning_model.architecture}-{lightning_model.encoder_name}'
-        name_of_your_approach = run_name
-        name_submission = f'{name_of_your_approach}_{self.baseline_inference_time}_{submission_inference_time}'
+        name_submission = f'{run_name}_{self.baseline_inference_time}_{submission_inference_time}'
         new_path_submission = os.path.join(path_run, name_submission)
         old_path_submission = os.path.join(path_run, 'not_confirmed')
         os.rename(old_path_submission, new_path_submission)
@@ -94,18 +100,16 @@ class FLAIR2Submission:
         path_run = self.update_variables(run_name)
         lightning_model = self.load_lightning_model(path_run)
 
-        # starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-        # starter.record()
-
+        start = time()
         self.trainer.test(model=lightning_model)
-
-        # dist.barrier() # ensures synchronization among distributed processes
-        # torch.cuda.synchronize() # ensures synchronization between the CPU and GPU
-        # ender.record() # end time
+        end = time()
 
         # inference_time_seconds = (starter.elapsed_time(ender) / 1000.0) * (self.nodes * self.gpus_per_nodes)
-        inference_time_seconds = 100000
-        submission_inference_time = f'{inference_time_seconds // 60}-{inference_time_seconds % 60}'
+        inference_time_seconds = end - start
+
+        minutes = floor(inference_time_seconds // 60)
+        secondes = floor(inference_time_seconds % 60)
+        submission_inference_time = f'{minutes}-{secondes}'
 
         return self.rename_submissions_dir(
             run_name=run_name,
@@ -116,5 +120,5 @@ class FLAIR2Submission:
 
 if __name__ == '__main__':
     sub = FLAIR2Submission()
-    run_name = 'peach-yogurt-30-33vegq7n'
+    run_name = 'leafy-blaze-19-3vmiyimu'
     sub(run_name=run_name)

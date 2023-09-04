@@ -1,4 +1,5 @@
 from torch import nn
+from time import time
 from torch.utils.data import DataLoader
 
 from src.data.tta import augmentations as agms
@@ -35,7 +36,7 @@ dataset_train = FLAIR2Dataset(
     is_test=False,
 )
 
-batch_size = 16
+batch_size = 24
 dataloader_train = DataLoader(
     dataset=dataset_train,
     batch_size=batch_size,
@@ -43,5 +44,11 @@ dataloader_train = DataLoader(
     drop_last=True
 )
 
-image_id, aerial, sen, labels = next(iter(dataloader_train))
-output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size, limit=10)
+start = time()
+
+for image_id, aerial, sen, labels in dataloader_train:
+    output = tta_wrapper(inputs={'aerial': aerial, 'sen': sen}, step='validation', batch_size=batch_size, limit=10)
+
+end = time()
+
+print(f'Finish with: {end - start} seconds')

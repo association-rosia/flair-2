@@ -66,46 +66,52 @@ class SegmentationWrapper(nn.Module):
             deparams_batch = [params[::-1] for params in params_batch]
             outputs = self.deaugment_outputs_batch(outputs, deparams_batch)
 
-        elif step == 'validation' or step == 'test' or step == 'predict':
+        elif step in ['validation', 'test', 'predict']:
             tta_params = self.product if limit is None else random.choices(self.product, k=limit)
             tta_deparams = [p[::-1] for p in tta_params]
-            outputs = []
+            tta_inputs = []
 
-            for i in range(batch_size):
-                inputs_i = {key: inputs[key][i] for key in inputs.keys()}
-                tta_inputs_i = {key: [] for key in inputs_i.keys()}
+            # uncomment to debug
+            # plt.imshow(inputs['aerial'][0, :3].permute(1, 2, 0))
+            # plt.show()
 
-                # uncomment to debug
-                # plt.imshow(inputs_i['aerial'][:3].permute(1, 2, 0))
-                # plt.show()
+            for params in tta_params:
+                inputs_copy = inputs.copy()
 
-                for params in tta_params:
-                    augmented_inputs_i = inputs_i.copy()
+                for augmentation, param in zip(self.list, params):
+                    inputs_copy = augmentation.augment(inputs_copy, param)
 
-                    for augmentation, param in zip(self.list, params):
-                        augmented_inputs_i = augmentation.augment(augmented_inputs_i, param)
+                tta_inputs.append(inputs_copy)
 
-                    for key in inputs.keys():
-                        tta_inputs_i[key].append(augmented_inputs_i[key])
+            # uncomment to debug
+            # for i in range(limit):
+            #     plt.imshow(tta_inputs[i]['aerial'][0, :3].permute(1, 2, 0))
+            #     plt.show()
 
-                for key in tta_inputs_i.keys():
-                    tta_inputs_i[key] = torch.stack(tta_inputs_i[key], dim=0)
+            tta_inputs = {key: [tta_input[key] for tta_input in tta_inputs] for key in tta_inputs[0]}
+            tta_inputs = {key: torch.stack(tta_inputs[key]) for key in tta_inputs}
 
-                tta_outputs_i = self.model(**tta_inputs_i)
+            shape = None
+            for key in tta_inputs:
+                shape = tta_inputs[key].shape
+                tta_inputs[key] = tta_inputs[key].view(shape[0]*shape[1], *shape[2:])
 
-                for i, deparams in enumerate(tta_deparams):
-                    for deaugmentation, de_param in zip(self.delist, deparams):
-                        tta_outputs_i[i] = deaugmentation.deaugment(tta_outputs_i[i], de_param)
+            tta_outputs = self.model(**tta_inputs)
+            tta_outputs = tta_outputs.view(shape[0], shape[1], *tta_outputs.shape[1:])
 
-                outputs_i = torch.sum(tta_outputs_i, dim=0) / len(tta_outputs_i)
+            # tta_outputs = []
+            # for i in range(limit):
+            #     tta_outputs.append(self.model(**tta_inputs[i]))
 
-                # uncomment to debug
-                # plt.imshow(outputs_i[:3].permute(1, 2, 0))
-                # plt.show()
+            for i, deparams in enumerate(tta_deparams):
+                for deaugmentation, de_param in zip(self.delist, deparams):
+                    tta_outputs[i] = deaugmentation.deaugment(tta_outputs[i], de_param)
 
-                outputs.append(outputs_i)
+            outputs = torch.mean(tta_outputs, dim=0)
 
-            outputs = torch.stack(outputs)
+            # uncomment to debug
+            # plt.imshow(outputs[0, :3].permute(1, 2, 0))
+            # plt.show()
 
         else:
             raise ValueError('step must be "training", "validation", "test" or "predict"')

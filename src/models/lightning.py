@@ -50,7 +50,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.arch = arch
         self.encoder_name = encoder_name
         self.classes = classes
-        self.class_labels = {id: label for id, label in enumerate(self.classes)}
+        self.class_labels = {key: label for key, label in enumerate(self.classes)}
         self.num_classes = len(classes)
         self.learning_rate = learning_rate
         self.class_weights = torch.as_tensor(class_weights, dtype=torch.float32)
@@ -63,6 +63,9 @@ class FLAIR2Lightning(pl.LightningModule):
         self.batch_size = batch_size
         self.tta_limit = tta_limit
         self.path_predictions = None
+
+        # self.val_aerial_image_idx = None
+        # self.get_val_aerial_image_idx()
 
         # Create the AerialModel
         self.model = AerialModel(
@@ -110,34 +113,40 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def on_validation_epoch_start(self) -> None:
         self.step = 'validation'
-        
+
+    def get_val_aerial_image_idx(self):
+        self.val_aerial_image_idx = None
+
+        for item in self.val_dataloader():
+            print(item)
+
     def log_aerial_mask(self, aerial, mask_target, mask_pred):
         image = aerial[:3]
         image = image.permute(1, 2, 0)
         image = image.numpy(force=True)
         image = image * 255.0
         image = image.astype(np.uint8)
-        
+
         mask_pred = mask_pred.softmax(dim=0)
         mask_pred = mask_pred.argmax(dim=0)
         mask_pred = mask_pred.numpy(force=True)
         mask_pred = mask_pred.astype(np.uint8)
-        
+
         mask_target = mask_target.numpy(force=True)
         mask_target = mask_target.astype(np.uint8)
-        
+
         self.logger.experiment.log(
             {'aerial_image': wandb.Image(
                 image,
                 masks={
-                        "predictions": {
-                            "mask_data": mask_pred,
-                            "class_labels": self.class_labels
-                        },
-                        "ground_truth": {
-                            "mask_data": mask_target,
-                            "class_labels": self.class_labels
-        }})})
+                    'predictions': {
+                        'mask_data': mask_pred,
+                        'class_labels': self.class_labels
+                    },
+                    'ground_truth': {
+                        'mask_data': mask_target,
+                        'class_labels': self.class_labels
+                    }})})
 
     def validation_step(self, batch, batch_idx):
         _, aerial, sen, labels = batch
@@ -146,12 +155,15 @@ class FLAIR2Lightning(pl.LightningModule):
         labels = labels.to(dtype=torch.int64)
         loss = self.criterion(outputs, labels)
 
-        self.log('val/loss', loss, on_epoch=True, on_step=True)
+        self.log('val/loss', loss, on_step=True, on_epoch=True)
         self.metrics.update(outputs, labels)
-        
+
+        # if batch_idx == self.val_aerial_image_idx:
+        #     self.log_aerial_mask(aerial[batch_idx], labels[batch_idx], outputs[batch_idx])
+
         if batch_idx == 0:
             self.log_aerial_mask(aerial[0], labels[0], outputs[0])
-        
+
         return loss
 
     def on_validation_epoch_end(self) -> None:
@@ -159,8 +171,8 @@ class FLAIR2Lightning(pl.LightningModule):
         metrics = self.metrics.compute()
 
         # Log metrics
-        self.log_dict(metrics, on_epoch=True, on_step=True)
-        
+        self.log_dict(metrics, on_epoch=True)
+
         # Reset metrics
         self.metrics.reset()
 
@@ -179,11 +191,12 @@ class FLAIR2Lightning(pl.LightningModule):
         # * Challenge rule: set the data type of the image files as Byte (uint8)
         # * with values ranging from 0 to 12
 
-        # ! Do not uncomment the folowing line, read the comment above.
+        # ! Do not uncomment the following line, read the comment above.
         # pred_labels += 1
 
         for pred_label, img_id in zip(outputs, image_ids):
             img = pred_label.numpy(force=True)
+            img = img.astype(dtype=np.uint8)
             img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
             tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
@@ -247,7 +260,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_test,
             batch_size=self.batch_size,
-            num_workers=cst.num_workers,
+            num_workers=10,  # DO NOT CHANGE: same as during the FLAIR#2 project testing
             shuffle=False,
             drop_last=False,
         )

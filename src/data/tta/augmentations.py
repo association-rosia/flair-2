@@ -76,7 +76,11 @@ class Rotate(Augmentation):
 
     def augment(self, inputs: dict, angle=0, **kwargs):
         for key in inputs.keys():
-            inputs[key] = F.rotate(inputs[key], angle=angle)
+            if key == 'aerial':
+                inputs[key] = F.rotate(inputs[key], angle=angle)
+            else:
+                for i in range(inputs[key].shape[0]):
+                    inputs[key][i, ...] = F.rotate(inputs[key][i, ...], angle=angle)
 
         return inputs
 
@@ -122,34 +126,55 @@ class Perspective(Augmentation):
 
         return [top_left, top_right, bot_right, bot_left]
 
-    def augment(self, inputs: dict, distortion_scale=0, **kwargs):
+    def calculate_first_startendpoints(self, inputs, key, distortion_scale):
         startendpoints = {}
+        height = inputs[key].shape[-1]
+        width = inputs[key].shape[-2]
+        startpoints = self.get_startpoints(width, height)
+        endpoints = self.get_endpoints(width, height, distortion_scale)
+
+        # save startpoints and endpoints for deaugmentation
+        startendpoints['startpoints'] = startpoints
+        startendpoints['endpoints'] = endpoints
+        self.startendpoints_list.append(startendpoints)
+
+        return height, width, startpoints, endpoints
+
+    def calculate_startendpoints(self, inputs, key, height, width, endpoints):
+        height_previous = height
+        height = inputs[key].shape[-1]
+        height_rate = height / height_previous
+
+        width_previous = width
+        width = inputs[key].shape[-2]
+        width_rate = width / width_previous
+
+        startpoints = self.get_startpoints(width, height)
+        endpoints = [[math.floor(width_rate * point[-2]),
+                      math.floor(height_rate * point[-1])]
+                     for point in endpoints]
+
+        return startpoints, endpoints
+
+    def augment(self, inputs: dict, distortion_scale=0, **kwargs):
         is_first = True
+        height, width = None, None
+        startpoints, endpoints = None, None
 
         for key in inputs.keys():
             if is_first:
-                height = inputs[key].shape[-1]
-                width = inputs[key].shape[-2]
-                startpoints = self.get_startpoints(width, height)
-                endpoints = self.get_endpoints(width, height, distortion_scale)
-                startendpoints['startpoints'] = startpoints
-                startendpoints['endpoints'] = endpoints
+                height, width, startpoints, endpoints = self.calculate_first_startendpoints(inputs, key, distortion_scale)
                 is_first = False
             else:
-                height_previous = height
-                height = inputs[key].shape[-1]
-                height_rate = height / height_previous
+                startpoints, endpoints = self.calculate_startendpoints(inputs, key, height, width, endpoints)
 
-                width_previous = width
-                width = inputs[key].shape[-2]
-                width_rate = width / width_previous
-
-                startpoints = self.get_startpoints(width, height)
-                endpoints = [[math.floor(width_rate * point[-2]), math.floor(height_rate * point[-1])] for point in endpoints]
-
-            inputs[key] = F.perspective(inputs[key], startpoints=startpoints, endpoints=endpoints)
-
-        self.startendpoints_list.append(startendpoints)
+            if key == 'aerial':
+                inputs[key] = F.perspective(inputs[key], startpoints=startpoints, endpoints=endpoints)
+            else:
+                for i in range(inputs[key].shape[0]):
+                    inputs[key][i, ...] = F.perspective(inputs[key][i, ...],
+                                                        startpoints=startpoints,
+                                                        endpoints=endpoints)
 
         return inputs
 
