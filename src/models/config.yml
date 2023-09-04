@@ -15,7 +15,7 @@ sen_size:
   desc: Size of the Sentinel 2 images
 
 batch_size:
-  value: 32
+  value: 20
   desc: Size of each mini-batch
 
 use_augmentation:
