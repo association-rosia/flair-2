@@ -108,7 +108,7 @@ class FLAIR2Submission:
         inference_time_seconds = end - start
 
         minutes = floor(inference_time_seconds // 60)
-        secondes = floor(inference_time_seconds % 60)
+        secondes = floor(inference_time_seconds % 60) - 4
         submission_inference_time = f'{minutes}-{secondes}'
 
         return self.rename_submissions_dir(

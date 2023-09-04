@@ -7,7 +7,7 @@ encoder_name:
   desc: Name of the timm encoder
 
 learning_rate:
-  value: 0.002
+  value: 0.01
   desc: Value of Learning rate
 
 sen_size:
@@ -28,6 +28,7 @@ tta_limit:
 
 class_weights:
   value: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+#  value: [0.12285, 0.12121, 0.07288, 0.28818, 0.20491, 0.36496, 0.06501, 0.14388, 0.31948, 0.05605, 0.09107, 0.25773, 1.58730]
   desc: Class weight applied to the cross entropy loss
 
 seed:
