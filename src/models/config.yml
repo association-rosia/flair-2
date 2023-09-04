@@ -23,7 +23,7 @@ use_augmentation:
   desc: Use or not data augmentation & tta
 
 tta_limit:
-  value: 8
+  value: 7
   desc: Limit of transformed images related to one observation
 
 class_weights:
