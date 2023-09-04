@@ -10,6 +10,7 @@ import numpy as np
 import rasterio
 import torch
 from torch.utils.data import Dataset
+import torchvision.transforms as T
 
 from src.constants import get_constants
 
@@ -25,6 +26,11 @@ class FLAIR2Dataset(Dataset):
         self.path = cst.path_data_train if not self.is_test else cst.path_data_test
         self.path_centroids = os.path.join(cst.path_data, 'centroids_sp_to_patch.json')
         self.centroids = self.read_centroids(self.path_centroids)
+        
+        path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
+        with open(path_aerial_pixels_metadata) as f:
+            stats = json.load(f)
+        self.aerial_normalize = T.Normalize(mean=stats['mean'], std=stats['std'])
 
     @staticmethod
     def img_to_msk(path_image):
@@ -98,7 +104,7 @@ class FLAIR2Dataset(Dataset):
         aerial = self.read_tif(path_aerial)
         aerial = aerial / 255.0
 
-        return aerial
+        return self.aerial_normalize(aerial)
 
     @staticmethod
     def extract_sen_months(sen_products):
@@ -185,7 +191,7 @@ if __name__ == '__main__':
 
     dataset = FLAIR2Dataset(
         list_images=list_images,
-        sen_size=40,
+        sen_size=114,
         is_test=False,
     )
 
