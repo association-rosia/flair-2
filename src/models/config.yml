@@ -3,7 +3,7 @@ arch:
   desc: Name of the segmentation architecture
 
 encoder_name:
-  value: 'tu-resnet50'
+  value: 'tu-efficientnet_b5'
   desc: Name of the timm encoder
 
 learning_rate:
