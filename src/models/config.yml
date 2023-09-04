@@ -3,7 +3,7 @@ arch:
   desc: Name of the segmentation architecture
 
 encoder_name:
-  value: 'tu-tf_efficientnet_b5'
+  value: 'tu-tf_efficientnetv2_s'
   desc: Name of the timm encoder
 
 learning_rate:
@@ -15,7 +15,7 @@ sen_size:
   desc: Size of the Sentinel 2 images
 
 batch_size:
-  value: 16
+  value: 18
   desc: Size of each mini-batch
 
 use_augmentation:
