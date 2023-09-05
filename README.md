@@ -2,7 +2,7 @@
 
 <img src="assets/bandeau.jpg">
 
-This project was made possible by our compute partners <a href="https://2crsi.com/"><img src="https://2crsi.com/web/image/website/1/favicon?unique=624c4c1" width="50px"/></a> and <a href="https://www.nvidia.com/"><img src="https://upload.wikimedia.org/wikipedia/fr/4/47/Nvidia_%28logo%29.svg" width="50px"/></a>
+This project was made possible by our compute partners [2CRSI](https://2crsi.com/) and [NVIDIA](https://www.nvidia.com/).
 
 ## 🏁 Getting started
 
