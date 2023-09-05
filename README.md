@@ -41,7 +41,7 @@ nohup python src/models/train_model.py </dev/null &>/dev/null &
 pkill -f 'python src/models/train_model.py'
 ```
 
-## Create a submission
+## 📝 Create a submission
 
 1 - Edit `run_name` in [predict_model.py](src%2Fmodels%2Fpredict_model.py).
 
