@@ -7,7 +7,7 @@ encoder_name:
   desc: Name of the timm encoder
 
 learning_rate:
-  value: 0.01
+  value: 0.001
   desc: Value of Learning rate
 
 sen_size:
