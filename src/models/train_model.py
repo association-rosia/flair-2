@@ -92,8 +92,8 @@ def init_trainer() -> Trainer:
     # Initialize ModelCheckpoint callback to save the best model checkpoint
     checkpoint_callback = callbacks.ModelCheckpoint(
         save_top_k=1,
-        monitor='val/loss',
-        mode='min',
+        monitor='val/miou',
+        mode='max',
         dirpath=cst.path_models,
         filename=f'{wandb.run.name}-{wandb.run.id}',
         auto_insert_metric_name=False,
