@@ -102,9 +102,10 @@ def init_trainer() -> Trainer:
 
     early_stopping_callback = callbacks.EarlyStopping(
         monitor='val/loss',
-        mode='min',
-        patience=10,
         min_delta=0,
+        patience=10,
+        verbose=True,
+        mode='min',
     )
 
     if wandb.config.dry:

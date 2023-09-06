@@ -211,8 +211,7 @@ class FLAIR2Lightning(pl.LightningModule):
             mode='min',
             factor=0.5,
             patience=5,
-            cooldown=2,
-            min_lr=1e-7,
+            verbose=True
         )
 
         return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, 'monitor': 'val/loss'}}
