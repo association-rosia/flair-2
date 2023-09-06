@@ -67,6 +67,7 @@ class SegmentationWrapper(nn.Module):
             outputs = self.deaugment_outputs_batch(outputs, deparams_batch)
 
         elif step in ['validation', 'test', 'predict']:
+            # TODO: force the use of the original image in the TTA
             tta_params = self.product if limit is None else random.choices(self.product, k=limit)
             tta_deparams = [p[::-1] for p in tta_params]
             tta_inputs = []
