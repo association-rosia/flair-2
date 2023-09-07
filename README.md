@@ -59,7 +59,7 @@ conda activate flair-2-env
 
 4 - Launch the model inference:
 ```bash
-python src/models/predict_model.py
+python src/models/predict_model.py -n {model name}
 ```
 
 ## 🔬 References
