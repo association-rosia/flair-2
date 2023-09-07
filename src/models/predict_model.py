@@ -104,12 +104,11 @@ class FLAIR2Submission:
         self.trainer.test(model=lightning_model)
         end = time()
 
-        # inference_time_seconds = (starter.elapsed_time(ender) / 1000.0) * (self.nodes * self.gpus_per_nodes)
-        inference_time_seconds = end - start
-
+        # 4 seconds is the gap between the displayed time by PL and the calculated time by the librairy "time"
+        inference_time_seconds = end - start - 4
         minutes = floor(inference_time_seconds // 60)
-        secondes = floor(inference_time_seconds % 60)
-        submission_inference_time = f'{minutes}-{secondes}'
+        seconds = floor(inference_time_seconds % 60)
+        submission_inference_time = f'{minutes}-{seconds}'
 
         return self.rename_submissions_dir(
             run_name=run_name,
@@ -120,5 +119,5 @@ class FLAIR2Submission:
 
 if __name__ == '__main__':
     sub = FLAIR2Submission()
-    run_name = 'leafy-blaze-19-3vmiyimu'
+    run_name = 'polished-morning-36-g3ass16c'
     sub(run_name=run_name)
