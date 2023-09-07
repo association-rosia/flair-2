@@ -7,7 +7,7 @@ from datetime import datetime
 from glob import glob
 
 import numpy as np
-import rasterio
+import tifffile
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
@@ -30,7 +30,11 @@ class FLAIR2Dataset(Dataset):
         path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
         with open(path_aerial_pixels_metadata) as f:
             stats = json.load(f)
-        self.aerial_normalize = T.Normalize(mean=stats['mean'], std=stats['std'])
+        self.aerial_normalize = torch.nn.Sequential(
+            T.ToTensor(),
+            T.Normalize(mean=stats['mean'], std=stats['std'])    
+        )
+        
 
     @staticmethod
     def img_to_msk(path_image):
@@ -49,15 +53,6 @@ class FLAIR2Dataset(Dataset):
         name_image = os.path.basename(path_aerial)
 
         return path_aerial, path_sen, path_labels, name_image
-
-    @staticmethod
-    def read_tif(path_file):
-        with rasterio.open(path_file) as f:
-            image = f.read()
-            image = torch.from_numpy(image)
-            image = image.type(torch.uint8)  # from 0 to 255
-
-        return image
 
     @staticmethod
     def read_centroids(path_file):
@@ -101,8 +96,7 @@ class FLAIR2Dataset(Dataset):
         return sen_data, sen_masks, sen_products
 
     def get_aerial(self, path_aerial):
-        aerial = self.read_tif(path_aerial)
-        aerial = aerial / 255.0
+        aerial = tifffile.imread(path_aerial)
 
         return self.aerial_normalize(aerial)
 
@@ -149,16 +143,17 @@ class FLAIR2Dataset(Dataset):
         sen_months = self.extract_sen_months(sen_products)
         sen_data, sen_months = self.masks_filtering(sen_data, sen_masks, sen_months)
         sen = self.months_averaging(sen_data, sen_months)
-        sen = sen / 19779.0  # founded maximum value (minimum = 0)
+        # https://docs.digitalearthafrica.org/en/latest/data_specs/Sentinel-2_Level-2A_specs.html
+        sen = sen - 10_000
 
         return sen
 
     def get_labels(self, path_labels):
-        labels = self.read_tif(path_labels)
+        labels = tifffile.imread(path_labels)
+        labels = torch.from_numpy(labels)
         labels = labels - 1
-        labels = torch.where(labels < 13, labels, 12)
 
-        return torch.squeeze(labels)
+        return torch.where(labels < 13, labels, 12)
 
     def __len__(self):
         return len(self.list_images)
