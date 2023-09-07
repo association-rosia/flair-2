@@ -1,5 +1,5 @@
 arch:
-  value: 'DeepLabV3Plus'
+  value: 'PSPNet'
   desc: Name of the segmentation architecture
 
 encoder_name:
