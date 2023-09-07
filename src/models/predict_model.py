@@ -104,10 +104,10 @@ class FLAIR2Submission:
         self.trainer.test(model=lightning_model)
         end = time()
 
-        inference_time_seconds = end - start
-        minutes = floor(inference_time_seconds // 60)
         # 4 seconds is the gap between the displayed time by PL and the calculated time by the librairy "time"
-        seconds = floor(inference_time_seconds % 60) - 4
+        inference_time_seconds = end - start - 4
+        minutes = floor(inference_time_seconds // 60)
+        seconds = floor(inference_time_seconds % 60)
         submission_inference_time = f'{minutes}-{seconds}'
 
         return self.rename_submissions_dir(
