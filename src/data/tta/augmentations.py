@@ -8,8 +8,6 @@ import math
 class Augmentation:
     def __init__(self, params):
         self.params = params
-        # TODO: add identity param value to reconstruct be sure to get the original inputs even if we are using the
-        #  limit parameter
         super().__init__()
 
     def augment(self, inputs: dict, *args, **params):

@@ -151,11 +151,12 @@ class FLAIR2Dataset(Dataset):
         sen_data, sen_masks, sen_products = self.read_sens(name_image, path_sen)
         sen_channels = self.extract_channels(sen_products, num_channels)
         sen = self.channels_averaging(sen_data, sen_masks, sen_channels, num_channels)
-        # sen = sen / 18172.0  # founded maximum value (minimum = 0)
+        sen = sen / 18172.0  # computed maximum value (minimum = 0)
 
-        self.sen_min = min(torch.min(sen).item(), self.sen_min)
-        self.sen_max = max(torch.max(sen).item(), self.sen_max)
-        print(self.sen_min, self.sen_max)
+        # uncomment to compute the maximum value
+        # self.sen_min = min(torch.min(sen).item(), self.sen_min)
+        # self.sen_max = max(torch.max(sen).item(), self.sen_max)
+        # print(self.sen_min, self.sen_max)
 
         return sen
 
