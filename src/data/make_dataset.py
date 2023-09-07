@@ -131,7 +131,7 @@ class FLAIR2Dataset(Dataset):
     #     return sen_data, sen_months
 
     @staticmethod
-    def channels_averaging(sen_data, sen_masks, sen_channels, num_channels, prob_cover=60):
+    def channels_averaging(sen_data, sen_masks, sen_channels, num_channels, prob_cover=50):
         sen_shape = list(sen_data.shape)
         sen_shape[0] = num_channels
         sen = torch.zeros(sen_shape)
@@ -151,12 +151,10 @@ class FLAIR2Dataset(Dataset):
         sen_data, sen_masks, sen_products = self.read_sens(name_image, path_sen)
         sen_channels = self.extract_channels(sen_products, num_channels)
         sen = self.channels_averaging(sen_data, sen_masks, sen_channels, num_channels)
-        # sen = sen / 19779.0  # founded maximum value (minimum = 0)
+        # sen = sen / 18172.0  # founded maximum value (minimum = 0)
 
-        print(torch.isnan(sen).all().item())
         self.sen_min = min(torch.min(sen).item(), self.sen_min)
         self.sen_max = max(torch.max(sen).item(), self.sen_max)
-
         print(self.sen_min, self.sen_max)
 
         return sen
