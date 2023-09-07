@@ -27,7 +27,7 @@ class Augmentations:
 
 class HorizontalFlip(Augmentation):
     def __init__(self):
-        super().__init__([True, False])  # apply
+        super().__init__([False, True])  # /!\ always start with the identity value
 
     def augment(self, inputs: dict, apply=False, **kwargs):
         if apply:
@@ -45,7 +45,7 @@ class HorizontalFlip(Augmentation):
 
 class VerticalFlip(Augmentation):
     def __init__(self):
-        super().__init__([True, False])  # apply
+        super().__init__([False, True])  # /!\ always start with the identity value
 
     def augment(self, inputs: dict, apply=False, **kwargs):
         if apply:
@@ -64,7 +64,7 @@ class VerticalFlip(Augmentation):
 class Rotate(Augmentation):
     def __init__(self, angles: List):
         allowed_angles = [0, 90, 180, 270]
-        angles = list(set([0] + angles))  # angle = 0 is not change
+        angles = list(set([0] + angles))  # /!\ always start with the identity value
 
         for angle in angles:
             if angle not in allowed_angles:
@@ -90,7 +90,7 @@ class Rotate(Augmentation):
 
 class Perspective(Augmentation):
     def __init__(self, distortion_scale: List):
-        distortion_scale = list(set([0] + distortion_scale))
+        distortion_scale = list(set([0] + distortion_scale))  # /!\ always start with the identity value
         super().__init__(distortion_scale)
         self.startendpoints_list = []
 
@@ -161,7 +161,8 @@ class Perspective(Augmentation):
 
         for key in inputs.keys():
             if is_first:
-                height, width, startpoints, endpoints = self.calculate_first_startendpoints(inputs, key, distortion_scale)
+                height, width, startpoints, endpoints = self.calculate_first_startendpoints(inputs, key,
+                                                                                            distortion_scale)
                 is_first = False
             else:
                 startpoints, endpoints = self.calculate_startendpoints(inputs, key, height, width, endpoints)

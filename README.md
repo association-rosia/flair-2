@@ -45,7 +45,7 @@ pkill -f 'python src/models/train_model.py'
 
 ## 📝 Create a submission
 
-1 - Edit `run_name` in [predict_model.py](src%2Fmodels%2Fpredict_model.py).
+1 - Update `self.run_name` variable in [constants.py](src%2Fconstants.py).
 
 2 - Move to the project folder:
 ```bash
