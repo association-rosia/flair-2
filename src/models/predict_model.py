@@ -18,6 +18,10 @@ cst = get_constants()
 
 from math import floor
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pytorch_lightning.trainer.connectors.logger_connector"
+                                                               ".logger_connector")
+
 torch.set_float32_matmul_precision('high')
 
 
@@ -122,5 +126,4 @@ class FLAIR2Submission:
 
 if __name__ == '__main__':
     submit = FLAIR2Submission()
-    run_name = 'polished-morning-36-g3ass16c'
-    submit(run_name=run_name)
+    submit(run_name=cst.run_name)

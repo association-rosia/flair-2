@@ -14,6 +14,8 @@ class FLAIR2Constants:
         self.path_data_train = os.path.join(self.path_data, 'train')
         self.path_data_test = os.path.join(self.path_data, 'test')
 
+        self.run_name = 'polished-morning-36-g3ass16c'
+
         # Paths for models and submissions
         self.path_models = 'models'
         self.path_submissions = 'submissions'
