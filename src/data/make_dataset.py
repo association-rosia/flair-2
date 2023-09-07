@@ -8,6 +8,7 @@ from glob import glob
 
 import numpy as np
 import rasterio
+import math
 import torch
 from torch.utils.data import Dataset
 
@@ -18,6 +19,9 @@ cst = get_constants()
 
 class FLAIR2Dataset(Dataset):
     def __init__(self, list_images, sen_size, is_test=False):
+        self.sen_min = 1000
+        self.sen_max = 0
+
         self.list_images = list_images
         self.sen_size = sen_size
         self.is_test = is_test
@@ -101,49 +105,59 @@ class FLAIR2Dataset(Dataset):
         return aerial
 
     @staticmethod
-    def extract_sen_months(sen_products):
+    def extract_channels(sen_products, num_channels):
         sen_dates = [datetime.strptime(product.split('_')[2], '%Y%m%dT%H%M%S') for product in sen_products]
-        sen_months = [date.month for date in sen_dates]
+        sen_channels = [math.ceil(date.month / (12 / num_channels)) for date in sen_dates]
 
-        return sen_months
+        return sen_channels
+
+    # @staticmethod
+    # def masks_filtering(sen_data, sen_masks, sen_months, thr_cover=60, thr_rate=0.5):
+    #     times = []
+    #
+    #     for t in range(len(sen_masks)):
+    #         cover = np.count_nonzero((sen_masks[t, 0, :, :] >= thr_cover) + (sen_masks[t, 1, :, :] >= thr_cover))
+    #         rate = cover / (sen_masks.shape[2] * sen_masks.shape[3])
+    #         sen_per_months = sen_months.count(sen_months[t])
+    #
+    #         if rate < thr_rate or sen_per_months == 1:
+    #             times.append(t)
+    #         else:
+    #             sen_months[t] = -1
+    #
+    #     sen_data = sen_data[times, :, :, :]
+    #     sen_months = [sen_month for sen_month in sen_months if sen_month != -1]
+    #
+    #     return sen_data, sen_months
 
     @staticmethod
-    def masks_filtering(sen_data, sen_masks, sen_months, thr_cover=60, thr_rate=0.5):
-        times = []
-
-        for t in range(len(sen_masks)):
-            cover = np.count_nonzero((sen_masks[t, 0, :, :] >= thr_cover) + (sen_masks[t, 1, :, :] >= thr_cover))
-            rate = cover / (sen_masks.shape[2] * sen_masks.shape[3])
-            sen_per_months = sen_months.count(sen_months[t])
-
-            if rate < thr_rate or sen_per_months == 1:
-                times.append(t)
-            else:
-                sen_months[t] = -1
-
-        sen_data = sen_data[times, :, :, :]
-        sen_months = [sen_month for sen_month in sen_months if sen_month != -1]
-
-        return sen_data, sen_months
-
-    @staticmethod
-    def months_averaging(sen_data, sen_months):
+    def channels_averaging(sen_data, sen_masks, sen_channels, num_channels, prob_cover=60):
         sen_shape = list(sen_data.shape)
-        sen_shape[0] = 12
+        sen_shape[0] = num_channels
         sen = torch.zeros(sen_shape)
 
-        for m in range(12):
-            indexes = [i for i in range(len(sen_months)) if sen_months[i] == m + 1]
-            sen[m, :, :, :] = torch.mean(sen_data[indexes, :, :, :].float(), dim=0)
+        for channel in range(num_channels):
+            idx = [i for i in range(len(sen_channels)) if sen_channels[i] == channel + 1]
+            cover = (sen_masks[idx, 0, :, :] >= prob_cover) + (sen_masks[idx, 1, :, :] >= prob_cover)
+            cover = cover.unsqueeze(1).repeat(1, 10, 1, 1)
+            sen_nan = torch.where(cover, float('nan'), sen_data[idx, :, :, :])
+            sen[channel, :, :, :] = torch.nanmean(sen_nan, dim=0)
+
+        sen = torch.where(torch.isnan(sen), 0, sen)
 
         return sen
 
-    def get_sen(self, name_image, path_sen):
+    def get_sen(self, name_image, path_sen, num_channels=3):
         sen_data, sen_masks, sen_products = self.read_sens(name_image, path_sen)
-        sen_months = self.extract_sen_months(sen_products)
-        sen_data, sen_months = self.masks_filtering(sen_data, sen_masks, sen_months)
-        sen = self.months_averaging(sen_data, sen_months)
-        sen = sen / 19779.0  # founded maximum value (minimum = 0)
+        sen_channels = self.extract_channels(sen_products, num_channels)
+        sen = self.channels_averaging(sen_data, sen_masks, sen_channels, num_channels)
+        # sen = sen / 19779.0  # founded maximum value (minimum = 0)
+
+        print(torch.isnan(sen).all().item())
+        self.sen_min = min(torch.min(sen).item(), self.sen_min)
+        self.sen_max = max(torch.max(sen).item(), self.sen_max)
+
+        print(self.sen_min, self.sen_max)
 
         return sen
 
@@ -199,5 +213,6 @@ if __name__ == '__main__':
     print(image_id, aerial.shape, sen.shape, labels.shape)
 
     for image_id, aerial, sen, labels in dataloader:
-        print(image_id, aerial.shape, sen.shape, labels.shape)
-        break
+        # print(image_id, aerial.shape, sen.shape, labels.shape)
+        # break
+        pass

@@ -62,7 +62,11 @@ conda activate flair-2-env
 python src/models/predict_model.py
 ```
 
-## Contributors
+## 🔬 References
+
+## 📝 License
+
+## 👨🏻‍💻 Contributors
 
 Louis REBERGA <a href="https://twitter.com/rbrgAlou"><img src="https://abs.twimg.com/favicons/twitter.3.ico" width="18px"/></a> <a href="https://www.linkedin.com/in/louisreberga/"><img src="https://static.licdn.com/sc/h/akt4ae504epesldzj74dzred8" width="18px"/></a> <a href="louis.reberga@gmail.com"><img src="https://www.google.com/a/cpanel/aqsone.com/images/favicon.ico" width="18px"/></a>
 
