@@ -5,6 +5,8 @@ import torch
 
 from time import time
 
+import shutil
+
 sys.path.append('.')
 
 from src.models.lightning import FLAIR2Lightning
@@ -16,6 +18,10 @@ cst = get_constants()
 
 from math import floor
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pytorch_lightning.trainer.connectors.logger_connector"
+                                                               ".logger_connector")
+
 torch.set_float32_matmul_precision('high')
 
 
@@ -24,13 +30,7 @@ class FLAIR2Submission:
     Class for submitting predictions using the FLAIR-2 Lightning model.
     """
     def __init__(self):
-        self.nodes = 1
-        self.gpus_per_nodes = 1
-        self.trainer = pl.Trainer(
-            accelerator=cst.device,
-            num_nodes=self.nodes,
-            # fast_dev_run=3
-        )
+        self.trainer = pl.Trainer(accelerator=cst.device)
         self.baseline_inference_time = cst.baseline_inference_time
         self.path_models = cst.path_models
         self.path_submissions = cst.path_submissions
@@ -50,25 +50,26 @@ class FLAIR2Submission:
 
         return path_predictions
 
-    def load_lightning_model(self, path_run) -> FLAIR2Lightning:
+    def load_lightning_model(self, path_run, run_name) -> FLAIR2Lightning:
         """
         Load the trained FLAIR-2 Lightning model checkpoint and configure it for submission.
 
         Args:
             path_run (str): Path to the directory of the current run.
+            run_name (str): Name of the predicted run.
 
         Returns:
             lightning_model (FLAIR2Lightning): Loaded and configured FLAIR-2 Lightning model.
         """
         lightning_ckpt = os.path.join(self.path_models, f'{run_name}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
-        path_predictions = os.path.join(path_run, 'not_confirmed')
+        path_predictions = os.path.join(path_run, 'predictions')
         lightning_model.path_predictions = path_predictions
         os.makedirs(path_predictions, exist_ok=False)
 
         return lightning_model
 
-    def rename_submissions_dir(self, run_name, submission_inference_time, path_run):
+    def create_zip_submission(self, run_name, submission_inference_time, path_run):
         """
         Rename the directory containing predictions to confirm the submission.
 
@@ -81,11 +82,12 @@ class FLAIR2Submission:
             success (bool): True if renaming is successful, False otherwise.
         """
         name_submission = f'{run_name}_{self.baseline_inference_time}_{submission_inference_time}'
-        new_path_submission = os.path.join(path_run, name_submission)
-        old_path_submission = os.path.join(path_run, 'not_confirmed')
-        os.rename(old_path_submission, new_path_submission)
+        path_submission = os.path.join(path_run, 'predictions')
 
-        return os.path.exists(new_path_submission)
+        zip_path_submission = os.path.join(self.path_submissions, name_submission)
+        shutil.make_archive(zip_path_submission, 'zip', path_submission)
+
+        shutil.rmtree(path_run)
 
     def __call__(self, run_name):
         """
@@ -98,7 +100,7 @@ class FLAIR2Submission:
             success (bool): True if the submission process is successful, False otherwise.
         """
         path_run = self.update_variables(run_name)
-        lightning_model = self.load_lightning_model(path_run)
+        lightning_model = self.load_lightning_model(path_run, run_name)
 
         start = time()
         self.trainer.test(model=lightning_model)
@@ -110,7 +112,7 @@ class FLAIR2Submission:
         seconds = floor(inference_time_seconds % 60)
         submission_inference_time = f'{minutes}-{seconds}'
 
-        return self.rename_submissions_dir(
+        self.create_zip_submission(
             run_name=run_name,
             submission_inference_time=submission_inference_time,
             path_run=path_run
@@ -118,6 +120,5 @@ class FLAIR2Submission:
 
 
 if __name__ == '__main__':
-    sub = FLAIR2Submission()
-    run_name = 'polished-morning-36-g3ass16c'
-    sub(run_name=run_name)
+    submit = FLAIR2Submission()
+    submit(run_name=cst.run_name)
