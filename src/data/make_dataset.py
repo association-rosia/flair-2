@@ -111,25 +111,6 @@ class FLAIR2Dataset(Dataset):
 
         return sen_channels
 
-    # @staticmethod
-    # def masks_filtering(sen_data, sen_masks, sen_months, thr_cover=60, thr_rate=0.5):
-    #     times = []
-    #
-    #     for t in range(len(sen_masks)):
-    #         cover = np.count_nonzero((sen_masks[t, 0, :, :] >= thr_cover) + (sen_masks[t, 1, :, :] >= thr_cover))
-    #         rate = cover / (sen_masks.shape[2] * sen_masks.shape[3])
-    #         sen_per_months = sen_months.count(sen_months[t])
-    #
-    #         if rate < thr_rate or sen_per_months == 1:
-    #             times.append(t)
-    #         else:
-    #             sen_months[t] = -1
-    #
-    #     sen_data = sen_data[times, :, :, :]
-    #     sen_months = [sen_month for sen_month in sen_months if sen_month != -1]
-    #
-    #     return sen_data, sen_months
-
     @staticmethod
     def channels_averaging(sen_data, sen_masks, sen_channels, num_channels, prob_cover=50):
         sen_shape = list(sen_data.shape)
@@ -151,8 +132,9 @@ class FLAIR2Dataset(Dataset):
         sen_data, sen_masks, sen_products = self.read_sens(name_image, path_sen)
         sen_channels = self.extract_channels(sen_products, num_channels)
         sen = self.channels_averaging(sen_data, sen_masks, sen_channels, num_channels)
-        sen = sen / 18172.0  # founded maximum value (minimum = 0)
+        sen = sen / 18172.0  # computed maximum value (minimum = 0)
 
+        # uncomment to compute the maximum value
         # self.sen_min = min(torch.min(sen).item(), self.sen_min)
         # self.sen_max = max(torch.max(sen).item(), self.sen_max)
         # print(self.sen_min, self.sen_max)

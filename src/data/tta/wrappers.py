@@ -3,6 +3,7 @@ import random
 import torch
 from torch import nn
 
+
 # uncomment to debug
 # import matplotlib.pyplot as plt
 
@@ -67,8 +68,9 @@ class SegmentationWrapper(nn.Module):
             outputs = self.deaugment_outputs_batch(outputs, deparams_batch)
 
         elif step in ['validation', 'test', 'predict']:
-            # TODO: force the use of the original image in the TTA
-            tta_params = self.product if limit is None else random.choices(self.product, k=limit)
+            tta_params = self.product if limit is None \
+                else [self.product[0]] + random.choices(self.product[1:], k=limit - 1)
+
             tta_deparams = [p[::-1] for p in tta_params]
             tta_inputs = []
 
@@ -95,7 +97,7 @@ class SegmentationWrapper(nn.Module):
             shape = None
             for key in tta_inputs:
                 shape = tta_inputs[key].shape
-                tta_inputs[key] = tta_inputs[key].view(shape[0]*shape[1], *shape[2:])
+                tta_inputs[key] = tta_inputs[key].view(shape[0] * shape[1], *shape[2:])
 
             tta_outputs = self.model(**tta_inputs)
             tta_outputs = tta_outputs.view(shape[0], shape[1], *tta_outputs.shape[1:])
