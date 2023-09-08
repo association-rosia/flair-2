@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 
 import torch
 
@@ -83,10 +84,8 @@ class FLAIR2Submission:
         """
         name_submission = f'{run_name}_{self.baseline_inference_time}_{submission_inference_time}'
         path_submission = os.path.join(path_run, 'predictions')
-
         zip_path_submission = os.path.join(self.path_submissions, name_submission)
         shutil.make_archive(zip_path_submission, 'zip', path_submission)
-
         shutil.rmtree(path_run)
 
     def __call__(self, run_name):
@@ -120,5 +119,12 @@ class FLAIR2Submission:
 
 
 if __name__ == '__main__':
-    submit = FLAIR2Submission()
-    submit(run_name=cst.run_name)
+    parser = argparse.ArgumentParser(description='Script for creating submissions with a specified model name')
+    parser.add_argument('-n', '--name', type=str, help='Name of the model to use for submissions')
+    args = parser.parse_args()
+
+    sub = FLAIR2Submission()
+    if args.name:
+        sub(run_name=args.name)
+    else:
+        print('Please provide a model name using the -n or --name parameter.')
