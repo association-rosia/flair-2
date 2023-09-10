@@ -38,5 +38,5 @@ seed:
   desc: Seed for random initialisation
 
 dry:
-  value: True
+  value: False
   desc: Enable or not dry mode pipeline
