@@ -324,7 +324,7 @@ class FLAIR2Dataset(Dataset):
         data = np.load(path_file, mmap_mode='r').astype(np.int16)
 
         sp_len = int(self.sen_size / 2)
-        data = data[:, :, centroid[1] - sp_len:centroid[1] + sp_len, centroid[0] - sp_len:centroid[0] + sp_len]
+        data = data[:, :, centroid[0] - sp_len:centroid[0] + sp_len, centroid[1] - sp_len:centroid[1] + sp_len]
         data = torch.from_numpy(data)
 
         return data
@@ -544,7 +544,7 @@ if __name__ == '__main__':
 
     dataloader = DataLoader(
         dataset=dataset,
-        batch_size=1,
+        batch_size=2,
         shuffle=False,
     )
 
@@ -552,5 +552,6 @@ if __name__ == '__main__':
     print(image_id, aerial.shape, sen.shape, labels.shape)
 
     for image_id, aerial, sen, labels in dataloader:
+        # pass
         print(image_id, aerial.shape, sen.shape, labels.shape)
         break
