@@ -23,6 +23,10 @@ _, list_images_val = train_test_split(
 dataset_val = FLAIR2Dataset(
     list_images=list_images_val,
     sen_size=40,
+    sen_temp_size=3,
+    sen_temp_reduc='median',
+    sen_list_bands=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
+    prob_cover=10,
     is_test=False,
 )
 
