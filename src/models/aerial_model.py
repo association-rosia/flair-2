@@ -6,6 +6,7 @@ class AerialModel(nn.Module):
     """
     AerialModel class for creating a segmentation model for aerial imagery.
     """
+
     def __init__(self, arch, encoder_name, num_classes) -> None:
         """
         Initialize the AerialModel.

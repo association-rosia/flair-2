@@ -1,8 +1,9 @@
-import torch
-import torchvision.transforms.functional as F
-from typing import List
 import itertools
 import math
+from typing import List
+
+import torch
+import torchvision.transforms.functional as F
 
 
 class Augmentation:

@@ -30,6 +30,7 @@ class ConfusionMatrix(torchmetrics.Metric):
         reset(self):
             Resets the accumulated target and predicted values.
     """
+
     def __init__(self, classes) -> None:
         super().__init__()
 

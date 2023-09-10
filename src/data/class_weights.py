@@ -1,6 +1,6 @@
+import numpy as np
 import pandas as pd
 from scipy.special import softmax
-import numpy as np
 
 df = pd.read_csv('../../data/raw/labels-statistics-12.csv')
 # df['Freq.-train (%)'] = df['Freq.-train (%)'].apply(lambda x: 1 / x)
@@ -11,4 +11,3 @@ class_weights_bis = np.append(softmax(list(df['Freq.-test (%)'])[:-1]), [0])
 
 print(list(class_weights))
 print(list(class_weights_bis))
-

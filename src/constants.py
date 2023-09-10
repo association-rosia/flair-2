@@ -1,6 +1,6 @@
 import os
+
 from torch import cuda
-from torch.backends import mps
 
 
 class FLAIR2Constants:

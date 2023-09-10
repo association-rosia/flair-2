@@ -1,10 +1,14 @@
+import math
 import os
+import shutil
+from time import time
 
 import numpy as np
 import pytorch_lightning as pl
 import tifffile as tiff
 import torch
 import torch.nn as nn
+import wandb
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
@@ -13,16 +17,9 @@ from torchmetrics.classification import MulticlassJaccardIndex
 
 import src.data.tta.augmentations as agms
 import src.data.tta.wrappers as wrps
-
-from time import time
-import math
-import shutil
-
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.models.aerial_model import AerialModel
-
-import wandb
 
 cst = get_constants()
 

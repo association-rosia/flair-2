@@ -1,12 +1,10 @@
-import os
-import sys
 import argparse
-
-import torch
-
+import os
+import shutil
+import sys
 from time import time
 
-import shutil
+import torch
 
 sys.path.append('.')
 
@@ -20,6 +18,7 @@ cst = get_constants()
 from math import floor
 
 import warnings
+
 warnings.filterwarnings("ignore", category=UserWarning, module="pytorch_lightning.trainer.connectors.logger_connector"
                                                                ".logger_connector")
 
@@ -30,6 +29,7 @@ class FLAIR2Submission:
     """
     Class for submitting predictions using the FLAIR-2 Lightning model.
     """
+
     def __init__(self):
         self.trainer = pl.Trainer(accelerator=cst.device)
         self.baseline_inference_time = cst.baseline_inference_time
