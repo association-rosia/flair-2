@@ -50,6 +50,10 @@ def main():
         list_images_val=list_images_val,
         list_images_test=list_images_test,
         sen_size=wandb.config.sen_size,
+        sen_temp_size=wandb.config.sen_temp_size,
+        sen_temp_reduc=wandb.config.sen_temp_reduc,
+        sen_list_bands=wandb.config.sen_list_bands,
+        prob_cover=wandb.config.prob_cover,
         use_augmentation=wandb.config.use_augmentation,
         batch_size=wandb.config.batch_size
     )

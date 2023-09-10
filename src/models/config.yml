@@ -15,6 +15,22 @@ sen_size:
   value: 40
   desc: Size of the Sentinel 2 images
 
+sen_temp_size:
+  value: 3
+  desc: Size of temporal channel for Sentinel 2 images
+
+sen_temp_reduc:
+  value: median
+  desc: Temporal sentinel reduction method (median or mean)
+
+sen_list_bands:
+  value: ['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12']
+  desc: List of sentinel bands to use
+
+prob_cover:
+  value: 10
+  desc: Probability value that the pixel are cover by cloud or snow.
+
 batch_size:
   value: 4
   desc: Size of each mini-batch

@@ -43,6 +43,10 @@ class FLAIR2Lightning(pl.LightningModule):
             list_images_val,
             list_images_test,
             sen_size,
+            sen_temp_size,
+            sen_temp_reduc,
+            sen_list_bands,
+            prob_cover,
             use_augmentation,
             batch_size,
     ):
@@ -63,6 +67,10 @@ class FLAIR2Lightning(pl.LightningModule):
         self.list_images_val = list_images_val
         self.list_images_test = list_images_test
         self.sen_size = sen_size
+        self.sen_temp_size = sen_temp_size
+        self.sen_temp_reduc = sen_temp_reduc
+        self.sen_list_bands = sen_list_bands
+        self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
         self.path_predictions = None
@@ -244,6 +252,10 @@ class FLAIR2Lightning(pl.LightningModule):
         dataset_train = FLAIR2Dataset(
             list_images=self.list_images_train,
             sen_size=self.sen_size,
+            sen_temp_size=self.sen_temp_size,
+            sen_temp_reduc=self.sen_temp_reduc,
+            sen_list_bands=self.sen_list_bands,
+            prob_cover=self.prob_cover,
             is_test=False,
         )
 
@@ -260,6 +272,10 @@ class FLAIR2Lightning(pl.LightningModule):
         dataset_val = FLAIR2Dataset(
             list_images=self.list_images_val,
             sen_size=self.sen_size,
+            sen_temp_size=self.sen_temp_size,
+            sen_temp_reduc=self.sen_temp_reduc,
+            sen_list_bands=self.sen_list_bands,
+            prob_cover=self.prob_cover,
             is_test=False,
         )
 
@@ -276,6 +292,10 @@ class FLAIR2Lightning(pl.LightningModule):
         dataset_test = FLAIR2Dataset(
             list_images=self.list_images_test,
             sen_size=self.sen_size,
+            sen_temp_size=self.sen_temp_size,
+            sen_temp_reduc=self.sen_temp_reduc,
+            sen_list_bands=self.sen_list_bands,
+            prob_cover=self.prob_cover,
             is_test=True,
         )
 
