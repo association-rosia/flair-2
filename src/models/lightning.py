@@ -14,6 +14,10 @@ from torchmetrics.classification import MulticlassJaccardIndex
 import src.data.tta.augmentations as agms
 import src.data.tta.wrappers as wrps
 
+from time import time
+import math
+import shutil
+
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.models.aerial_model import AerialModel
@@ -27,6 +31,7 @@ class FLAIR2Lightning(pl.LightningModule):
     """
     Lightning Module for the FLAIR-2 project.
     """
+
     def __init__(
             self,
             arch,
@@ -40,7 +45,6 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_size,
             use_augmentation,
             batch_size,
-            tta_limit,
     ):
         super(FLAIR2Lightning, self).__init__()
         self.step = None
@@ -61,11 +65,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.sen_size = sen_size
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
-        self.tta_limit = tta_limit
         self.path_predictions = None
-
-        # self.val_aerial_image_idx = None
-        # self.get_val_aerial_image_idx()
 
         # Create the AerialModel
         self.model = AerialModel(
@@ -83,6 +83,8 @@ class FLAIR2Lightning(pl.LightningModule):
         ])
 
         if use_augmentation:
+            # init TTA limit to avoid the submission exceed the time limit
+            self.tta_limit = self.init_tta_limit()
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
         # Initialize metrics for evaluation
@@ -99,6 +101,33 @@ class FLAIR2Lightning(pl.LightningModule):
             x = self.model(**inputs)
         return x
 
+    def init_tta_limit(self):
+        path_test = os.path.join(cst.path_submissions, 'test')
+        os.makedirs(path_test, exist_ok=True)
+
+        start = time()
+        for batch in self.test_dataloader:
+            image_ids, aerial, sen, _ = batch
+            inputs = {'aerial': aerial, 'sen': sen}
+            outputs = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=1)
+            outputs = outputs.softmax(dim=1)
+            outputs = outputs.argmax(dim=1)
+
+            for pred_label, img_id in zip(outputs, image_ids):
+                img = pred_label.numpy(force=True)
+                img = img.astype(dtype=np.uint8)
+                img_path = os.path.join(path_test, f'PRED_{img_id}')
+                tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
+
+        end = time()
+        shutil.rmtree(path_test)
+        inference_time_seconds = end - start - 4
+        max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
+        tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
+        self.logger.experiment.config['tta_limit'] = tta_limit
+
+        return tta_limit
+
     def on_train_epoch_start(self) -> None:
         self.step = 'training'
 
@@ -113,12 +142,6 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def on_validation_epoch_start(self) -> None:
         self.step = 'validation'
-
-    def get_val_aerial_image_idx(self):
-        self.val_aerial_image_idx = None
-
-        for item in self.val_dataloader():
-            print(item)
 
     def log_aerial_mask(self, aerial, mask_target, mask_pred):
         image = aerial[:3]

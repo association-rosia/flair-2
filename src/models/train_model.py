@@ -51,8 +51,7 @@ def main():
         list_images_test=list_images_test,
         sen_size=wandb.config.sen_size,
         use_augmentation=wandb.config.use_augmentation,
-        batch_size=wandb.config.batch_size,
-        tta_limit=wandb.config.tta_limit
+        batch_size=wandb.config.batch_size
     )
 
     # Initialize the PyTorch Lightning Trainer
