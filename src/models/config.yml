@@ -3,7 +3,7 @@ arch:
   desc: Name of the segmentation architecture
 
 encoder_name:
-  value: 'tu-tf_efficientnetv2_l.in21k_ft_in1k'
+  value: 'tu-maxvit_tiny_tf_512.in1k'
   # TO TEST: tu-xception41, tu-efficientnet_b5, tu-resnet50
   desc: Name of the timm encoder
 
