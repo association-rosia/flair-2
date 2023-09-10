@@ -96,8 +96,8 @@ def init_trainer() -> Trainer:
     # Initialize ModelCheckpoint callback to save the best model checkpoint
     checkpoint_callback = callbacks.ModelCheckpoint(
         save_top_k=1,
-        monitor='val/loss',
-        mode='min',
+        monitor='val/miou',
+        mode='max',
         dirpath=cst.path_models,
         filename=f'{wandb.run.name}-{wandb.run.id}',
         auto_insert_metric_name=False,
@@ -105,10 +105,11 @@ def init_trainer() -> Trainer:
     )
 
     early_stopping_callback = callbacks.EarlyStopping(
-        monitor='val/loss',
-        mode='min',
-        patience=10,
+        monitor='val/miou',
         min_delta=0,
+        patience=10,
+        verbose=True,
+        mode='max'
     )
 
     if wandb.config.dry:
@@ -125,7 +126,7 @@ def init_trainer() -> Trainer:
     else:
         # Configure Trainer for regular training
         trainer = Trainer(
-            max_epochs=100,
+            max_epochs=200,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device

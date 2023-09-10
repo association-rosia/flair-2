@@ -1,6 +1,8 @@
-# FLAIR #2
+# 🛰️ FLAIR #2
 
 <img src="assets/bandeau.jpg">
+
+This project was made possible by our compute partners [2CRSI](https://2crsi.com/) and [NVIDIA](https://www.nvidia.com/).
 
 ## 🏁 Getting started
 
@@ -41,11 +43,9 @@ nohup python src/models/train_model.py </dev/null &>/dev/null &
 pkill -f 'python src/models/train_model.py'
 ```
 
-## Create a submission
+## 📝 Create a submission
 
-1 - Edit `run_name` in [predict_model.py](src%2Fmodels%2Fpredict_model.py).
-
-2 - Move to the project folder:
+1 - Move to the project folder:
 ```bash
 cd flair-2
 ```
@@ -57,7 +57,17 @@ conda activate flair-2-env
 
 4 - Launch the model inference:
 ```bash
-python src/models/predict_model.py
+python src/models/predict_model.py -n {model checkpoint name}
 ```
+
+## 🔬 References
+
+## 📝 License
+
+## 👨🏻‍💻 Contributors
+
+Louis REBERGA <a href="https://twitter.com/rbrgAlou"><img src="https://abs.twimg.com/favicons/twitter.3.ico" width="18px"/></a> <a href="https://www.linkedin.com/in/louisreberga/"><img src="https://static.licdn.com/sc/h/akt4ae504epesldzj74dzred8" width="18px"/></a> <a href="louis.reberga@gmail.com"><img src="https://www.google.com/a/cpanel/aqsone.com/images/favicon.ico" width="18px"/></a>
+
+Baptiste URGELL <a href="https://twitter.com/Baptiste2108"><img src="https://abs.twimg.com/favicons/twitter.3.ico" width="18px"/></a> <a href="https://www.linkedin.com/in/baptiste-urgell/"><img src="https://static.licdn.com/sc/h/akt4ae504epesldzj74dzred8" width="18px"/></a> <a href="baptiste.u@gmail.com"><img src="https://www.google.com/a/cpanel/aqsone.com/images/favicon.ico" width="18px"/></a> 
 
 
