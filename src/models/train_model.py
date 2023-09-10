@@ -122,7 +122,7 @@ def init_trainer() -> Trainer:
     else:
         # Configure Trainer for regular training
         trainer = Trainer(
-            max_epochs=100,
+            max_epochs=200,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device
