@@ -39,7 +39,7 @@ class FLAIR2Dataset(Dataset):
         Args:
             list_images (list[str]): List of image paths.
             sen_size (int): Size of sentinel images.
-            sen_temp_size (int): Size of temporal data.
+            sen_temp_size (int): Size of temporal channel for Sentinel 2 images.
             sen_temp_reduc (str): Temporal data reduction method.
             sen_list_bands (list[str]): List of sentinel bands.
             prob_cover (int): Probability cover value.
