@@ -45,9 +45,7 @@ pkill -f 'python src/models/train_model.py'
 
 ## 📝 Create a submission
 
-1 - Update `self.run_name` variable in [constants.py](src%2Fconstants.py).
-
-2 - Move to the project folder:
+1 - Move to the project folder:
 ```bash
 cd flair-2
 ```
