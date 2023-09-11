@@ -69,7 +69,7 @@ def main():
     trainer = init_trainer()
 
     # Find optimal TTA limit for inference
-    # lightning_model = find_optimal_tta_limit(lightning_model, trainer)
+    lightning_model = find_optimal_tta_limit(lightning_model, trainer)
 
     # Train the model
     trainer.fit(model=lightning_model)
