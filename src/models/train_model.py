@@ -72,6 +72,7 @@ def main():
     lightning_model.path_predictions = path_test
     os.makedirs(path_test, exist_ok=True)
 
+    print(f'Current TTA limit = {lightning_model.tta_limit}')
     start = time()
     trainer.test(model=lightning_model)
     end = time()
@@ -79,10 +80,8 @@ def main():
     shutil.rmtree(path_test)
     inference_time_seconds = end - start - 4
     max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
-    print(f'inference_time_seconds = {inference_time_seconds} and max_inference_time_seconds = {max_inference_time_seconds}')
-
     tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
-    print(f'tta_limit = {tta_limit}')
+    print(f'New TTA limit =  = {tta_limit}')
     wandb.config['tta_limit'] = tta_limit
     lightning_model.tta_limit = tta_limit
 
