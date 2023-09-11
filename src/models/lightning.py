@@ -2,6 +2,7 @@ import math
 import os
 import shutil
 from time import time
+import json
 
 import numpy as np
 import pytorch_lightning as pl
@@ -12,6 +13,7 @@ import wandb
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
+import torchvision.transforms as T
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassJaccardIndex
 
@@ -98,6 +100,12 @@ class FLAIR2Lightning(pl.LightningModule):
                 'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
             }
         )
+        
+        path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
+        with open(path_aerial_pixels_metadata) as f:
+            stats = json.load(f)
+        self.inverse_normalize = T.Normalize(mean=-torch.Tensor(stats['mean']) / torch.Tensor(stats['std']), std=1 / torch.Tensor(stats['std']))
+        
 
     def forward(self, inputs):
         if self.use_augmentation:
@@ -149,6 +157,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.step = 'validation'
 
     def log_aerial_mask(self, aerial, mask_target, mask_pred):
+        image = self.inverse_normalize(image)
         image = aerial[:3]
         image = image.permute(1, 2, 0)
         image = image.numpy(force=True)
