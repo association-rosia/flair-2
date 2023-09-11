@@ -69,6 +69,7 @@ def main():
     trainer = init_trainer()
 
     path_test = os.path.join(cst.path_submissions, 'test')
+    lightning_model.path_predictions = path_test
     os.makedirs(path_test, exist_ok=True)
 
     start = time()
