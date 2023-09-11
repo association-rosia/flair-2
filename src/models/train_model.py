@@ -97,6 +97,7 @@ def find_optimal_tta_limit(lightning_model, trainer):
 
         if inference_time_seconds <= max_inference_time_seconds:
             lightning_model.tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
+            lightning_model.tta_limit += 1
         else:
             optimal_tta_limit_found = True
 
