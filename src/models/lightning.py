@@ -114,7 +114,7 @@ class FLAIR2Lightning(pl.LightningModule):
         for batch in self.test_dataloader():
             image_ids, aerial, sen, _ = batch
             inputs = {'aerial': aerial, 'sen': sen}
-            outputs = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=1)
+            outputs = self.model(inputs=inputs, step='predict', batch_size=self.batch_size, limit=1)
             outputs = outputs.softmax(dim=1)
             outputs = outputs.argmax(dim=1)
 
