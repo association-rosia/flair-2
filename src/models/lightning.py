@@ -114,19 +114,20 @@ class FLAIR2Lightning(pl.LightningModule):
         os.makedirs(path_test, exist_ok=True)
 
         start = time()
-        for batch in tqdm(self.test_dataloader()):
-            image_ids, aerial, sen, _ = batch
-            inputs = {'aerial': aerial, 'sen': sen}
-            outputs = self.model(inputs=inputs, step='test', batch_size=self.batch_size, limit=1)
-            outputs = outputs.softmax(dim=1)
-            outputs = outputs.argmax(dim=1)
+        # for batch in tqdm(self.test_dataloader()):
+        #     image_ids, aerial, sen, _ = batch
+        #     inputs = {'aerial': aerial, 'sen': sen}
+        #     outputs = self.model(inputs=inputs, step='test', batch_size=self.batch_size, limit=1)
+        #     outputs = outputs.softmax(dim=1)
+        #     outputs = outputs.argmax(dim=1)
+        #
+        #     for pred_label, img_id in zip(outputs, image_ids):
+        #         img = pred_label.numpy(force=True)
+        #         img = img.astype(dtype=np.uint8)
+        #         img_path = os.path.join(path_test, f'PRED_{img_id}')
+        #         tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
-            for pred_label, img_id in zip(outputs, image_ids):
-                img = pred_label.numpy(force=True)
-                img = img.astype(dtype=np.uint8)
-                img_path = os.path.join(path_test, f'PRED_{img_id}')
-                tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
-
+        self.trainer.test(model=self.model)
         end = time()
         shutil.rmtree(path_test)
         inference_time_seconds = end - start - 4
