@@ -1,7 +1,6 @@
 import math
 import os
 
-
 import numpy as np
 import pytorch_lightning as pl
 import tifffile as tiff
@@ -71,7 +70,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
-        self.tta_limit = 10
+        self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
 
         # Create the AerialModel

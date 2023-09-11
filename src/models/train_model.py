@@ -68,28 +68,42 @@ def main():
     # Initialize the PyTorch Lightning Trainer
     trainer = init_trainer()
 
-    path_test = os.path.join(cst.path_submissions, 'test')
-    lightning_model.path_predictions = path_test
-    os.makedirs(path_test, exist_ok=True)
-
-    print(f'Current TTA limit = {lightning_model.tta_limit}')
-    start = time()
-    trainer.test(model=lightning_model)
-    end = time()
-
-    shutil.rmtree(path_test)
-    inference_time_seconds = end - start - 4
-    max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
-    tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
-    print(f'New TTA limit =  = {tta_limit}')
-    wandb.config['tta_limit'] = tta_limit
-    lightning_model.tta_limit = tta_limit
+    # Find optimal TTA limit for inference
+    lightning_model = find_optimal_tta_limit(lightning_model, trainer)
 
     # Train the model
     trainer.fit(model=lightning_model)
 
     # Finish the WandB run
     wandb.finish()
+
+
+def find_optimal_tta_limit(lightning_model, trainer):
+    optimal_tta_limit_found = False
+
+    while not optimal_tta_limit_found:
+        path_test = os.path.join(cst.path_submissions, 'test')
+        lightning_model.path_predictions = path_test
+        os.makedirs(path_test, exist_ok=True)
+
+        print(f'Current TTA limit = {lightning_model.tta_limit}')
+        start = time()
+        trainer.test(model=lightning_model)
+        end = time()
+
+        shutil.rmtree(path_test)
+        inference_time_seconds = end - start - 4
+        max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
+
+        if inference_time_seconds <= max_inference_time_seconds:
+            lightning_model.tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
+        else:
+            optimal_tta_limit_found = True
+
+    print(f'New TTA limit =  = {lightning_model.tta_limit}')
+    wandb.config['tta_limit'] = lightning_model.tta_limit
+
+    return lightning_model
 
 
 def init_wandb():
