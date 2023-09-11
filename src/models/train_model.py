@@ -116,9 +116,9 @@ def init_wandb():
     parser = argparse.ArgumentParser(description='Script Description')
 
     # Add the parameters with default values
-    parser.add_argument('--arch_lib', type=str, default='SMP', help='Name of the segmentation librairy used')
-    parser.add_argument('--arch', type=str, default='DeepLabV3Plus', help='Name of the segmentation architecture')
-    parser.add_argument('--encoder_name', type=str, default='tu-tf_efficientnetv2_s', help='Name of the timm encoder')
+    parser.add_argument('--arch_lib', type=str, default='', help='Name of the segmentation librairy used')
+    parser.add_argument('--arch', type=str, default='', help='Name of the segmentation architecture')
+    parser.add_argument('--encoder_name', type=str, default='', help='Name of the timm encoder')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
     parser.add_argument('--sen_size', type=int, default=40, help='Size of the Sentinel 2 images')
     parser.add_argument('--sen_temp_size', type=int, default=3, help='Size of temporal channel for Sentinel 2 images')
