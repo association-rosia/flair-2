@@ -111,7 +111,7 @@ class FLAIR2Lightning(pl.LightningModule):
         os.makedirs(path_test, exist_ok=True)
 
         start = time()
-        for batch in self.test_dataloader:
+        for batch in self.test_dataloader():
             image_ids, aerial, sen, _ = batch
             inputs = {'aerial': aerial, 'sen': sen}
             outputs = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=1)

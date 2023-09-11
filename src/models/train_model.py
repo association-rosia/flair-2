@@ -29,7 +29,7 @@ def main():
     """
     # Initialize WandB logging
     init_wandb()
-    
+
     # Set torch seed
     torch.manual_seed(wandb.config.seed)
 
@@ -76,7 +76,7 @@ def init_wandb():
     """
     Initialize WandB logging and configuration.
     """
-    
+
     # Define the parameters
     parser = argparse.ArgumentParser(description="Script Description")
 
@@ -86,24 +86,33 @@ def init_wandb():
     parser.add_argument("--learning_rate", type=float, default=0.001, help="Value of Learning rate")
     parser.add_argument("--sen_size", type=int, default=40, help="Size of the Sentinel 2 images")
     parser.add_argument("--sen_temp_size", type=int, default=3, help="Size of temporal channel for Sentinel 2 images")
-    parser.add_argument("--sen_temp_reduc", type=str, default="median", choices=["median", "mean"], help="Temporal sentinel reduction method (median or mean)")
-    parser.add_argument("--sen_list_bands", nargs='+', type=str, default=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'], help="List of sentinel bands to use")
-    parser.add_argument("--prob_cover", type=int, default=10, help="Probability value that the pixel is covered by cloud or snow.")
+    parser.add_argument("--sen_temp_reduc", type=str, default="median", choices=["median", "mean"],
+                        help="Temporal sentinel reduction method (median or mean)")
+    parser.add_argument("--sen_list_bands", nargs='+', type=str,
+                        default=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
+                        help="List of sentinel bands to use")
+    parser.add_argument("--prob_cover", type=int, default=10,
+                        help="Probability value that the pixel is covered by cloud or snow.")
     parser.add_argument("--batch_size", type=int, default=26, help="Size of each mini-batch")
     parser.add_argument("--use_augmentation", type=bool, default=True, help="Use data augmentation & tta")
-    parser.add_argument("--class_weights", nargs='+', type=float, default=[0.07451054458054185, 0.07123414669165881, 0.06501057431176234, 0.10243128536707254, 0.0751622868386753, 0.060451925970421205, 0.057084409075513015, 0.0712831075581589, 0.08115403779097626, 0.05767359681290979, 0.05792606455080904, 0.0952665140613815, 0.1308115063901194], help="Class weights applied to the cross-entropy loss")
+    parser.add_argument("--class_weights", nargs='+', type=float,
+                        default=[0.07451054458054185, 0.07123414669165881, 0.06501057431176234, 0.10243128536707254,
+                                 0.0751622868386753, 0.060451925970421205, 0.057084409075513015, 0.0712831075581589,
+                                 0.08115403779097626, 0.05767359681290979, 0.05792606455080904, 0.0952665140613815,
+                                 0.1308115063901194], help="Class weights applied to the cross-entropy loss")
     parser.add_argument("--seed", type=int, default=42, help="Seed for random initialization")
     parser.add_argument("--dry", type=bool, default=False, help="Enable or disable dry mode pipeline")
 
     # Parse the arguments
     args = parser.parse_args()
-    
+
     # Initialize WandB with project and entity information
     wandb.init(
         entity='association-rosia',
         project='flair-2',
         config=args
     )
+
 
 def init_trainer() -> Trainer:
     """
