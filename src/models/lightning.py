@@ -28,6 +28,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def __init__(
             self,
+            arch_lib,
             arch,
             encoder_name,
             classes,
@@ -49,6 +50,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.save_hyperparameters(logger=False)
 
         # Initialize hyperparameters and configurations
+        self.arch_lib = arch_lib
         self.arch = arch
         self.encoder_name = encoder_name
         self.classes = classes
@@ -72,6 +74,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         # Create the AerialModel
         self.model = AerialModel(
+            arch_lib=self.arch_lib,
             arch=self.arch,
             encoder_name=self.encoder_name,
             num_classes=self.num_classes
@@ -154,9 +157,6 @@ class FLAIR2Lightning(pl.LightningModule):
 
         self.log('val/loss', loss, on_step=True, on_epoch=True)
         self.metrics.update(outputs, labels)
-
-        # if batch_idx == self.val_aerial_image_idx:
-        #     self.log_aerial_mask(aerial[batch_idx], labels[batch_idx], outputs[batch_idx])
 
         if batch_idx == 0:
             self.log_aerial_mask(aerial[0], labels[0], outputs[0])
