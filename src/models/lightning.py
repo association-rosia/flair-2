@@ -71,7 +71,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
-        self.tta_limit = 1
+        self.tta_limit = 2
         self.path_predictions = None
 
         # Create the AerialModel
