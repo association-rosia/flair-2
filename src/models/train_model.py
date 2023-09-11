@@ -3,6 +3,9 @@ import sys
 import argparse
 
 import wandb
+import math
+import shutil
+from time import time
 
 sys.path.append(os.curdir)
 
@@ -64,6 +67,23 @@ def main():
 
     # Initialize the PyTorch Lightning Trainer
     trainer = init_trainer()
+
+    path_test = os.path.join(cst.path_submissions, 'test')
+    os.makedirs(path_test, exist_ok=True)
+
+    start = time()
+    trainer.test(model=lightning_model)
+    end = time()
+
+    shutil.rmtree(path_test)
+    inference_time_seconds = end - start - 4
+    max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
+    print(f'inference_time_seconds = {inference_time_seconds} and max_inference_time_seconds = {max_inference_time_seconds}')
+
+    tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
+    print(f'tta_limit = {tta_limit}')
+    wandb.config['tta_limit'] = tta_limit
+    lightning_model.tta_limit = tta_limit
 
     # Train the model
     trainer.fit(model=lightning_model)
