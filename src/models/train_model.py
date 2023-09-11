@@ -81,15 +81,20 @@ def find_optimal_tta_limit(lightning_model, trainer):
     optimal_tta_limit_found = False
 
     while not optimal_tta_limit_found:
+        # create path to save images
         path_test = os.path.join(cst.path_submissions, 'test')
+        # update path in the PL model
         lightning_model.path_predictions = path_test
+        # create the folder
         os.makedirs(path_test, exist_ok=True)
 
+        # start the testing
         print(f'Tested TTA limit = {lightning_model.tta_limit}')
         start = time()
         trainer.test(model=lightning_model)
         end = time()
 
+        # remove the saved folder
         shutil.rmtree(path_test)
         inference_time_seconds = end - start - 4
         max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
