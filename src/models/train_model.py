@@ -98,6 +98,7 @@ def find_optimal_tta_limit(lightning_model, trainer):
             lightning_model.tta_limit += 1
         else:
             optimal_tta_limit_found = True
+            lightning_model.tta_limit -= 1
 
     print(f'New TTA limit =  = {lightning_model.tta_limit}')
     wandb.config['tta_limit'] = lightning_model.tta_limit
