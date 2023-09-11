@@ -86,7 +86,7 @@ def find_optimal_tta_limit(lightning_model, trainer):
         lightning_model.path_predictions = path_test
         os.makedirs(path_test, exist_ok=True)
 
-        print(f'Current TTA limit = {lightning_model.tta_limit}')
+        print(f'Tested TTA limit = {lightning_model.tta_limit}')
         start = time()
         trainer.test(model=lightning_model)
         end = time()
