@@ -1,4 +1,3 @@
-import math
 import os
 
 import numpy as np
@@ -18,8 +17,6 @@ import src.data.tta.wrappers as wrps
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.models.aerial_model import AerialModel
-
-from tqdm import tqdm
 
 cst = get_constants()
 

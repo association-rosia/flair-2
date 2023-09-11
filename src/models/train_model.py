@@ -1,11 +1,10 @@
-import os
-import sys
 import argparse
+import os
+import shutil
+import sys
+from time import time
 
 import wandb
-import math
-import shutil
-from time import time
 
 sys.path.append(os.curdir)
 
