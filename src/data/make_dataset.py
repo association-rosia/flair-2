@@ -256,7 +256,7 @@ class FLAIR2Dataset(Dataset):
         Returns:
             T.Compose: Sentinel image normalization transform.
         """
-        path_sen_metadata = os.path.join(cst.path_data, f'sen_pixels_metadata.json')
+        path_sen_metadata = os.path.join(cst.path_data, 'sen_pixels_metadata.json')
         sen_metadata = self.load_sen_metadata(path_sen_metadata)
 
         band_mean = None
