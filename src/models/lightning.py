@@ -21,6 +21,8 @@ from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.models.aerial_model import AerialModel
 
+from tqdm import tqdm
+
 cst = get_constants()
 
 
@@ -111,10 +113,10 @@ class FLAIR2Lightning(pl.LightningModule):
         os.makedirs(path_test, exist_ok=True)
 
         start = time()
-        for batch in self.test_dataloader():
+        for batch in tqdm(self.test_dataloader()):
             image_ids, aerial, sen, _ = batch
             inputs = {'aerial': aerial, 'sen': sen}
-            outputs = self.model(inputs=inputs, step='predict', batch_size=self.batch_size, limit=1)
+            outputs = self.model(inputs=inputs, step='testing', batch_size=self.batch_size, limit=1)
             outputs = outputs.softmax(dim=1)
             outputs = outputs.argmax(dim=1)
 
@@ -227,9 +229,6 @@ class FLAIR2Lightning(pl.LightningModule):
             img = img.astype(dtype=np.uint8)
             img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
             tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
-
-    def on_predict_epoch_start(self) -> None:
-        self.step = 'predict'
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)
