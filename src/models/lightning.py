@@ -130,7 +130,10 @@ class FLAIR2Lightning(pl.LightningModule):
         shutil.rmtree(path_test)
         inference_time_seconds = end - start - 4
         max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
+        print(f'inference_time_seconds = {inference_time_seconds} and max_inference_time_seconds = {max_inference_time_seconds}')
+
         tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
+        print(f'tta_limit = {tta_limit}')
         self.logger.experiment.config['tta_limit'] = tta_limit
 
         return tta_limit
