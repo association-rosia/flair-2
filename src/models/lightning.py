@@ -116,7 +116,7 @@ class FLAIR2Lightning(pl.LightningModule):
         for batch in tqdm(self.test_dataloader()):
             image_ids, aerial, sen, _ = batch
             inputs = {'aerial': aerial, 'sen': sen}
-            outputs = self.model(inputs=inputs, step='testing', batch_size=self.batch_size, limit=1)
+            outputs = self.model(inputs=inputs, step='test', batch_size=self.batch_size, limit=1)
             outputs = outputs.softmax(dim=1)
             outputs = outputs.argmax(dim=1)
 
