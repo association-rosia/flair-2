@@ -92,8 +92,8 @@ class FLAIR2Lightning(pl.LightningModule):
         if use_augmentation:
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
             # init TTA limit to avoid the submission exceed the time limit
-            # self.tta_limit = self.init_tta_limit()
-            self.tta_limit = 5
+            self.tta_limit = self.init_tta_limit()
+            # self.tta_limit = 5
 
         # init metrics for evaluation
         self.metrics = MetricCollection(
