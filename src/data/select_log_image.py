@@ -38,6 +38,7 @@ dataloader = DataLoader(
 
 results = []
 for idx, batch in enumerate(dataloader):
+    print(f'Testing {idx}')
     _, _, _, labels = batch
     labels = labels.squeeze()
     plt.imshow(labels)
