@@ -1,4 +1,3 @@
-import math
 import os
 import shutil
 from time import time
@@ -72,6 +71,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
         self.batch_size = batch_size
+        self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
 
         # Create the AerialModel
@@ -90,11 +90,9 @@ class FLAIR2Lightning(pl.LightningModule):
         ])
 
         if use_augmentation:
-            # init TTA limit to avoid the submission exceed the time limit
-            self.tta_limit = self.init_tta_limit()
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
-        # Initialize metrics for evaluation
+        # init metrics for evaluation
         self.metrics = MetricCollection(
             {
                 'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
@@ -113,33 +111,6 @@ class FLAIR2Lightning(pl.LightningModule):
         else:
             x = self.model(**inputs)
         return x
-
-    def init_tta_limit(self):
-        path_test = os.path.join(cst.path_submissions, 'test')
-        os.makedirs(path_test, exist_ok=True)
-
-        start = time()
-        for batch in self.test_dataloader:
-            image_ids, aerial, sen, _ = batch
-            inputs = {'aerial': aerial, 'sen': sen}
-            outputs = self.model(inputs=inputs, step=self.step, batch_size=self.batch_size, limit=1)
-            outputs = outputs.softmax(dim=1)
-            outputs = outputs.argmax(dim=1)
-
-            for pred_label, img_id in zip(outputs, image_ids):
-                img = pred_label.numpy(force=True)
-                img = img.astype(dtype=np.uint8)
-                img_path = os.path.join(path_test, f'PRED_{img_id}')
-                tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
-
-        end = time()
-        shutil.rmtree(path_test)
-        inference_time_seconds = end - start - 4
-        max_inference_time_seconds = 14 * 60 + 52  # 14 min 52 seconds
-        tta_limit = math.floor(max_inference_time_seconds / inference_time_seconds)
-        self.logger.experiment.config['tta_limit'] = tta_limit
-
-        return tta_limit
 
     def on_train_epoch_start(self) -> None:
         self.step = 'training'
@@ -236,9 +207,6 @@ class FLAIR2Lightning(pl.LightningModule):
             img = img.astype(dtype=np.uint8)
             img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
             tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
-
-    def on_predict_epoch_start(self) -> None:
-        self.step = 'predict'
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)
