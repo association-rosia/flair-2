@@ -36,25 +36,34 @@ dataloader = DataLoader(
     shuffle=False,
 )
 
+max_number_classes = 0
+for idx, batch in enumerate(dataloader):
+    _, _, _, labels = batch
+    labels = labels.squeeze()
+    return_counts = labels.unique(return_counts=True)
+    return_counts = return_counts[0].tolist(), return_counts[1].tolist()
+    max_number_classes = max(max_number_classes, len(return_counts[0]))
+    print(f'Max number of classes = {max_number_classes}')
+
+print()
 results = []
 for idx, batch in enumerate(dataloader):
     print(f'Testing {idx}')
     _, _, _, labels = batch
     labels = labels.squeeze()
-    plt.imshow(labels)
-    plt.show()
     return_counts = labels.unique(return_counts=True)
     return_counts = return_counts[0].tolist(), return_counts[1].tolist()
 
-    distribution = []
-    for i in range(12):
-        if i in return_counts[0]:
-            distribution.append(return_counts[1][return_counts[0].index(i)])
-        else:
-            distribution.append(0)
+    if len(return_counts[0]) == max_number_classes:
+        distribution = []
+        for i in range(12):
+            if i in return_counts[0]:
+                distribution.append(return_counts[1][return_counts[0].index(i)])
+            else:
+                distribution.append(0)
 
-    test_statistic, p_value = kstest(distribution, 'uniform')
-    results.append((idx, test_statistic, p_value))
+        test_statistic, p_value = kstest(distribution, 'uniform')
+        results.append((idx, test_statistic, p_value))
 
 # Sort the results by p-value in ascending order
 results.sort(key=lambda x: x[2])
