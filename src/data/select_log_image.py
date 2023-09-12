@@ -3,7 +3,6 @@ import sys
 
 sys.path.append(os.curdir)
 
-import matplotlib.pyplot as plt
 from scipy.stats import kstest
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -39,9 +38,12 @@ dataloader = DataLoader(
 max_number_classes = 0
 for idx, batch in enumerate(dataloader):
     _, _, _, labels = batch
-    labels = labels.squeeze()
+    # get the unique values and the associated counts
     return_counts = labels.unique(return_counts=True)
+
+    # convert to list
     return_counts = return_counts[0].tolist(), return_counts[1].tolist()
+
     max_number_classes = max(max_number_classes, len(return_counts[0]))
     print(f'Testing {idx} - Max number of classes = {max_number_classes}')
 
@@ -50,11 +52,15 @@ results = []
 for idx, batch in enumerate(dataloader):
     print(f'Testing {idx}')
     _, _, _, labels = batch
-    labels = labels.squeeze()
+
+    # get the unique values and the associated counts
     return_counts = labels.unique(return_counts=True)
+
+    # convert to list
     return_counts = return_counts[0].tolist(), return_counts[1].tolist()
 
     if len(return_counts[0]) == max_number_classes:
+        # build the distribution with all classes possible values
         distribution = []
         for i in range(12):
             if i in return_counts[0]:
@@ -62,6 +68,7 @@ for idx, batch in enumerate(dataloader):
             else:
                 distribution.append(0)
 
+        # compute statistical test to determine how close the distribution is close to uniform
         test_statistic, p_value = kstest(distribution, 'uniform')
         results.append((idx, test_statistic, p_value))
 
