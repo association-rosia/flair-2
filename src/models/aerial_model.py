@@ -1,6 +1,6 @@
-from transformers import SegformerForSemanticSegmentation
 import segmentation_models_pytorch as smp
 from torch import nn
+from transformers import SegformerForSemanticSegmentation
 
 
 class AerialModel(nn.Module):

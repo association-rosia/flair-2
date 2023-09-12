@@ -1,9 +1,15 @@
-from torch.utils.data import DataLoader
-from src.data.make_dataset import get_list_images, FLAIR2Dataset
-from src.constants import get_constants
-from sklearn.model_selection import train_test_split
+import os
+import sys
+
 import matplotlib.pyplot as plt
 from scipy.stats import kstest
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
+
+from src.constants import get_constants
+from src.data.make_dataset import get_list_images, FLAIR2Dataset
+
+sys.path.append(os.curdir)
 
 cst = get_constants()
 
@@ -55,4 +61,3 @@ results.sort(key=lambda x: x[2])
 closest_distribution_index = results[0][0]
 
 print(f"The distribution closest to uniform is distribution {closest_distribution_index}")
-
