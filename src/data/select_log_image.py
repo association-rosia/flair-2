@@ -43,7 +43,7 @@ for idx, batch in enumerate(dataloader):
     return_counts = labels.unique(return_counts=True)
     return_counts = return_counts[0].tolist(), return_counts[1].tolist()
     max_number_classes = max(max_number_classes, len(return_counts[0]))
-    print(f'Max number of classes = {max_number_classes}')
+    print(f'Testing {idx} - Max number of classes = {max_number_classes}')
 
 print()
 results = []
