@@ -11,7 +11,7 @@ This project was made possible by our compute partners [2CRSI](https://2crsi.com
  4. [🔬 References](#references)
  5. [📝 Citing](#citing)
  6. [🛡️ License](#license)
- 7. [👨🏻‍💻 Contributors](contributors)
+ 7. [👨🏻‍💻 Contributors](#contributors)
 
 ## 🏁 Getting started <a name="start"></a>
 
