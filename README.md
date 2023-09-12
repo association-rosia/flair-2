@@ -6,14 +6,13 @@ This project was made possible by our compute partners [2CRSI](https://2crsi.com
 and [NVIDIA](https://www.nvidia.com/).
 
 ## 📋 Table of content
-
-1. [🏁 Getting started](#start)
-2. [⚙️ Train a model](#train)
-3. [📝 Create a submission](#models)
-4. [🔬 References](#references)
-5. [📝 Citing](#citing)
-6. [🛡️ License](#license)
-7. [👨🏻‍💻 Contributors](contributors)
+ 1. [🏁 Getting started](#start)
+ 2. [⚙️ Train a model](#train)
+ 3. [📝 Create a submission](#models)
+ 4. [🔬 References](#references)
+ 5. [📝 Citing](#citing)
+ 6. [🛡️ License](#license)
+ 7. [👨🏻‍💻 Contributors](#contributors)
 
 ## 🏁 Getting started <a name="start"></a>
 
