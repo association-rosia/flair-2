@@ -103,12 +103,12 @@ class FLAIR2Lightning(pl.LightningModule):
                 'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
             }
         )
-        
+
         path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
         with open(path_aerial_pixels_metadata) as f:
             stats = json.load(f)
-        self.inverse_normalize = T.Normalize(mean=-torch.Tensor(stats['mean']) / torch.Tensor(stats['std']), std=1 / torch.Tensor(stats['std']))
-        
+        self.inverse_normalize = T.Normalize(mean=-torch.Tensor(stats['mean']) / torch.Tensor(stats['std']),
+                                             std=1 / torch.Tensor(stats['std']))
 
     def forward(self, inputs):
         if self.use_augmentation:
