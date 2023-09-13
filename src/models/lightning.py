@@ -47,7 +47,8 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_list_bands,
             prob_cover,
             use_augmentation,
-            batch_size,
+            train_batch_size,
+            eval_batch_size
     ):
         super(FLAIR2Lightning, self).__init__()
         self.step = None
@@ -72,7 +73,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.sen_list_bands = sen_list_bands
         self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
-        self.batch_size = batch_size
+        self.train_batch_size = train_batch_size
+        self.eval_batch_size = eval_batch_size
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
 
@@ -237,7 +239,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return DataLoader(
             dataset=dataset_train,
-            batch_size=self.batch_size,
+            batch_size=self.train_batch_size,
             num_workers=cst.num_workers,
             shuffle=True,
             drop_last=True,
@@ -257,7 +259,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return DataLoader(
             dataset=dataset_val,
-            batch_size=self.batch_size,
+            batch_size=self.eval_batch_size,
             num_workers=cst.num_workers,
             shuffle=False,
             drop_last=True,
@@ -277,7 +279,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return DataLoader(
             dataset=dataset_test,
-            batch_size=self.batch_size,
+            batch_size=self.eval_batch_size,
             num_workers=10,  # DO NOT CHANGE: same as during the FLAIR#2 project testing
             shuffle=False,
             drop_last=False,
