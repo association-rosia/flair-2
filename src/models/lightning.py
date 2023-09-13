@@ -133,8 +133,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.step = 'validation'
 
     def log_aerial_mask(self, aerial, mask_target, mask_pred):
-        image = self.inverse_normalize(image)
         image = aerial[:3]
+        image = self.inverse_normalize(image)
         image = image.permute(1, 2, 0)
         image = image.numpy(force=True)
         image = image * 255.0
