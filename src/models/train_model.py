@@ -63,7 +63,7 @@ def main():
         prob_cover=wandb.config.prob_cover,
         use_augmentation=wandb.config.use_augmentation,
         train_batch_size=wandb.config.train_batch_size,
-        eval_batch_size=wandb.config.eval_batch_size,
+        test_batch_size=wandb.config.test_batch_size,
     )
 
     # Initialize the PyTorch Lightning Trainer
@@ -136,7 +136,7 @@ def init_wandb():
     parser.add_argument('--prob_cover', type=int, default=10,
                         help='Probability value that the pixel is covered by cloud or snow.')
     parser.add_argument('--train_batch_size', type=int, default=16, help='Size of each train mini-batch')
-    parser.add_argument('--eval_batch_size', type=int, default=16, help='Size of each eval (val and test) mini-batch')
+    parser.add_argument('--test_batch_size', type=int, default=16, help='Size of each eval (val and test) mini-batch')
     parser.add_argument('--use_augmentation', type=bool, default=True, help='Use data augmentation & tta')
     parser.add_argument('--class_weights', nargs='+', type=float,
                         default=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],

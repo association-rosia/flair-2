@@ -24,7 +24,8 @@ class FLAIR2Constants:
         self.baseline_inference_time = '5-57'  # max 14-52
 
         # Number of worker threads for data loading
-        self.num_workers = 18
+        self.train_num_workers = 18
+        self.test_num_workers = 10  # same as in the baseline
 
         # Initialize the device for computation
         self.device = self.init_device()
