@@ -47,6 +47,7 @@ def main():
 
     # Initialize FLAIR-2 Lightning model
     lightning_model = FLAIR2Lightning(
+        arch_lib=wandb.config.arch_lib,
         arch=wandb.config.arch,
         encoder_name=wandb.config.encoder_name,
         classes=df['Class'],
@@ -117,28 +118,29 @@ def init_wandb():
     """
 
     # Define the parameters
-    parser = argparse.ArgumentParser(description="Script Description")
+    parser = argparse.ArgumentParser(description='Script Description')
 
     # Add the parameters with default values
-    parser.add_argument("--arch", type=str, default="DeepLabV3Plus", help="Name of the segmentation architecture")
-    parser.add_argument("--encoder_name", type=str, default="tu-tf_efficientnetv2_s", help="Name of the timm encoder")
-    parser.add_argument("--learning_rate", type=float, default=0.001, help="Value of Learning rate")
-    parser.add_argument("--sen_size", type=int, default=40, help="Size of the Sentinel 2 images")
-    parser.add_argument("--sen_temp_size", type=int, default=3, help="Size of temporal channel for Sentinel 2 images")
-    parser.add_argument("--sen_temp_reduc", type=str, default="median", choices=["median", "mean"],
-                        help="Temporal sentinel reduction method (median or mean)")
-    parser.add_argument("--sen_list_bands", nargs='+', type=str,
+    parser.add_argument('--arch_lib', type=str, default='', help='Name of the segmentation librairy used')
+    parser.add_argument('--arch', type=str, default='', help='Name of the segmentation architecture')
+    parser.add_argument('--encoder_name', type=str, default='', help='Name of the timm encoder')
+    parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
+    parser.add_argument('--sen_size', type=int, default=40, help='Size of the Sentinel 2 images')
+    parser.add_argument('--sen_temp_size', type=int, default=3, help='Size of temporal channel for Sentinel 2 images')
+    parser.add_argument('--sen_temp_reduc', type=str, default='median', choices=['median', 'mean'],
+                        help='Temporal sentinel reduction method (median or mean)')
+    parser.add_argument('--sen_list_bands', nargs='+', type=str,
                         default=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
-                        help="List of sentinel bands to use")
-    parser.add_argument("--prob_cover", type=int, default=10,
-                        help="Probability value that the pixel is covered by cloud or snow.")
-    parser.add_argument("--batch_size", type=int, default=26, help="Size of each mini-batch")
-    parser.add_argument("--use_augmentation", type=bool, default=True, help="Use data augmentation & tta")
-    parser.add_argument("--class_weights", nargs='+', type=float,
+                        help='List of sentinel bands to use')
+    parser.add_argument('--prob_cover', type=int, default=10,
+                        help='Probability value that the pixel is covered by cloud or snow.')
+    parser.add_argument('--batch_size', type=int, default=26, help='Size of each mini-batch')
+    parser.add_argument('--use_augmentation', type=bool, default=True, help='Use data augmentation & tta')
+    parser.add_argument('--class_weights', nargs='+', type=float,
                         default=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
-                        help="Class weights applied to the cross-entropy loss")
-    parser.add_argument("--seed", type=int, default=42, help="Seed for random initialization")
-    parser.add_argument("--dry", type=bool, default=False, help="Enable or disable dry mode pipeline")
+                        help='Class weights applied to the cross-entropy loss')
+    parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
+    parser.add_argument('--dry', type=bool, default=False, help='Enable or disable dry mode pipeline')
 
     # Parse the arguments
     args = parser.parse_args()
