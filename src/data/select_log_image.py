@@ -3,14 +3,18 @@ import sys
 
 sys.path.append(os.curdir)
 
-from scipy.stats import kstest
+from statistics import mean
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 from src.constants import get_constants
 from src.data.make_dataset import get_list_images, FLAIR2Dataset
 
+from scipy import special
+
 cst = get_constants()
+
+import pandas as pd
 
 path_data = cst.path_data_train
 list_images_train = get_list_images(path_data)
@@ -35,6 +39,9 @@ dataloader = DataLoader(
     shuffle=False,
 )
 
+df = pd.read_csv('data/raw/labels-statistics-12.csv')
+target_distribution = list(df['Freq.-test (%)'])
+
 max_number_classes = 0
 for idx, batch in enumerate(dataloader):
     _, _, _, labels = batch
@@ -53,27 +60,30 @@ for idx, batch in enumerate(dataloader):
     print(f'Testing {idx}')
     _, _, _, labels = batch
 
+    num_total_pixels = labels.shape[-2] * labels.shape[-1]
+
     # get the unique values and the associated counts
     return_counts = labels.unique(return_counts=True)
 
     # convert to list
-    return_counts = return_counts[0].tolist(), return_counts[1].tolist()
+    return_counts = return_counts[0].tolist(), [num_pixels / num_total_pixels for num_pixels in return_counts[1].tolist()]
 
     if len(return_counts[0]) == max_number_classes:
         # build the distribution with all classes possible values
         distribution = []
-        for i in range(12):
+        for i in range(13):
             if i in return_counts[0]:
                 distribution.append(return_counts[1][return_counts[0].index(i)])
             else:
                 distribution.append(0)
 
         # compute statistical test to determine how close the distribution is close to uniform
-        test_statistic, p_value = kstest(distribution, 'uniform')
-        results.append((idx, test_statistic, p_value))
+        kl_div = special.kl_div(distribution, target_distribution)
+        kl_div = mean(kl_div)
+        results.append((idx, kl_div))
 
 # Sort the results by p-value in ascending order
-results.sort(key=lambda x: x[2])
+results.sort(key=lambda x: x[1])
 # The distribution with the lowest p-value is the closest to uniform
 closest_distribution_index = results[0][0]
 
