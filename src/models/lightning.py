@@ -172,8 +172,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.metrics.update(outputs, labels)
 
         image_idx = 5589  # found val mask with max different classes and closest to uniform distribution
-        if batch_idx == image_idx // self.test_batch_size:
-            batch_image_idx = image_idx % self.test_batch_size
+        if batch_idx == image_idx // self.train_batch_size:
+            batch_image_idx = image_idx % self.train_batch_size
             self.log_aerial_mask(aerial[batch_image_idx], labels[batch_image_idx], outputs[batch_image_idx])
 
         return loss
