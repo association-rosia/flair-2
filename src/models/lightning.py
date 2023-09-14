@@ -48,7 +48,7 @@ class FLAIR2Lightning(pl.LightningModule):
             prob_cover,
             use_augmentation,
             train_batch_size,
-            eval_batch_size
+            test_batch_size
     ):
         super(FLAIR2Lightning, self).__init__()
         self.step = None
@@ -74,7 +74,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
         self.train_batch_size = train_batch_size
-        self.eval_batch_size = eval_batch_size
+        self.test_batch_size = test_batch_size
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
 
@@ -103,12 +103,12 @@ class FLAIR2Lightning(pl.LightningModule):
                 'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
             }
         )
-        
+
         path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
         with open(path_aerial_pixels_metadata) as f:
             stats = json.load(f)
-        self.inverse_normalize = T.Normalize(mean=-torch.Tensor(stats['mean']) / torch.Tensor(stats['std']), std=1 / torch.Tensor(stats['std']))
-        
+        self.inverse_normalize = T.Normalize(mean=-torch.Tensor(stats['mean']) / torch.Tensor(stats['std']),
+                                             std=1 / torch.Tensor(stats['std']))
 
     def forward(self, inputs):
         if self.use_augmentation:
@@ -172,8 +172,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.metrics.update(outputs, labels)
 
         image_idx = 5589  # found val mask with max different classes and closest to uniform distribution
-        if batch_idx == image_idx // self.eval_batch_size:
-            batch_image_idx = image_idx % self.eval_batch_size
+        if batch_idx == image_idx // self.train_batch_size:
+            batch_image_idx = image_idx % self.train_batch_size
             self.log_aerial_mask(aerial[batch_image_idx], labels[batch_image_idx], outputs[batch_image_idx])
 
         return loss
@@ -240,7 +240,7 @@ class FLAIR2Lightning(pl.LightningModule):
         return DataLoader(
             dataset=dataset_train,
             batch_size=self.train_batch_size,
-            num_workers=cst.num_workers,
+            num_workers=cst.train_num_workers,
             shuffle=True,
             drop_last=True,
         )
@@ -259,8 +259,8 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return DataLoader(
             dataset=dataset_val,
-            batch_size=self.eval_batch_size,
-            num_workers=cst.num_workers,
+            batch_size=self.train_batch_size,
+            num_workers=cst.train_num_workers,
             shuffle=False,
             drop_last=True,
         )
@@ -279,8 +279,8 @@ class FLAIR2Lightning(pl.LightningModule):
 
         return DataLoader(
             dataset=dataset_test,
-            batch_size=self.eval_batch_size,
-            num_workers=10,  # DO NOT CHANGE: same as during the FLAIR#2 project testing
+            batch_size=self.test_batch_size,
+            num_workers=cst.test_num_workers,
             shuffle=False,
             drop_last=False,
         )

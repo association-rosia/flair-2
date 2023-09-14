@@ -63,14 +63,17 @@ def main():
         prob_cover=wandb.config.prob_cover,
         use_augmentation=wandb.config.use_augmentation,
         train_batch_size=wandb.config.train_batch_size,
-        eval_batch_size=wandb.config.eval_batch_size,
+        test_batch_size=wandb.config.test_batch_size,
     )
 
     # Initialize the PyTorch Lightning Trainer
     trainer = init_trainer()
 
-    # Find optimal TTA limit for inference
-    lightning_model = find_optimal_tta_limit(lightning_model, trainer)
+    if wandb.config.tta_limit is None:
+        # Find optimal TTA limit for inference
+        lightning_model = find_optimal_tta_limit(lightning_model, trainer)
+    else:
+        lightning_model.tta_limit = wandb.config.tta_limit
 
     # Train the model
     trainer.fit(model=lightning_model)
@@ -136,11 +139,12 @@ def init_wandb():
     parser.add_argument('--prob_cover', type=int, default=10,
                         help='Probability value that the pixel is covered by cloud or snow.')
     parser.add_argument('--train_batch_size', type=int, default=16, help='Size of each train mini-batch')
-    parser.add_argument('--eval_batch_size', type=int, default=16, help='Size of each eval (val and test) mini-batch')
+    parser.add_argument('--test_batch_size', type=int, default=10, help='Size of each test mini-batch')
     parser.add_argument('--use_augmentation', type=bool, default=True, help='Use data augmentation & tta')
     parser.add_argument('--class_weights', nargs='+', type=float,
                         default=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
                         help='Class weights applied to the cross-entropy loss')
+    parser.add_argument('--tta-limit', type=int, default=None, help='TTA limit used')
     parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
     parser.add_argument('--dry', type=bool, default=False, help='Enable or disable dry mode pipeline')
 
