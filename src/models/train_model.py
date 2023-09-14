@@ -69,8 +69,11 @@ def main():
     # Initialize the PyTorch Lightning Trainer
     trainer = init_trainer()
 
-    # Find optimal TTA limit for inference
-    lightning_model = find_optimal_tta_limit(lightning_model, trainer)
+    if wandb.config.tta_limit is None:
+        # Find optimal TTA limit for inference
+        lightning_model = find_optimal_tta_limit(lightning_model, trainer)
+    else:
+        lightning_model.tta_limit = wandb.config.tta_limit
 
     # Train the model
     trainer.fit(model=lightning_model)
@@ -141,6 +144,7 @@ def init_wandb():
     parser.add_argument('--class_weights', nargs='+', type=float,
                         default=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
                         help='Class weights applied to the cross-entropy loss')
+    parser.add_argument('--tta-limit', type=int, default=None, help='TTA limit used')
     parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
     parser.add_argument('--dry', type=bool, default=False, help='Enable or disable dry mode pipeline')
 
