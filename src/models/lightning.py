@@ -21,6 +21,7 @@ import src.data.tta.wrappers as wrps
 from src.constants import get_constants
 from src.data.make_dataset import FLAIR2Dataset
 from src.models.aerial_model import AerialModel
+from src.models.multimodal_model import MultiModalSegformer
 
 cst = get_constants()
 
@@ -78,13 +79,21 @@ class FLAIR2Lightning(pl.LightningModule):
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
 
-        # Create the AerialModel
-        self.model = AerialModel(
-            arch_lib=self.arch_lib,
-            arch=self.arch,
-            encoder_name=self.encoder_name,
-            num_classes=self.num_classes
-        )
+        if self.arch_lib == 'custom':
+            self.model = MultiModalSegformer.from_pretrained(
+                pretrained_model_name_or_path=self.arch,
+                num_labels=self.num_classes,
+                num_channels=5,
+                ignore_mismatched_sizes=True
+            )
+        else:
+            # Create the AerialModel
+            self.model = AerialModel(
+                arch_lib=self.arch_lib,
+                arch=self.arch,
+                encoder_name=self.encoder_name,
+                num_classes=self.num_classes
+            )
 
         # Initialize augmentations
         augmentations = agms.Augmentations([
@@ -98,11 +107,9 @@ class FLAIR2Lightning(pl.LightningModule):
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
         # init metrics for evaluation
-        self.metrics = MetricCollection(
-            {
+        self.metrics = MetricCollection({
                 'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
-            }
-        )
+            })
 
         path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
         with open(path_aerial_pixels_metadata) as f:
