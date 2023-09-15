@@ -204,7 +204,8 @@ def init_trainer() -> Trainer:
             callbacks=[checkpoint_callback],
             accelerator=cst.device,
             limit_train_batches=1,
-            limit_val_batches=1
+            limit_val_batches=1,
+            num_sanity_val_steps=2,
         )
 
     else:
