@@ -129,6 +129,9 @@ def init_wandb():
     parser.add_argument('--arch', type=str, default='', help='Name of the segmentation architecture')
     parser.add_argument('--encoder_name', type=str, default='', help='Name of the timm encoder')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
+    parser.add_argument('--aerial_list_bands', nargs='+', type=str,
+                        default=['R', 'G', 'B', 'NIR', 'DSM'],
+                        help='List of sentinel bands to use')
     parser.add_argument('--sen_size', type=int, default=40, help='Size of the Sentinel 2 images')
     parser.add_argument('--sen_temp_size', type=int, default=3, help='Size of temporal channel for Sentinel 2 images')
     parser.add_argument('--sen_temp_reduc', type=str, default='median', choices=['median', 'mean'],

@@ -9,6 +9,8 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
     def __init__(self, config):
         super().__init__(config)
         
+        decoder_hidden_size = int(config.decoder_hidden_size)
+        
         self.sen_encoder = nn.Sequential(
             nn.LazyConv3d(16, kernel_size=3, padding=1),
             nn.LazyBatchNorm3d(),
@@ -19,10 +21,10 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
             nn.LazyBatchNorm3d(),
             nn.LazyConv3d(32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.AdaptiveMaxPool3d((16, 16, 16))
+            nn.AdaptiveAvgPool3d((decoder_hidden_size // 32, 16, 16))
         )
         
-        self.aerial_sen_norm = nn.LayerNorm((512, 16, 16), eps=1e-05, elementwise_affine=True)
+        self.aerial_sen_norm = nn.LayerNorm(decoder_hidden_size)
          
     def forward(
         self,
@@ -47,8 +49,11 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
         encoder_hidden_states = outputs.hidden_states if return_dict else outputs[1]
         
         encoder_hidden_states = list(encoder_hidden_states)
-        encoder_hidden_states[-1] += output_sen
-        encoder_hidden_states[-1] = self.aerial_sen_norm(encoder_hidden_states[-1])
+        
+        last_encoder_hidden_state = output_sen + encoder_hidden_states[-1]
+        last_encoder_hidden_state = last_encoder_hidden_state.permute(0, 2, 3, 1)
+        last_encoder_hidden_state = self.aerial_sen_norm(last_encoder_hidden_state)
+        encoder_hidden_states[-1] = last_encoder_hidden_state.permute(0, 3, 1, 2)
         
         logits = self.decode_head(encoder_hidden_states)
         
