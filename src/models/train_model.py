@@ -56,6 +56,7 @@ def main():
         list_images_train=list_images_train,
         list_images_val=list_images_val,
         list_images_test=list_images_test,
+        aerial_list_bands=wandb.config.aerial_list_bands,
         sen_size=wandb.config.sen_size,
         sen_temp_size=wandb.config.sen_temp_size,
         sen_temp_reduc=wandb.config.sen_temp_reduc,
