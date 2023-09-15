@@ -25,6 +25,7 @@ class FLAIR2Dataset(Dataset):
     def __init__(
             self,
             list_images: list[str],
+            aerial_list_bands,
             sen_size: int,
             sen_temp_size: int,
             sen_temp_reduc: str,
@@ -45,7 +46,15 @@ class FLAIR2Dataset(Dataset):
             is_test (bool): Indicates if the dataset is for testing.
         """
         self.list_images = list_images
-
+        
+        aerial_band = ['R', 'G', 'B', 'NIR', 'DSM']
+        for band in aerial_list_bands:
+            if not band in aerial_band:
+                raise ValueError(f'sen_list_bands can be composed of {", ".join(aerial_band)} but found {band}.')
+        self.aerial_band2idx = {band: i for i, band in enumerate(aerial_band)}
+        self.aerial_list_bands = aerial_list_bands
+        self.aerial_idx_band = [self.aerial_band2idx[str(band)] for band in self.aerial_list_bands]
+        
         if sen_size <= 0:
             raise ValueError(f'sen_size is a size, it must be positif but found {sen_size}')
         self.prob_cover = prob_cover
@@ -57,13 +66,13 @@ class FLAIR2Dataset(Dataset):
             raise ValueError(f'sen_temp_reduc can be on of {", ".join(possible_reduction)} but found {sen_temp_reduc}.')
         self.sen_temp_reduc = sen_temp_reduc
 
-        dataset_band = ['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12']
+        sen_band = ['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12']
         for band in sen_list_bands:
-            if not band in dataset_band:
-                raise ValueError(f'sen_list_bands can be composed of {", ".join(dataset_band)} but found {band}.')
-        self.band2idx = {band: i for i, band in enumerate(dataset_band)}
+            if not band in sen_band:
+                raise ValueError(f'sen_list_bands can be composed of {", ".join(sen_band)} but found {band}.')
+        self.sen_band2idx = {band: i for i, band in enumerate(sen_band)}
         self.sen_list_bands = sen_list_bands
-        self.sen_idx_band = [self.band2idx[str(band)] for band in self.sen_list_bands]
+        self.sen_idx_band = [self.sen_band2idx[str(band)] for band in self.sen_list_bands]
 
         if prob_cover <= 0:
             raise ValueError(f'prob_cover is an integer between 1 and 100, found {prob_cover}')
@@ -115,8 +124,7 @@ class FLAIR2Dataset(Dataset):
 
         return path_aerial, path_sen, path_labels, name_image
 
-    @staticmethod
-    def init_aerial_normalize() -> T.Compose:
+    def init_aerial_normalize(self) -> T.Compose:
         """
         Initialize aerial image normalization.
 
@@ -127,9 +135,12 @@ class FLAIR2Dataset(Dataset):
         with open(path_aerial_pixels_metadata, 'r') as f:
             stats = json.load(f)
 
+        mean = torch.Tensor(stats['mean'])
+        std = torch.Tensor(stats['std'])
+        
         return T.Compose([
             T.ToTensor(),
-            T.Normalize(mean=stats['mean'], std=stats['std'])
+            T.Normalize(mean=mean[self.aerial_idx_band], std=std[self.aerial_idx_band])
         ])
 
     def compute_sen_mean(
@@ -211,7 +222,7 @@ class FLAIR2Dataset(Dataset):
         num_bands = len(self.sen_list_bands)
 
         total_band_pixel = self.sen_temp_size * self.sen_size * self.sen_size * len(list_path_aerial)
-        sen_idx_band = list(self.band2idx.values())
+        sen_idx_band = list(self.sen_band2idx.values())
 
         band_mean = self.compute_sen_mean(list_path_aerial, total_band_pixel, sen_idx_band, num_bands)
         band_std = self.compute_sen_std(list_path_aerial, total_band_pixel, sen_idx_band, num_bands, band_mean)
@@ -447,7 +458,7 @@ class FLAIR2Dataset(Dataset):
 
         return self.sen_normalize(sen_data)
 
-    def get_aerial(self, path_aerial) -> Tensor:
+    def get_aerial(self, path_aerial, aerial_idx_band: list[int]) -> Tensor:
         """
         Get aerial image data.
 
@@ -458,7 +469,7 @@ class FLAIR2Dataset(Dataset):
             Tensor: Aerial image data.
         """
         aerial = tifffile.imread(path_aerial)
-
+        aerial = aerial[:, :, aerial_idx_band]
         return self.aerial_normalize(aerial)
 
     def get_labels(self, path_labels) -> Tensor:
@@ -497,7 +508,7 @@ class FLAIR2Dataset(Dataset):
             tuple[str, Tensor, Tensor, Tensor]: Image name, aerial data, sentinel data, and labels data.
         """
         path_aerial, path_sen, path_labels, name_image = self.get_paths(idx)
-        aerial = self.get_aerial(path_aerial)
+        aerial = self.get_aerial(path_aerial, self.aerial_idx_band)
         sen = self.get_sen(name_image, path_sen, self.sen_idx_band)
 
         if self.is_test:
@@ -532,6 +543,7 @@ if __name__ == '__main__':
 
     dataset = FLAIR2Dataset(
         list_images=list_images,
+        aerial_list_bands=['R', 'G', 'B'],
         sen_size=40,
         sen_temp_size=3,
         sen_temp_reduc='median',

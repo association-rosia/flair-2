@@ -55,6 +55,7 @@ nohup python src/models/train_model.py \
     --arch DeepLabV3Plus \
     --encoder_name tu-tf_efficientnetv2_s \
     --learning_rate 0.001 \
+    --aerial_list_bands R G B NIR DSM \
     --sen_size 40 \
     --sen_temp_size 3 \
     --sen_temp_reduc median \

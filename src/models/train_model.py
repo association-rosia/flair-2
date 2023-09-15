@@ -40,7 +40,7 @@ def main():
     list_images_train = get_list_images(cst.path_data_train)
 
     list_images_train, list_images_val = train_test_split(list_images_train,
-                                                          test_size=0.1,
+                                                          test_size=0.01,
                                                           random_state=wandb.config.seed)
 
     list_images_test = get_list_images(cst.path_data_test)
@@ -182,8 +182,8 @@ def init_trainer() -> Trainer:
 
     early_stopping_callback = callbacks.EarlyStopping(
         monitor='val/miou',
-        min_delta=0,
-        patience=10,
+        min_delta=0.01,
+        patience=3,
         verbose=True,
         mode='max'
     )
@@ -202,7 +202,7 @@ def init_trainer() -> Trainer:
     else:
         # Configure Trainer for regular training
         trainer = Trainer(
-            max_epochs=200,
+            max_epochs=30,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device
