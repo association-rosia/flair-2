@@ -85,7 +85,7 @@ class FLAIR2Lightning(pl.LightningModule):
             self.model = MultiModalSegformer.from_pretrained(
                 pretrained_model_name_or_path=self.arch,
                 num_labels=self.num_classes,
-                num_channels=5,
+                num_channels=len(self.aerial_list_bands),
                 ignore_mismatched_sizes=True
             )
         else:
@@ -94,6 +94,7 @@ class FLAIR2Lightning(pl.LightningModule):
                 arch_lib=self.arch_lib,
                 arch=self.arch,
                 encoder_name=self.encoder_name,
+                num_channels=len(self.aerial_list_bands),
                 num_classes=self.num_classes
             )
 

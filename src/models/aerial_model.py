@@ -8,7 +8,7 @@ class AerialModel(nn.Module):
     AerialModel class for creating a segmentation model for aerial imagery.
     """
 
-    def __init__(self, arch_lib, arch, encoder_name, num_classes) -> None:
+    def __init__(self, arch_lib, arch, encoder_name, num_channels, num_classes) -> None:
         """
         Initialize the AerialModel.
 
@@ -22,6 +22,7 @@ class AerialModel(nn.Module):
         self.arch_lib = arch_lib
         self.arch = arch
         self.encoder_name = encoder_name
+        self.num_channels = num_channels
         self.num_classes = num_classes
 
         if self.arch_lib == 'SMP':
@@ -30,14 +31,14 @@ class AerialModel(nn.Module):
                 arch=self.arch,
                 encoder_name=self.encoder_name,
                 classes=self.num_classes,
-                in_channels=5,
+                in_channels=self.num_channels,
             )
         elif self.arch_lib == 'HF':
             # Create the segmentation model using Transformers
             self.model = SegformerForSemanticSegmentation.from_pretrained(
                 pretrained_model_name_or_path=self.arch,
                 num_labels=self.num_classes,
-                num_channels=5,
+                num_channels=self.num_classes,
                 ignore_mismatched_sizes=True
             )
         else:
