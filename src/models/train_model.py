@@ -40,7 +40,7 @@ def main():
     list_images_train = get_list_images(cst.path_data_train)
 
     list_images_train, list_images_val = train_test_split(list_images_train,
-                                                          test_size=0.1,
+                                                          test_size=0.01,
                                                           random_state=wandb.config.seed)
 
     list_images_test = get_list_images(cst.path_data_test)
@@ -129,6 +129,9 @@ def init_wandb():
     parser.add_argument('--arch', type=str, default='', help='Name of the segmentation architecture')
     parser.add_argument('--encoder_name', type=str, default='', help='Name of the timm encoder')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
+    parser.add_argument('--aerial_list_bands', nargs='+', type=str,
+                        default=['R', 'G', 'B', 'NIR', 'DSM'],
+                        help='List of sentinel bands to use')
     parser.add_argument('--sen_size', type=int, default=40, help='Size of the Sentinel 2 images')
     parser.add_argument('--sen_temp_size', type=int, default=3, help='Size of temporal channel for Sentinel 2 images')
     parser.add_argument('--sen_temp_reduc', type=str, default='median', choices=['median', 'mean'],
@@ -182,8 +185,8 @@ def init_trainer() -> Trainer:
 
     early_stopping_callback = callbacks.EarlyStopping(
         monitor='val/miou',
-        min_delta=0,
-        patience=10,
+        min_delta=0.01,
+        patience=3,
         verbose=True,
         mode='max'
     )
@@ -202,7 +205,7 @@ def init_trainer() -> Trainer:
     else:
         # Configure Trainer for regular training
         trainer = Trainer(
-            max_epochs=200,
+            max_epochs=30,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device

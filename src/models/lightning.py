@@ -42,6 +42,7 @@ class FLAIR2Lightning(pl.LightningModule):
             list_images_train,
             list_images_val,
             list_images_test,
+            aerial_list_bands,
             sen_size,
             sen_temp_size,
             sen_temp_reduc,
@@ -68,6 +69,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.list_images_train = list_images_train
         self.list_images_val = list_images_val
         self.list_images_test = list_images_test
+        self.aerial_list_bands = aerial_list_bands
         self.sen_size = sen_size
         self.sen_temp_size = sen_temp_size
         self.sen_temp_reduc = sen_temp_reduc
@@ -83,7 +85,7 @@ class FLAIR2Lightning(pl.LightningModule):
             self.model = MultiModalSegformer.from_pretrained(
                 pretrained_model_name_or_path=self.arch,
                 num_labels=self.num_classes,
-                num_channels=5,
+                num_channels=len(self.aerial_list_bands),
                 ignore_mismatched_sizes=True
             )
         else:
@@ -92,6 +94,7 @@ class FLAIR2Lightning(pl.LightningModule):
                 arch_lib=self.arch_lib,
                 arch=self.arch,
                 encoder_name=self.encoder_name,
+                num_channels=len(self.aerial_list_bands),
                 num_classes=self.num_classes
             )
 
@@ -236,6 +239,7 @@ class FLAIR2Lightning(pl.LightningModule):
         # Initialize training dataset and data loader
         dataset_train = FLAIR2Dataset(
             list_images=self.list_images_train,
+            aerial_list_bands=self.aerial_list_bands,
             sen_size=self.sen_size,
             sen_temp_size=self.sen_temp_size,
             sen_temp_reduc=self.sen_temp_reduc,
@@ -256,6 +260,7 @@ class FLAIR2Lightning(pl.LightningModule):
         # Initialize validation dataset and data loader
         dataset_val = FLAIR2Dataset(
             list_images=self.list_images_val,
+            aerial_list_bands=self.aerial_list_bands,
             sen_size=self.sen_size,
             sen_temp_size=self.sen_temp_size,
             sen_temp_reduc=self.sen_temp_reduc,
@@ -276,6 +281,7 @@ class FLAIR2Lightning(pl.LightningModule):
         # Initialize test dataset and data loader
         dataset_test = FLAIR2Dataset(
             list_images=self.list_images_test,
+            aerial_list_bands=self.aerial_list_bands,
             sen_size=self.sen_size,
             sen_temp_size=self.sen_temp_size,
             sen_temp_reduc=self.sen_temp_reduc,
