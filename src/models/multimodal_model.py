@@ -1,8 +1,6 @@
 import torch
 from torch import nn
-from typing import Optional, Union
 from transformers import SegformerForSemanticSegmentation
-from transformers.modeling_outputs import SemanticSegmenterOutput
 
 
 class MultiModalSegformer(SegformerForSemanticSegmentation):
@@ -12,14 +10,14 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
         decoder_hidden_size = int(config.decoder_hidden_size)
         
         self.sen_encoder = nn.Sequential(
-            nn.LazyConv3d(16, kernel_size=3, padding=1),
-            nn.LazyBatchNorm3d(),
-            nn.LazyConv3d(16, kernel_size=3, padding=1),
+            nn.Conv3d(10, 16, kernel_size=3, padding=1),
+            nn.BatchNorm3d(16),
+            nn.Conv3d(16, 16, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool3d((2, 2, 2)),
-            nn.LazyConv3d(32, kernel_size=3, padding=1),
-            nn.LazyBatchNorm3d(),
-            nn.LazyConv3d(32, kernel_size=3, padding=1),
+            nn.Conv3d(32, kernel_size=3, padding=1),
+            nn.BatchNorm3d(32),
+            nn.Conv3d(32, 32, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.AdaptiveAvgPool3d((decoder_hidden_size // 32, 16, 16))
         )
@@ -30,7 +28,7 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
         self,
         aerial: torch.FloatTensor,
         sen: torch.FloatTensor,
-    ) -> Union[tuple, SemanticSegmenterOutput]:
+    ):
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
