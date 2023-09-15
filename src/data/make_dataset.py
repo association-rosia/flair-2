@@ -47,11 +47,11 @@ class FLAIR2Dataset(Dataset):
         """
         self.list_images = list_images
         
-        aerial_band = ['R', 'G', 'B', 'NIR', 'DSM']
+        self.aerial_band2idx = cst.aerial_band2idx
+        aerial_band = self.aerial_band2idx.keys()
         for band in aerial_list_bands:
             if not band in aerial_band:
                 raise ValueError(f'sen_list_bands can be composed of {", ".join(aerial_band)} but found {band}.')
-        self.aerial_band2idx = {band: i for i, band in enumerate(aerial_band)}
         self.aerial_list_bands = aerial_list_bands
         self.aerial_idx_band = [self.aerial_band2idx[str(band)] for band in self.aerial_list_bands]
         
@@ -66,11 +66,11 @@ class FLAIR2Dataset(Dataset):
             raise ValueError(f'sen_temp_reduc can be on of {", ".join(possible_reduction)} but found {sen_temp_reduc}.')
         self.sen_temp_reduc = sen_temp_reduc
 
-        sen_band = ['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12']
+        self.sen_band2idx = cst.sen_band2idx
+        sen_band = self.sen_band2idx.keys()
         for band in sen_list_bands:
             if not band in sen_band:
                 raise ValueError(f'sen_list_bands can be composed of {", ".join(sen_band)} but found {band}.')
-        self.sen_band2idx = {band: i for i, band in enumerate(sen_band)}
         self.sen_list_bands = sen_list_bands
         self.sen_idx_band = [self.sen_band2idx[str(band)] for band in self.sen_list_bands]
 

@@ -113,12 +113,24 @@ class FLAIR2Lightning(pl.LightningModule):
         self.metrics = MetricCollection({
                 'val/miou': MulticlassJaccardIndex(self.num_classes, average='macro')
             })
+        
+        self.inverse_normalize = self.init_inverse_normalize(self.aerial_list_bands)
 
+    @staticmethod
+    def init_inverse_normalize(aerial_list_bands):
         path_aerial_pixels_metadata = os.path.join(cst.path_data, 'aerial_pixels_metadata.json')
         with open(path_aerial_pixels_metadata) as f:
             stats = json.load(f)
-        self.inverse_normalize = T.Normalize(mean=-torch.Tensor(stats['mean']) / torch.Tensor(stats['std']),
-                                             std=1 / torch.Tensor(stats['std']))
+        
+        aerial_idx_band = [cst.aerial_band2idx[str(band)] for band in aerial_list_bands]
+        
+        mean = -torch.Tensor(stats['mean']) / torch.Tensor(stats['std'])
+        std = 1 / torch.Tensor(stats['std'])
+        
+        return T.Normalize(
+            mean=mean[aerial_idx_band],
+            std=std[aerial_idx_band]
+        )
 
     def forward(self, inputs):
         if self.use_augmentation:

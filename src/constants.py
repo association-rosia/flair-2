@@ -29,6 +29,13 @@ class FLAIR2Constants:
 
         # Initialize the device for computation
         self.device = self.init_device()
+        
+        sen_band = ['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12']
+        self.sen_band2idx = {band: i for i, band in enumerate(sen_band)}
+        
+        aerial_band = ['R', 'G', 'B', 'NIR', 'DSM']
+        self.aerial_band2idx = {band: i for i, band in enumerate(aerial_band)}
+
 
     @staticmethod
     def init_device():

@@ -70,11 +70,12 @@ def main():
     # Initialize the PyTorch Lightning Trainer
     trainer = init_trainer()
 
-    if wandb.config.tta_limit is None:
-        # Find optimal TTA limit for inference
-        lightning_model = find_optimal_tta_limit(lightning_model, trainer)
-    else:
-        lightning_model.tta_limit = wandb.config.tta_limit
+    if wandb.config.use_augmentation:
+        if wandb.config.tta_limit is None:
+            # Find optimal TTA limit for inference
+            lightning_model = find_optimal_tta_limit(lightning_model, trainer)
+        else:
+            lightning_model.tta_limit = wandb.config.tta_limit
 
     # Train the model
     trainer.fit(model=lightning_model)
@@ -130,6 +131,8 @@ def init_wandb():
     parser.add_argument('--arch', type=str, default='', help='Name of the segmentation architecture')
     parser.add_argument('--encoder_name', type=str, default='', help='Name of the timm encoder')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
+    parser.add_argument('--min_delta', type=float, default=0.01, help='Value of early stopping minimum delta')
+    parser.add_argument('--patience', type=int, default=3, help='Value of early stopping patience')
     parser.add_argument('--aerial_list_bands', nargs='+', type=str,
                         default=['R', 'G', 'B', 'NIR', 'DSM'],
                         help='List of sentinel bands to use')
@@ -150,6 +153,7 @@ def init_wandb():
                         help='Class weights applied to the cross-entropy loss')
     parser.add_argument('--tta-limit', type=int, default=None, help='TTA limit used')
     parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
+    parser.add_argument('--max_epochs', type=int, default=30, help='Maximum number of epochs for training')
     parser.add_argument('--dry', type=bool, default=False, help='Enable or disable dry mode pipeline')
 
     # Parse the arguments
@@ -186,8 +190,8 @@ def init_trainer() -> Trainer:
 
     early_stopping_callback = callbacks.EarlyStopping(
         monitor='val/miou',
-        min_delta=0.01,
-        patience=3,
+        min_delta=wandb.config.min_delta,
+        patience=wandb.config.patience,
         verbose=True,
         mode='max'
     )
@@ -206,7 +210,7 @@ def init_trainer() -> Trainer:
     else:
         # Configure Trainer for regular training
         trainer = Trainer(
-            max_epochs=30,
+            max_epochs=wandb.config.max_epochs,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback, early_stopping_callback],
             accelerator=cst.device
