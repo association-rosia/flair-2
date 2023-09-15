@@ -15,7 +15,7 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
             nn.Conv3d(16, 16, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool3d((2, 2, 2)),
-            nn.Conv3d(32, kernel_size=3, padding=1),
+            nn.Conv3d(32, 32, kernel_size=3, padding=1),
             nn.BatchNorm3d(32),
             nn.Conv3d(32, 32, kernel_size=3, padding=1),
             nn.ReLU(),
