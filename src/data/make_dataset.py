@@ -466,7 +466,7 @@ class FLAIR2Dataset(Dataset):
         sen_data = self.sen_temporal_reduction(sen_data, idx_temporal)
         sen_data = sen_data / 10_000
         
-        if use_augmentation and not self.use_tta:
+        if use_augmentation and not self.use_tta and not self.is_test:
             sen_data = self.data_augmentation(
                 sen_data,
                 hflip=config_augmentation['hflip'],
@@ -493,7 +493,7 @@ class FLAIR2Dataset(Dataset):
         aerial = aerial[:, :, aerial_idx_band]
         aerial = F.to_tensor(aerial)
 
-        if self.use_augmentation and not self.use_tta:
+        if self.use_augmentation and not self.use_tta and not self.is_test:
             aerial = self.data_augmentation(
                 aerial,
                 **config_augmentation,
@@ -516,7 +516,7 @@ class FLAIR2Dataset(Dataset):
         labels = labels - 1
         
         labels = labels.unsqueeze(0)
-        if self.use_augmentation and not self.use_tta:
+        if self.use_augmentation and not self.use_tta and not self.is_test:
             labels = self.data_augmentation(
                 labels,
                 hflip=config_augmentation['hflip'],
