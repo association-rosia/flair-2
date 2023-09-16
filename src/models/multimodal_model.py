@@ -7,7 +7,7 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
     def __init__(self, config):
         super().__init__(config)
         
-        decoder_hidden_size = int(config.hidden_sizes[-1])
+        last_hidden_size = int(config.hidden_sizes[-1])
         
         self.sen_encoder = nn.Sequential(
             nn.Conv3d(10, 16, kernel_size=3, padding=1),
@@ -19,10 +19,10 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
             nn.BatchNorm3d(32),
             nn.Conv3d(32, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.AdaptiveAvgPool3d((decoder_hidden_size // 32, 16, 16))
+            nn.AdaptiveAvgPool3d((last_hidden_size // 32, 16, 16))
         )
         
-        self.aerial_sen_norm = nn.LayerNorm(decoder_hidden_size)
+        self.aerial_sen_norm = nn.LayerNorm(last_hidden_size)
          
     def forward(
         self,
