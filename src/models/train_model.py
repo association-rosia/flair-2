@@ -63,6 +63,7 @@ def main():
         sen_list_bands=wandb.config.sen_list_bands,
         prob_cover=wandb.config.prob_cover,
         use_augmentation=wandb.config.use_augmentation,
+        use_tta=wandb.config.use_tta,
         train_batch_size=wandb.config.train_batch_size,
         test_batch_size=wandb.config.test_batch_size,
     )
