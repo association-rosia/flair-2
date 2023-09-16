@@ -29,7 +29,6 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
         aerial: torch.FloatTensor,
         sen: torch.FloatTensor,
     ):
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
@@ -38,15 +37,13 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
             aerial,
             output_attentions=None,
             output_hidden_states=True,  # we need the intermediate hidden states
-            return_dict=return_dict,
+            return_dict=False,
         )
         
         output_sen = self.sen_encoder(sen)
         output_sen = output_sen.flatten(start_dim=1, end_dim=2)
         
-        encoder_hidden_states = outputs.hidden_states if return_dict else outputs[1]
-        
-        encoder_hidden_states = list(encoder_hidden_states)
+        encoder_hidden_states = list(outputs[1])
         
         last_encoder_hidden_state = output_sen + encoder_hidden_states[-1]
         last_encoder_hidden_state = last_encoder_hidden_state.permute(0, 2, 3, 1)

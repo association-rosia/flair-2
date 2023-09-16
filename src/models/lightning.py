@@ -49,6 +49,7 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_list_bands,
             prob_cover,
             use_augmentation,
+            use_tta,
             train_batch_size,
             test_batch_size
     ):
@@ -76,6 +77,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.sen_list_bands = sen_list_bands
         self.prob_cover = prob_cover
         self.use_augmentation = use_augmentation
+        self.use_tta = use_tta
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
         self.tta_limit = 1  # init TTA to mim value possible
@@ -98,15 +100,14 @@ class FLAIR2Lightning(pl.LightningModule):
                 num_classes=self.num_classes
             )
 
-        # Initialize augmentations
-        augmentations = agms.Augmentations([
-            agms.HorizontalFlip(),
-            agms.VerticalFlip(),
-            agms.Rotate([90, 180, 270]),
-            agms.Perspective([0.25, 0.375, 0.5])
-        ])
-
-        if use_augmentation:
+        if self.use_tta and self.use_augmentation:
+            # Initialize augmentations for tta
+            augmentations = agms.Augmentations([
+                agms.HorizontalFlip(),
+                agms.VerticalFlip(),
+                agms.Rotate([90, 180, 270]),
+                agms.Perspective([0.25, 0.375, 0.5])
+            ])
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
         # init metrics for evaluation
@@ -257,6 +258,8 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_temp_reduc=self.sen_temp_reduc,
             sen_list_bands=self.sen_list_bands,
             prob_cover=self.prob_cover,
+            use_augmentation=self.use_augmentation,
+            use_tta=self.use_tta,
             is_test=False,
         )
 
@@ -278,6 +281,8 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_temp_reduc=self.sen_temp_reduc,
             sen_list_bands=self.sen_list_bands,
             prob_cover=self.prob_cover,
+            use_augmentation=self.use_augmentation,
+            use_tta=self.use_tta,
             is_test=False,
         )
 
@@ -299,6 +304,8 @@ class FLAIR2Lightning(pl.LightningModule):
             sen_temp_reduc=self.sen_temp_reduc,
             sen_list_bands=self.sen_list_bands,
             prob_cover=self.prob_cover,
+            use_augmentation=self.use_augmentation,
+            use_tta=self.use_tta,
             is_test=True,
         )
 

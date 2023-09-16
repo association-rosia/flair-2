@@ -7,14 +7,16 @@ sys.path.append(os.curdir)
 from datetime import datetime
 from glob import glob
 from tqdm import tqdm
+import random
 
 import math
 import numpy as np
 import tifffile
 import torch
-from torch import Tensor
+from torch import Tensor, FloatTensor, ByteTensor
 from torch.utils.data import Dataset
 import torchvision.transforms as T
+import torchvision.transforms.functional as F
 
 from src.constants import get_constants
 
@@ -31,6 +33,8 @@ class FLAIR2Dataset(Dataset):
             sen_temp_reduc: str,
             sen_list_bands: list[str],
             prob_cover: int,
+            use_augmentation: bool,
+            use_tta: bool,
             is_test: bool,
     ):
         """
@@ -46,6 +50,8 @@ class FLAIR2Dataset(Dataset):
             is_test (bool): Indicates if the dataset is for testing.
         """
         self.list_images = list_images
+        self.use_augmentation = use_augmentation
+        self.use_tta = use_tta
         
         self.aerial_band2idx = cst.aerial_band2idx
         aerial_band = self.aerial_band2idx.keys()
@@ -83,10 +89,20 @@ class FLAIR2Dataset(Dataset):
         self.path_centroids = os.path.join(cst.path_data, 'centroids_sp_to_patch.json')
         self.centroids = self.read_centroids(self.path_centroids)
 
+        # Init normalize images
         self.aerial_normalize = self.init_aerial_normalize()
 
+        # init to Identity trasformation to 
+        # compute mean and std if it is necessary
         self.sen_normalize = lambda x: x
         self.sen_normalize = self.init_sen_normalize()
+        
+        # Data augmentation parameters
+        self.list_angles = [90, 180, 270]
+        self.brightness_factor = 0.5
+        self.contrast_factor = 1
+        self.saturation_factor = 0.1
+        
 
     @staticmethod
     def img_to_msk(path_image: str) -> str:
@@ -138,10 +154,7 @@ class FLAIR2Dataset(Dataset):
         mean = torch.Tensor(stats['mean'])
         std = torch.Tensor(stats['std'])
         
-        return T.Compose([
-            T.ToTensor(),
-            T.Normalize(mean=mean[self.aerial_idx_band], std=std[self.aerial_idx_band])
-        ])
+        return T.Normalize(mean=mean[self.aerial_idx_band], std=std[self.aerial_idx_band])
 
     def compute_sen_mean(
             self,
@@ -169,7 +182,7 @@ class FLAIR2Dataset(Dataset):
             list_dir_aerial = path_aerial.split(os.sep)[-4:-2]
             path_sen = os.path.join(self.path, 'sen', *list_dir_aerial, 'sen')
             name_aerial = os.path.basename(path_aerial)
-            sen_data = self.get_sen(name_aerial, path_sen, sen_idx_band)
+            sen_data = self.get_sen(name_aerial, path_sen, sen_idx_band, False)
 
             band_sum += sen_data.sum(dim=[0, 2, 3])
 
@@ -204,7 +217,7 @@ class FLAIR2Dataset(Dataset):
             list_dir_aerial = path_aerial.split(os.sep)[-4:-2]
             path_sen = os.path.join(self.path, 'sen', *list_dir_aerial, 'sen')
             name_aerial = os.path.basename(path_aerial)
-            sen_data = self.get_sen(name_aerial, path_sen, sen_idx_band)
+            sen_data = self.get_sen(name_aerial, path_sen, sen_idx_band, False)
 
             sen_diff = sen_data - band_mean
             band_mean_squared_diff_sum += (sen_diff * sen_diff).sum(dim=[0, 2, 3])
@@ -297,9 +310,7 @@ class FLAIR2Dataset(Dataset):
             })
             self.update_sen_metadata(sen_metadata, path_sen_metadata)
 
-        return T.Compose([T.Normalize(
-            mean=band_mean[self.sen_idx_band], std=band_std[self.sen_idx_band]
-        )])
+        return T.Normalize(mean=band_mean[self.sen_idx_band], std=band_std[self.sen_idx_band])
 
     @staticmethod
     def read_centroids(path_file):
@@ -437,7 +448,7 @@ class FLAIR2Dataset(Dataset):
 
         return torch.where(torch.isnan(sen_red), 0, sen_red)
 
-    def get_sen(self, name_image: str, path_sen: str, sen_idx_band: list[int]) -> Tensor:
+    def get_sen(self, name_image: str, path_sen: str, sen_idx_band: list[int], use_augmentation: bool, config_augmentation: dict = None) -> FloatTensor:
         """
         Get sentinel data for an image.
 
@@ -455,10 +466,19 @@ class FLAIR2Dataset(Dataset):
         idx_temporal = self.get_sen_idx_temp(sen_products)
         sen_data = self.sen_temporal_reduction(sen_data, idx_temporal)
         sen_data = sen_data / 10_000
+        
+        if use_augmentation and not self.use_tta:
+            sen_data = self.data_augmentation(
+                sen_data,
+                hflip=config_augmentation['hflip'],
+                vflip=config_augmentation['vflip'],
+                rotate=config_augmentation['rotate'],
+                angle=config_augmentation['angle'],
+            )
 
         return self.sen_normalize(sen_data)
 
-    def get_aerial(self, path_aerial, aerial_idx_band: list[int]) -> Tensor:
+    def get_aerial(self, path_aerial, aerial_idx_band: list[int], config_augmentation: dict) -> FloatTensor:
         """
         Get aerial image data.
 
@@ -470,9 +490,17 @@ class FLAIR2Dataset(Dataset):
         """
         aerial = tifffile.imread(path_aerial)
         aerial = aerial[:, :, aerial_idx_band]
+        aerial = F.to_tensor(aerial)
+
+        if self.use_augmentation and not self.use_tta:
+            aerial = self.data_augmentation(
+                aerial,
+                **config_augmentation,
+            )
+        
         return self.aerial_normalize(aerial)
 
-    def get_labels(self, path_labels) -> Tensor:
+    def get_labels(self, path_labels: str, config_augmentation: dict) -> ByteTensor:
         """
         Get labels data.
 
@@ -485,8 +513,52 @@ class FLAIR2Dataset(Dataset):
         labels = tifffile.imread(path_labels)
         labels = torch.from_numpy(labels)
         labels = labels - 1
-
+        
+        labels = labels.unsqueeze(0)
+        if self.use_augmentation and not self.use_tta:
+            labels = self.data_augmentation(
+                labels,
+                hflip=config_augmentation['hflip'],
+                vflip=config_augmentation['vflip'],
+                rotate=config_augmentation['rotate'],
+                angle=config_augmentation['angle'],
+            )
+        labels = labels.squeeze(0)
+        
         return torch.where(labels < 13, labels, 12)
+    
+    def data_augmentation(
+        self,
+        image: Tensor,
+        hflip: bool = False,
+        vflip: bool = False,
+        rotate: bool = False,
+        angle: int = None,
+        brightness: bool = False,
+        brightness_factor: float = None,
+        contrast: bool = False,
+        contrast_factor: float = None,
+        saturation: bool = False,
+        saturation_factor: float = None,
+        hue: bool = False,
+        hue_factor: float = None,
+    ):
+        if hflip:
+            image = F.hflip(image)
+        if vflip:
+            image = F.vflip(image)
+        if rotate:
+            image = F.rotate(image, angle=angle)
+        if brightness:
+            image = F.adjust_brightness(image, brightness_factor)
+        if contrast:
+            image = F.adjust_contrast(image, contrast_factor)
+        if saturation:
+            image = F.adjust_saturation(image, saturation_factor)
+        if hue:
+            image = F.adjust_hue(image, hue_factor)
+
+        return image
 
     def __len__(self) -> int:
         """
@@ -508,14 +580,32 @@ class FLAIR2Dataset(Dataset):
             tuple[str, Tensor, Tensor, Tensor]: Image name, aerial data, sentinel data, and labels data.
         """
         path_aerial, path_sen, path_labels, name_image = self.get_paths(idx)
-        aerial = self.get_aerial(path_aerial, self.aerial_idx_band)
-        sen = self.get_sen(name_image, path_sen, self.sen_idx_band)
-
+        
+        apply_transform = torch.randint(0, 2, size=(6,))
+        angle = self.list_angles[torch.randint(0, len(self.list_angles), size=(1,))]
+        factors = torch.rand(size=(3,))
+        
+        config_augmentation = {
+            'hflip': apply_transform[0],
+            'vflip': apply_transform[1],
+            'rotate': apply_transform[2],
+            'angle': angle,
+            'brightness': apply_transform[3],
+            'brightness_factor': factors[0] + self.brightness_factor,
+            'contrast': apply_transform[4],
+            'contrast_factor': factors[1] + self.contrast_factor,
+            'saturation': apply_transform[5],
+            'saturation_factor': factors[2] + self.saturation_factor,
+        }
+        
+        aerial = self.get_aerial(path_aerial, self.aerial_idx_band, config_augmentation)
+        sen = self.get_sen(name_image, path_sen, self.sen_idx_band, self.use_augmentation, config_augmentation)
+        
         if self.is_test:
             labels = torch.ByteTensor()
         else:
-            labels = self.get_labels(path_labels)
-
+            labels = self.get_labels(path_labels, config_augmentation)
+        
         return name_image, aerial, sen, labels
 
 
@@ -549,6 +639,8 @@ if __name__ == '__main__':
         sen_temp_reduc='median',
         sen_list_bands=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
         prob_cover=10,
+        use_augmentation=True,
+        use_tta=False,
         is_test=False,
     )
 
