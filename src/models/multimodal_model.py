@@ -7,7 +7,7 @@ class MultiModalSegformer(SegformerForSemanticSegmentation):
     def __init__(self, config):
         super().__init__(config)
         
-        decoder_hidden_size = int(config.decoder_hidden_size)
+        decoder_hidden_size = int(config.hidden_sizes[-1])
         
         self.sen_encoder = nn.Sequential(
             nn.Conv3d(10, 16, kernel_size=3, padding=1),
