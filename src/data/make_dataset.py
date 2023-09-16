@@ -345,9 +345,8 @@ class FLAIR2Dataset(Dataset):
 
         sp_len = int(self.sen_size / 2)
         data = data[:, :, centroid[0] - sp_len:centroid[0] + sp_len, centroid[1] - sp_len:centroid[1] + sp_len]
-        data = torch.from_numpy(data)
-
-        return data
+        
+        return torch.from_numpy(data)
 
     @staticmethod
     def read_sen_txt(path_sen: str, file_name: str) -> list[str]:
@@ -475,8 +474,10 @@ class FLAIR2Dataset(Dataset):
                 rotate=config_augmentation['rotate'],
                 angle=config_augmentation['angle'],
             )
+            
+        sen_data = self.sen_normalize(sen_data)
 
-        return self.sen_normalize(sen_data)
+        return sen_data.permute(1, 0, 2, 3)
 
     def get_aerial(self, path_aerial, aerial_idx_band: list[int], config_augmentation: dict) -> FloatTensor:
         """
