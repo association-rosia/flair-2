@@ -11,7 +11,7 @@ method: grid
 parameters:
   seed:
     distribution: constant
-    values: 42
+    value: 42
 
   learning_rate:
     distribution: constant
@@ -23,7 +23,7 @@ parameters:
 
   arch_lib:
     distribution: categorical
-    value: ['custom', 'HF']
+    values: ['custom', 'HF']
 
   arch:
     distribution: categorical
