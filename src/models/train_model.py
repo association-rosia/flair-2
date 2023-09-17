@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import sys
+import ast
 from time import time
 
 import wandb
@@ -135,14 +136,14 @@ def init_wandb():
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
     parser.add_argument('--min_delta', type=float, default=0.01, help='Value of early stopping minimum delta')
     parser.add_argument('--patience', type=int, default=3, help='Value of early stopping patience')
-    parser.add_argument('--aerial_list_bands', nargs='+', type=str,
+    parser.add_argument('--aerial_list_bands', type=ast.literal_eval,
                         default=['R', 'G', 'B', 'NIR', 'DSM'],
                         help='List of sentinel bands to use')
     parser.add_argument('--sen_size', type=int, default=40, help='Size of the Sentinel 2 images')
     parser.add_argument('--sen_temp_size', type=int, default=3, help='Size of temporal channel for Sentinel 2 images')
     parser.add_argument('--sen_temp_reduc', type=str, default='median', choices=['median', 'mean'],
                         help='Temporal sentinel reduction method (median or mean)')
-    parser.add_argument('--sen_list_bands', nargs='+', type=str,
+    parser.add_argument('--sen_list_bands', type=ast.literal_eval,
                         default=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
                         help='List of sentinel bands to use')
     parser.add_argument('--prob_cover', type=int, default=10,
@@ -150,7 +151,7 @@ def init_wandb():
     parser.add_argument('--train_batch_size', type=int, default=16, help='Size of each train mini-batch')
     parser.add_argument('--test_batch_size', type=int, default=10, help='Size of each test mini-batch')
     parser.add_argument('--use_augmentation', action='store_true', default=False, help='Use data augmentation')
-    parser.add_argument('--class_weights', nargs='+', type=float,
+    parser.add_argument('--class_weights', type=ast.literal_eval,
                         default=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0],
                         help='Class weights applied to the cross-entropy loss')
     parser.add_argument('--use_tta', action='store_true', default=False, help='Use tta')
