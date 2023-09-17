@@ -10,16 +10,24 @@ method: grid
 
 parameters:
   seed:
-    distribution: categorical
-    values: [21, 42]
+    distribution: constant
+    values: 42
+
+  learning_rate:
+    distribution: constant
+    value: 0.00006
+
+  train_batch_size:
+    distribution: constant
+    value: 32
 
   arch_lib:
-    distribution: constant
-    value: 'custom'
+    distribution: categorical
+    value: ['custom', 'HF']
 
   arch:
     distribution: categorical
-    values: ['nvidia/segformer-b0-finetuned-ade-512-512', 'nvidia/segformer-b1-finetuned-ade-512-512', 'nvidia/segformer-b2-finetuned-ade-512-512']
+    values: ['nvidia/segformer-b0-finetuned-ade-512-512', 'nvidia/segformer-b2-finetuned-ade-512-512']
 
   max_epochs:
     distribution: categorical

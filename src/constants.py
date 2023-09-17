@@ -14,8 +14,6 @@ class FLAIR2Constants:
         self.path_data_train = os.path.join(self.path_data, 'train')
         self.path_data_test = os.path.join(self.path_data, 'test')
 
-        self.run_name = 'youthful-violet-37-0conn3x2'
-
         # Paths for models and submissions
         self.path_models = 'models'
         self.path_submissions = 'submissions'
@@ -29,13 +27,12 @@ class FLAIR2Constants:
 
         # Initialize the device for computation
         self.device = self.init_device()
-        
+
         sen_band = ['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12']
         self.sen_band2idx = {band: i for i, band in enumerate(sen_band)}
-        
+
         aerial_band = ['R', 'G', 'B', 'NIR', 'DSM']
         self.aerial_band2idx = {band: i for i, band in enumerate(aerial_band)}
-
 
     @staticmethod
     def init_device():
