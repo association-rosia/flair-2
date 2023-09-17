@@ -100,7 +100,7 @@ class FLAIR2Lightning(pl.LightningModule):
                 num_classes=self.num_classes
             )
 
-        if self.use_tta and self.use_augmentation:
+        if self.use_tta:
             # Initialize augmentations for tta
             augmentations = agms.Augmentations([
                 agms.HorizontalFlip(),
@@ -134,7 +134,7 @@ class FLAIR2Lightning(pl.LightningModule):
         )
 
     def forward(self, inputs):
-        if self.use_augmentation:
+        if self.use_tta:
             x = self.model(inputs=inputs, step=self.step, batch_size=self.train_batch_size, limit=self.tta_limit)
         else:
             x = self.model(**inputs)
