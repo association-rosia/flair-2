@@ -84,7 +84,7 @@ def main(list_images_val):
     # The distribution with the lowest p-value is the closest to uniform
     log_image_idx = results[0][0]
 
-    print(f'Log image index is {log_image_idx}')
+    print(f'\nLog image index is {log_image_idx}\n')
 
     return log_image_idx
 
