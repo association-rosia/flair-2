@@ -73,7 +73,7 @@ def main():
     trainer = init_trainer()
 
     print()
-    if wandb.config.use_augmentation:
+    if wandb.config.use_augmentation and wandb.config.use_tta:
         if wandb.config.tta_limit is None:
             # Find optimal TTA limit for inference
             lightning_model = find_optimal_tta_limit(lightning_model, trainer)
