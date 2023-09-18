@@ -23,6 +23,8 @@ from src.constants import get_constants
 
 cst = get_constants()
 
+import src.data.select_log_image as sli
+
 torch.set_float32_matmul_precision('high')
 
 
@@ -69,10 +71,13 @@ def main():
         test_batch_size=wandb.config.test_batch_size,
     )
 
-    # Initialize the PyTorch Lightning Trainer
+    # Init the PyTorch Lightning Trainer
     trainer = init_trainer()
 
-    print()
+    # Select image use for W&B logging
+    log_image_idx = sli.main(list_images_val)
+    lightning_model.log_image_idx = log_image_idx
+
     if wandb.config.use_augmentation and wandb.config.use_tta:
         if wandb.config.tta_limit is None:
             # Find optimal TTA limit for inference
@@ -134,8 +139,8 @@ def init_wandb():
     parser.add_argument('--arch', type=str, default='', help='Name of the segmentation architecture')
     parser.add_argument('--encoder_name', type=str, default='', help='Name of the timm encoder')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Value of Learning rate')
-    parser.add_argument('--min_delta', type=float, default=0.01, help='Value of early stopping minimum delta')
-    parser.add_argument('--patience', type=int, default=3, help='Value of early stopping patience')
+    # parser.add_argument('--min_delta', type=float, default=0.01, help='Value of early stopping minimum delta')
+    # parser.add_argument('--patience', type=int, default=3, help='Value of early stopping patience')
     parser.add_argument('--aerial_list_bands', type=ast.literal_eval,
                         default=['R', 'G', 'B', 'NIR', 'DSM'],
                         help='List of sentinel bands to use')
@@ -192,13 +197,13 @@ def init_trainer() -> Trainer:
         verbose=True
     )
 
-    early_stopping_callback = callbacks.EarlyStopping(
-        monitor='val/miou',
-        min_delta=wandb.config.min_delta,
-        patience=wandb.config.patience,
-        verbose=True,
-        mode='max'
-    )
+    # early_stopping_callback = callbacks.EarlyStopping(
+    #     monitor='val/miou',
+    #     min_delta=wandb.config.min_delta,
+    #     patience=wandb.config.patience,
+    #     verbose=True,
+    #     mode='max'
+    # )
 
     if wandb.config.dry:
         # Configure Trainer for dry run
@@ -216,7 +221,7 @@ def init_trainer() -> Trainer:
         trainer = Trainer(
             max_epochs=wandb.config.max_epochs,
             logger=loggers.WandbLogger(),
-            callbacks=[checkpoint_callback, early_stopping_callback],
+            callbacks=[checkpoint_callback],  # , early_stopping_callback],
             accelerator=cst.device
         )
 
