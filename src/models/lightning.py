@@ -226,7 +226,7 @@ class FLAIR2Lightning(pl.LightningModule):
         
         if self.assemble:
             for prob_label, img_id in zip(outputs, image_ids):
-                img_id = os.path.splitext(img_id)
+                img_id = os.path.splitext(img_id)[0]
                 img_path = os.path.join(self.path_predictions, f'PRED_{img_id}.pt')
                 # If path already exist sum probability
                 if os.path.exists(img_path):
