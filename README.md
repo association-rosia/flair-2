@@ -92,7 +92,7 @@ conda activate flair-2-env
 4 - Launch the model inference:
 
 ```bash
-python src/models/predict_model.py -n {model checkpoint name}
+python src/models/predict_model.py -n {model.ckpt}
 ```
 
 ## 🔬 References <a name="references"></a>

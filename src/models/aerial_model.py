@@ -38,7 +38,7 @@ class AerialModel(nn.Module):
             self.model = SegformerForSemanticSegmentation.from_pretrained(
                 pretrained_model_name_or_path=self.arch,
                 num_labels=self.num_classes,
-                num_channels=self.num_classes,
+                num_channels=self.num_channels,
                 ignore_mismatched_sizes=True
             )
         else:

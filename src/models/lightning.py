@@ -82,6 +82,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.test_batch_size = test_batch_size
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
+        self.log_image_idx = None
         self.assemble = None
 
         if self.arch_lib == 'custom':
@@ -107,7 +108,8 @@ class FLAIR2Lightning(pl.LightningModule):
                 agms.HorizontalFlip(),
                 agms.VerticalFlip(),
                 agms.Rotate([90, 180, 270]),
-                agms.Perspective([0.25, 0.375, 0.5])
+                # not a good idea to use this transformation for multi-class segmentation
+                # agms.Perspective([0.25, 0.375, 0.5])
             ])
             self.model = wrps.SegmentationWrapper(model=self.model, augmentations=augmentations)
 
@@ -195,9 +197,8 @@ class FLAIR2Lightning(pl.LightningModule):
         self.log('val/loss', loss, on_step=True, on_epoch=True)
         self.metrics.update(outputs, labels)
 
-        image_idx = 5589  # found val mask with max different classes and closest to uniform distribution
-        if batch_idx == image_idx // self.train_batch_size:
-            batch_image_idx = image_idx % self.train_batch_size
+        if batch_idx == self.log_image_idx // self.train_batch_size:
+            batch_image_idx = self.log_image_idx % self.train_batch_size
             self.log_aerial_mask(aerial[batch_image_idx], labels[batch_image_idx], outputs[batch_image_idx])
 
         return loss
@@ -250,15 +251,16 @@ class FLAIR2Lightning(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)
 
-        scheduler = ReduceLROnPlateau(
-            optimizer=optimizer,
-            mode='min',
-            factor=0.5,
-            patience=5,
-            verbose=True
-        )
+        # scheduler = ReduceLROnPlateau(
+        #     optimizer=optimizer,
+        #     mode='min',
+        #     factor=0.5,
+        #     patience=5,
+        #     verbose=True
+        # )
 
-        return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, 'monitor': 'val/loss'}}
+        # return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, 'monitor': 'val/loss'}}
+        return optimizer
 
     def train_dataloader(self):
         # Initialize training dataset and data loader

@@ -52,7 +52,7 @@ class FLAIR2Dataset(Dataset):
         self.list_images = list_images
         self.use_augmentation = use_augmentation
         self.use_tta = use_tta
-        
+
         self.aerial_band2idx = cst.aerial_band2idx
         aerial_band = self.aerial_band2idx.keys()
         for band in aerial_list_bands:
@@ -60,7 +60,7 @@ class FLAIR2Dataset(Dataset):
                 raise ValueError(f'sen_list_bands can be composed of {", ".join(aerial_band)} but found {band}.')
         self.aerial_list_bands = aerial_list_bands
         self.aerial_idx_band = [self.aerial_band2idx[str(band)] for band in self.aerial_list_bands]
-        
+
         if sen_size <= 0:
             raise ValueError(f'sen_size is a size, it must be positif but found {sen_size}')
         self.prob_cover = prob_cover
@@ -68,14 +68,14 @@ class FLAIR2Dataset(Dataset):
         self.sen_temp_size = sen_temp_size
 
         possible_reduction = ['median', 'mean']
-        if not sen_temp_reduc in possible_reduction:
+        if sen_temp_reduc not in possible_reduction:
             raise ValueError(f'sen_temp_reduc can be on of {", ".join(possible_reduction)} but found {sen_temp_reduc}.')
         self.sen_temp_reduc = sen_temp_reduc
 
         self.sen_band2idx = cst.sen_band2idx
         sen_band = self.sen_band2idx.keys()
         for band in sen_list_bands:
-            if not band in sen_band:
+            if band not in sen_band:
                 raise ValueError(f'sen_list_bands can be composed of {", ".join(sen_band)} but found {band}.')
         self.sen_list_bands = sen_list_bands
         self.sen_idx_band = [self.sen_band2idx[str(band)] for band in self.sen_list_bands]
@@ -96,13 +96,12 @@ class FLAIR2Dataset(Dataset):
         # compute mean and std if it is necessary
         self.sen_normalize = lambda x: x
         self.sen_normalize = self.init_sen_normalize()
-        
+
         # Data augmentation parameters
         self.list_angles = [90, 180, 270]
         self.brightness_factor = 0.5
         self.contrast_factor = 1
         self.saturation_factor = 0.1
-        
 
     @staticmethod
     def img_to_msk(path_image: str) -> str:
@@ -153,7 +152,7 @@ class FLAIR2Dataset(Dataset):
 
         mean = torch.Tensor(stats['mean'])
         std = torch.Tensor(stats['std'])
-        
+
         return T.Normalize(mean=mean[self.aerial_idx_band], std=std[self.aerial_idx_band])
 
     def compute_sen_mean(
@@ -345,7 +344,7 @@ class FLAIR2Dataset(Dataset):
 
         sp_len = int(self.sen_size / 2)
         data = data[:, :, centroid[0] - sp_len:centroid[0] + sp_len, centroid[1] - sp_len:centroid[1] + sp_len]
-        
+
         return torch.from_numpy(data)
 
     @staticmethod
@@ -447,7 +446,8 @@ class FLAIR2Dataset(Dataset):
 
         return torch.where(torch.isnan(sen_red), 0, sen_red)
 
-    def get_sen(self, name_image: str, path_sen: str, sen_idx_band: list[int], use_augmentation: bool, config_augmentation: dict = None) -> FloatTensor:
+    def get_sen(self, name_image: str, path_sen: str, sen_idx_band: list[int], use_augmentation: bool,
+                config_augmentation: dict = None) -> FloatTensor:
         """
         Get sentinel data for an image.
 
@@ -455,6 +455,8 @@ class FLAIR2Dataset(Dataset):
             name_image (str): Name of the image.
             path_sen (str): Path to the sentinel data directory.
             sen_idx_band (list[int]): List of sentinel band indices.
+            use_augmentation
+            config_augmentation
 
         Returns:
             Tensor: Sentinel data.
@@ -465,7 +467,7 @@ class FLAIR2Dataset(Dataset):
         idx_temporal = self.get_sen_idx_temp(sen_products)
         sen_data = self.sen_temporal_reduction(sen_data, idx_temporal)
         sen_data = sen_data / 10_000
-        
+
         if use_augmentation and not self.use_tta and not self.is_test:
             sen_data = self.data_augmentation(
                 sen_data,
@@ -474,7 +476,7 @@ class FLAIR2Dataset(Dataset):
                 rotate=config_augmentation['rotate'],
                 angle=config_augmentation['angle'],
             )
-            
+
         sen_data = self.sen_normalize(sen_data)
 
         return sen_data.permute(1, 0, 2, 3)
@@ -485,6 +487,8 @@ class FLAIR2Dataset(Dataset):
 
         Args:
             path_aerial (str): Path to the aerial image.
+            aerial_idx_band
+            config_augmentation
 
         Returns:
             Tensor: Aerial image data.
@@ -498,7 +502,7 @@ class FLAIR2Dataset(Dataset):
                 aerial,
                 **config_augmentation,
             )
-        
+
         return self.aerial_normalize(aerial)
 
     def get_labels(self, path_labels: str, config_augmentation: dict) -> ByteTensor:
@@ -507,6 +511,7 @@ class FLAIR2Dataset(Dataset):
 
         Args:
             path_labels (str): Path to the labels data.
+            config_augmentation
 
         Returns:
             Tensor: Labels data.
@@ -514,7 +519,7 @@ class FLAIR2Dataset(Dataset):
         labels = tifffile.imread(path_labels)
         labels = torch.from_numpy(labels)
         labels = labels - 1
-        
+
         labels = labels.unsqueeze(0)
         if self.use_augmentation and not self.use_tta and not self.is_test:
             labels = self.data_augmentation(
@@ -525,24 +530,22 @@ class FLAIR2Dataset(Dataset):
                 angle=config_augmentation['angle'],
             )
         labels = labels.squeeze(0)
-        
+
         return torch.where(labels < 13, labels, 12)
-    
+
+    @staticmethod
     def data_augmentation(
-        self,
-        image: Tensor,
-        hflip: bool = False,
-        vflip: bool = False,
-        rotate: bool = False,
-        angle: int = None,
-        brightness: bool = False,
-        brightness_factor: float = None,
-        contrast: bool = False,
-        contrast_factor: float = None,
-        saturation: bool = False,
-        saturation_factor: float = None,
-        hue: bool = False,
-        hue_factor: float = None,
+            image: Tensor,
+            hflip: bool = False,
+            vflip: bool = False,
+            rotate: bool = False,
+            angle: int = None,
+            brightness: bool = False,
+            brightness_factor: float = None,
+            contrast: bool = False,
+            contrast_factor: float = None,
+            saturation: bool = False,
+            saturation_factor: float = None,
     ):
         if hflip:
             image = F.hflip(image)
@@ -556,8 +559,6 @@ class FLAIR2Dataset(Dataset):
             image = F.adjust_contrast(image, contrast_factor)
         if saturation:
             image = F.adjust_saturation(image, saturation_factor)
-        if hue:
-            image = F.adjust_hue(image, hue_factor)
 
         return image
 
@@ -581,11 +582,11 @@ class FLAIR2Dataset(Dataset):
             tuple[str, Tensor, Tensor, Tensor]: Image name, aerial data, sentinel data, and labels data.
         """
         path_aerial, path_sen, path_labels, name_image = self.get_paths(idx)
-        
+
         apply_transform = torch.randint(0, 2, size=(6,))
         angle = self.list_angles[torch.randint(0, len(self.list_angles), size=(1,))]
         factors = torch.rand(size=(3,))
-        
+
         config_augmentation = {
             'hflip': apply_transform[0],
             'vflip': apply_transform[1],
@@ -598,15 +599,15 @@ class FLAIR2Dataset(Dataset):
             'saturation': apply_transform[5],
             'saturation_factor': factors[2] + self.saturation_factor,
         }
-        
+
         aerial = self.get_aerial(path_aerial, self.aerial_idx_band, config_augmentation)
         sen = self.get_sen(name_image, path_sen, self.sen_idx_band, self.use_augmentation, config_augmentation)
-        
+
         if self.is_test:
             labels = torch.ByteTensor()
         else:
             labels = self.get_labels(path_labels, config_augmentation)
-        
+
         return name_image, aerial, sen, labels
 
 
@@ -655,6 +656,5 @@ if __name__ == '__main__':
     print(image_id, aerial.shape, sen.shape, labels.shape)
 
     for image_id, aerial, sen, labels in dataloader:
-        # pass
         print(image_id, aerial.shape, sen.shape, labels.shape)
         break
