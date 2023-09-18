@@ -82,6 +82,7 @@ class FLAIR2Lightning(pl.LightningModule):
         self.test_batch_size = test_batch_size
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
+        self.assemble = None
 
         if self.arch_lib == 'custom':
             self.model = MultiModalSegformer.from_pretrained(
@@ -221,19 +222,30 @@ class FLAIR2Lightning(pl.LightningModule):
 
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
         outputs = outputs.softmax(dim=1)
-        outputs = outputs.argmax(dim=1)
+        
+        if self.assemble:
+            for prob_label, img_id in zip(outputs, image_ids):
+                img_id = os.path.splitext(img_id)
+                img_path = os.path.join(self.path_predictions, f'PRED_{img_id}.pt')
+                # If path already exist sum probability
+                if os.path.exists(img_path):
+                    prob_label += torch.load(img_path, map_location=self.device)
+                
+                torch.save(prob_label, img_path)
+        else:
+            outputs = outputs.argmax(dim=1)
 
-        # * Challenge rule: set the data type of the image files as Byte (uint8)
-        # * with values ranging from 0 to 12
+            # * Challenge rule: set the data type of the image files as Byte (uint8)
+            # * with values ranging from 0 to 12
 
-        # ! Do not uncomment the following line, read the comment above.
-        # pred_labels += 1
-
-        for pred_label, img_id in zip(outputs, image_ids):
-            img = pred_label.numpy(force=True)
-            img = img.astype(dtype=np.uint8)
-            img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
-            tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
+            # ! Do not uncomment the following line, read the comment above.
+            # pred_labels += 1
+            
+            for pred_label, img_id in zip(outputs, image_ids):
+                img = pred_label.numpy(force=True)
+                img = img.astype(dtype=np.uint8)
+                img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
+                tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)

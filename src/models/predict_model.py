@@ -93,7 +93,7 @@ class FLAIR2Submission:
         Execute the submission process for a given run.
 
         Args:
-            run_name (str): Name of the current run.
+            run_name (list): List of run names.
 
         Returns:
             success (bool): True if the submission process is successful, False otherwise.
@@ -119,8 +119,8 @@ class FLAIR2Submission:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Script for creating submissions with a specified model name')
-    parser.add_argument('-n', '--name', type=str, help='Name of the model to use for submissions')
+    parser = argparse.ArgumentParser(description='Script for creating submissions with specified models names. Unique name for classique inference or multiple names for assemble.')
+    parser.add_argument('-n', '--name', nargs='+', type=str, help='Name of models to use for submissions')
     args = parser.parse_args()
 
     sub = FLAIR2Submission()
