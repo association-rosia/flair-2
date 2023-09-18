@@ -19,23 +19,28 @@ parameters:
 
   train_batch_size:
     distribution: constant
-    value: 32
+    value: 16
 
   arch_lib:
-    distribution: categorical
-    values: ['custom', 'HF']
+    distribution: constant
+    value: 'custom'
 
   arch:
     distribution: categorical
-    values: ['nvidia/segformer-b0-finetuned-ade-512-512', 'nvidia/segformer-b2-finetuned-ade-512-512']
+    values: ['nvidia/segformer-b0-finetuned-ade-512-512',
+             'nvidia/segformer-b1-finetuned-ade-512-512',
+             'nvidia/segformer-b2-finetuned-ade-512-512',
+             'nvidia/segformer-b3-finetuned-ade-512-512',
+             'nvidia/segformer-b4-finetuned-ade-512-512',
+             'nvidia/segformer-b5-finetuned-ade-640-640']
 
   max_epochs:
-    distribution: categorical
-    values: [5, 10]
+    distribution: constant
+    value: 10
 
   sen_temp_size:
     distribution: constant
-    value: 6
+    value: 4
 
   aerial_list_bands:
     distribution: constant
