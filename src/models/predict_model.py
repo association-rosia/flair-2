@@ -151,7 +151,7 @@ class FLAIR2Submission:
         shutil.rmtree(path_tensors)
         
         # 4 seconds is the gap between the displayed time by PL and the calculated time by the librairy "time"
-        return dir_predictions, end - start - 4
+        return dir_predictions, end - start - 4 * len(name_runs)
 
     def __call__(self, name_runs):
         """
@@ -182,6 +182,6 @@ if __name__ == '__main__':
 
     sub = FLAIR2Submission()
     if args.name:
-        sub(run_name=args.name)
+        sub(name_runs=args.name)
     else:
         print('Please provide a model name using the -n or --name parameter.')
