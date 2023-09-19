@@ -285,7 +285,7 @@ class FLAIR2Lightning(pl.LightningModule):
             prob_cover=self.prob_cover,
             use_augmentation=self.use_augmentation,
             use_tta=self.use_tta,
-            is_test=False,
+            is_test=True,
         )
 
         return DataLoader(
