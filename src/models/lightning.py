@@ -82,8 +82,9 @@ class FLAIR2Lightning(pl.LightningModule):
         self.test_batch_size = test_batch_size
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
-        self.log_image_idx = None
         self.assemble = None
+        self.path_assemble = None
+        self.log_image_idx = None
 
         if self.arch_lib == 'custom':
             self.model = MultiModalSegformer.from_pretrained(
@@ -217,36 +218,47 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def on_test_epoch_start(self) -> None:
         self.step = 'test'
+        
+    
+    def save_prediction(self, pred_label, name_img):
+        pred_label = pred_label.numpy(force=True)
+        pred_label = pred_label.astype(dtype=np.uint8)
+        img_path = os.path.join(self.path_predictions, f'PRED_{name_img}')
+        tiff.imwrite(img_path, pred_label, dtype=np.uint8, compression='LZW')
 
     def test_step(self, batch, batch_idx):
-        image_ids, aerial, sen, _ = batch
+        name_images, aerial, sen, _ = batch
 
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
         outputs = outputs.softmax(dim=1)
         
         if self.assemble:
-            for prob_label, img_id in zip(outputs, image_ids):
-                img_id = os.path.splitext(img_id)[0]
-                img_path = os.path.join(self.path_predictions, f'PRED_{img_id}.pt')
-                # If path already exist sum probability
-                if os.path.exists(img_path):
+            for prob_label, name_img in zip(outputs, name_images):
+                id_img = os.path.splitext(name_img)[0]
+                img_path = os.path.join(self.path_assemble, f'PRED_{id_img}.pt')
+                
+                # If it is the first model of the assemble do not load the tensor
+                if not self.assemble == 'first':
                     prob_label += torch.load(img_path, map_location=self.device)
                 
-                torch.save(prob_label, img_path)
+                # If it is the last model of the assemble save as tiff image
+                # else save the tensor
+                if self.assemble == 'last':
+                    pred_label = prob_label.argmax(dim=0)
+                    self.save_prediction(pred_label, id_img=name_img)
+                else:
+                    torch.save(prob_label, img_path)
         else:
             outputs = outputs.argmax(dim=1)
-
+            
             # * Challenge rule: set the data type of the image files as Byte (uint8)
             # * with values ranging from 0 to 12
 
             # ! Do not uncomment the following line, read the comment above.
             # pred_labels += 1
             
-            for pred_label, img_id in zip(outputs, image_ids):
-                img = pred_label.numpy(force=True)
-                img = img.astype(dtype=np.uint8)
-                img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
-                tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
+            for pred_label, name_img in zip(outputs, name_images):
+                self.save_prediction(pred_label, name_img)
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)

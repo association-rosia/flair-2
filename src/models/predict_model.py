@@ -60,7 +60,7 @@ class FLAIR2Submission:
 
         return path_predictions
 
-    def load_lightning_model(self, path_predictions, name_run, assemble) -> FLAIR2Lightning:
+    def load_lightning_model(self, path_predictions, path_assemble, name_run, assemble) -> FLAIR2Lightning:
         """
         Load the trained FLAIR-2 Lightning model checkpoint and configure it for submission.
 
@@ -74,6 +74,7 @@ class FLAIR2Submission:
         lightning_ckpt = os.path.join(self.path_models, f'{name_run}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
         lightning_model.path_predictions = path_predictions
+        lightning_model.path_assemble = path_assemble
         lightning_model.assemble = assemble
 
         return lightning_model
@@ -103,7 +104,8 @@ class FLAIR2Submission:
     def unique_submission(self, name_run):
         path_predictions = self.create_path_predictions(dir_predictions=name_run)
         lightning_model = self.load_lightning_model(
-            path_predictions=path_predictions, 
+            path_predictions=path_predictions,
+            path_assemble=None,
             name_run=name_run, 
             assemble=False
         )
@@ -117,17 +119,25 @@ class FLAIR2Submission:
         
     def assemble_submission(self, name_runs):
         dir_predictions = '_'.join(name_runs)
-        dir_tensors = dir_predictions + '_tensor'
+        dir_assemble = dir_predictions + '_tensor'
         
         path_predictions = self.create_path_predictions(dir_predictions)
-        path_tensors = self.create_path_predictions(dir_tensors)
+        path_assemble = self.create_path_predictions(dir_assemble)
         
         start = time()
-        for name_run in name_runs:
+        nb_model = len(name_runs)
+        for i, name_run in enumerate(name_runs):
+            assemble = 'middle'
+            if i == 0:
+                assemble = 'first'
+            elif i == nb_model:
+                assemble = 'last'
+                
             lightning_model = self.load_lightning_model(
-                path_predictions=path_tensors,
+                path_predictions=path_predictions,
+                path_assemble=path_assemble,
                 name_run=name_run, 
-                assemble=True
+                assemble=assemble
             )
             
             self.trainer.test(model=lightning_model)
