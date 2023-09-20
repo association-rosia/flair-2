@@ -218,13 +218,6 @@ class FLAIR2Lightning(pl.LightningModule):
 
     def on_test_epoch_start(self) -> None:
         self.step = 'test'
-        
-    
-    def save_prediction(self, pred_label, name_img):
-        pred_label = pred_label.numpy(force=True)
-        pred_label = pred_label.astype(dtype=np.uint8)
-        img_path = os.path.join(self.path_predictions, f'PRED_{name_img}')
-        tiff.imwrite(img_path, pred_label, dtype=np.uint8, compression='LZW')
 
     def test_step(self, batch, batch_idx):
         name_images, aerial, sen, _ = batch
@@ -233,22 +226,18 @@ class FLAIR2Lightning(pl.LightningModule):
         outputs = outputs.softmax(dim=1)
         
         if self.assemble:
-            for prob_label, name_img in zip(outputs, name_images):
-                id_img = os.path.splitext(name_img)[0]
-                img_path = os.path.join(self.path_assemble, f'PRED_{id_img}.pt')
-                
-                # If it is the first model of the assemble do not load the tensor
-                if not self.assemble == 'first':
-                    prob_label += torch.load(img_path, map_location=self.device)
-                
-                # If it is the last model of the assemble save as tiff image
-                # else save the tensor
-                if self.assemble == 'last':
-                    pred_label = prob_label.argmax(dim=0)
-                    self.save_prediction(pred_label, id_img=name_img)
-                else:
-                    torch.save(prob_label, img_path)
-        else:
+            batch_path = os.path.join(self.path_assemble, f'PRED_{batch_idx}.pt')
+            
+            # If it is the first model of the assemble do not load the tensor
+            if not self.assemble == 'first':
+                outputs += torch.load(batch_path, map_location=self.device)
+
+            # If it is the last model of the assemble save as tiff image
+            # else save the tensor
+            if not self.assemble == 'last':
+                torch.save(outputs, batch_path)
+        
+        if not self.assemble or self.assemble == 'last':
             outputs = outputs.argmax(dim=1)
             
             # * Challenge rule: set the data type of the image files as Byte (uint8)
@@ -258,7 +247,10 @@ class FLAIR2Lightning(pl.LightningModule):
             # pred_labels += 1
             
             for pred_label, name_img in zip(outputs, name_images):
-                self.save_prediction(pred_label, name_img)
+                pred_label = pred_label.numpy(force=True)
+                pred_label = pred_label.astype(dtype=np.uint8)
+                img_path = os.path.join(self.path_predictions, f'PRED_{name_img}')
+                tiff.imwrite(img_path, pred_label, dtype=np.uint8, compression='LZW')
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)
