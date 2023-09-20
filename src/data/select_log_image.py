@@ -28,6 +28,7 @@ def main(list_images_val):
         prob_cover=10,
         use_augmentation=False,
         use_tta=False,
+        is_val=True,
         is_test=False,
     )
 
