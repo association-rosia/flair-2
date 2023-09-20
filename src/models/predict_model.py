@@ -142,23 +142,23 @@ class FLAIR2Submission:
             
             self.trainer.test(model=lightning_model)
         
-        path_template = os.path.join(path_tensors, '*.pt')
-        for path_tensor in glob(path_template):
-            pred_label = torch.load(path_tensor)
+        # path_template = os.path.join(path_assemble, '*.pt')
+        # for path_tensor in glob(path_template):
+        #     pred_label = torch.load(path_tensor)
             
-            img = pred_label.argmax(dim=0)
-            img = pred_label.numpy(force=True)
-            img = img.astype(dtype=np.uint8)
+        #     img = pred_label.argmax(dim=0)
+        #     img = pred_label.numpy(force=True)
+        #     img = img.astype(dtype=np.uint8)
             
-            name_img = os.path.basename(path_tensor)
-            id_img = os.path.splitext(name_img)[0]
-            path_img = os.path.join(path_predictions, f'PRED_{id_img}')
+        #     name_img = os.path.basename(path_tensor)
+        #     id_img = os.path.splitext(name_img)[0]
+        #     path_img = os.path.join(path_predictions, f'PRED_{id_img}')
             
-            tiff.imwrite(path_img, img, dtype=np.uint8, compression='LZW')
+        #     tiff.imwrite(path_img, img, dtype=np.uint8, compression='LZW')
 
         end = time()
         
-        shutil.rmtree(path_tensors)
+        shutil.rmtree(path_assemble)
         
         # 4 seconds is the gap between the displayed time by PL and the calculated time by the librairy "time"
         return dir_predictions, end - start - 4 * len(name_runs)
