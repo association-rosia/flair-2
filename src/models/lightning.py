@@ -223,7 +223,8 @@ class FLAIR2Lightning(pl.LightningModule):
         name_images, aerial, sen, _ = batch
 
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
-        outputs = outputs.softmax(dim=1)
+        outputs = outputs.softmax(dim=1) * 255
+        outputs = outputs.to(dtype=torch.uint8)
         
         if self.assemble:
             batch_path = os.path.join(self.path_assemble, f'PRED_{batch_idx}.pt')

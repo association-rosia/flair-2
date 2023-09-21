@@ -177,7 +177,7 @@ class FLAIR2Submission:
         if isinstance(name_runs, list) and len(name_runs) >= 2:
             dir_predictions, inference_time_seconds = self.assemble_submission(name_runs)
         else:
-            dir_predictions, inference_time_seconds = self.unique_submission(name_runs)
+            dir_predictions, inference_time_seconds = self.unique_submission(name_runs[0])
  
         self.create_zip_submission(
             dir_predictions=dir_predictions,
