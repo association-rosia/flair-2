@@ -224,11 +224,11 @@ class FLAIR2Lightning(pl.LightningModule):
         outputs = outputs.softmax(dim=1)
         outputs = outputs.argmax(dim=1)
 
-        for pred_label, img_id in zip(outputs, image_ids):
-            img = pred_label.numpy(force=True)
-            img = img.astype(dtype=np.uint8)
-            img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
-            tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
+        # for pred_label, img_id in zip(outputs, image_ids):
+        #     img = pred_label.numpy(force=True)
+        #     img = img.astype(dtype=np.uint8)
+        #     img_path = os.path.join(self.path_predictions, f'PRED_{img_id}')
+        #     tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.learning_rate)
