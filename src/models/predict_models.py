@@ -2,8 +2,7 @@ import os
 import sys
 sys.path.append(os.curdir)
 
-from src.data.make_dataset import FLAIR2Dataset
-from torch.utils.data import DataLoader
+from src.models.lightning import FLAIR2Lightning
 
 import argparse
 
@@ -14,11 +13,14 @@ parser = argparse.ArgumentParser(description='Script for creating submissions wi
 parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
 args = parser.parse_args()
 
-models = []
+lightning_models = []
 dataloaders = []
 for name in args.names:
-    print(name)
+    lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
+    lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
+    lightning_models.append(lightning_model)
 
+print(lightning_models)
 
 # TODO: create test dataloader
 
