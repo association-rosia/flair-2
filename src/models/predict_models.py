@@ -60,7 +60,10 @@ def predict(models, weights, iterators, path_predictions, save_predictions):
 
             output = models[i](aerial=aerial, sen=sen)
             output = output.softmax(dim=1)
-            output = weights[i] * output
+
+            print(weights[i], weights)
+
+            output = torch.mul(weights[i], output)
             outputs = torch.add(outputs, output)
 
         outputs = outputs.argmax(dim=1)
