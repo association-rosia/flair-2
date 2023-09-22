@@ -18,8 +18,8 @@ dataloaders = []
 for name in args.names:
     lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
     lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
-    lightning_models.append(lightning_model.model)
-    dataloaders.append(lightning_model.test_dataloader())
+    lightning_models.append(lightning_model.model.cuda())
+    dataloaders.append(lightning_model.test_dataloader().cuda())
 
 print(dataloaders)
 
