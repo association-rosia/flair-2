@@ -34,7 +34,7 @@ def predict(models, iterators):
             aerial = aerial.cuda()
             sen = sen.cuda()
 
-            outputs = models[i](inputs={'aerial': aerial, 'sen': sen})
+            outputs = models[i](aerial=aerial, sen=sen)
             outputs = outputs.softmax(dim=1)
             outputs = outputs.argmax(dim=1)
 
