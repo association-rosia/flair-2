@@ -33,7 +33,7 @@ def create_list_objects(names):
 
 
 def predict(models, iterators, path_predictions, save_predictions):
-    for batches in tqdm(zip(*iterators)):
+    for batches in tqdm(zip(*iterators), total=len(iterators[0])):
         image_ids = None
         outputs = torch.zeros((10, 13, 512, 512)).cuda()
 
