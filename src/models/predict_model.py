@@ -76,6 +76,7 @@ class FLAIR2Submission:
         lightning_model.path_predictions = path_predictions
         lightning_model.path_assemble = path_assemble
         lightning_model.assemble = assemble
+        lightning_model.test_batch_size = 28
 
         return lightning_model
 
