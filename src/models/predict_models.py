@@ -21,10 +21,11 @@ for name in args.names:
     lightning_models.append(lightning_model.model.cuda())
     dataloaders.append(lightning_model.test_dataloader())
 
-for _ in range(len(dataloaders)):
-    for batch in dataloaders:
-        print(next(iter(dataloaders)))
 
+iterators = [iter(loader) for loader in dataloaders]
+
+for batches in zip(*iterators):
+    print(batches)
     break
 
 
