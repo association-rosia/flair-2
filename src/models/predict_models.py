@@ -17,14 +17,14 @@ from src.constants import get_constants
 cst = get_constants()
 
 
-def create_list_objects(names):
+def create_list_objects(names, test_batch_size):
     models = []
     dataloaders = []
 
     for name in names:
         lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
-        lightning_model.test_batch_size = 16
+        lightning_model.test_batch_size = test_batch_size
 
         # load model
         model = lightning_model.model.cuda()
@@ -39,10 +39,10 @@ def create_list_objects(names):
     return models, iterators
 
 
-def predict(models, iterators, path_predictions, save_predictions):
+def predict(models, iterators, test_batch_size, path_predictions, save_predictions):
     for batches in tqdm(zip(*iterators), total=len(iterators[0])):
         image_ids = None
-        outputs = torch.zeros((10, 13, 512, 512)).cuda()
+        outputs = torch.zeros((test_batch_size, 13, 512, 512)).cuda()
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
@@ -69,7 +69,8 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
     args = parser.parse_args()
 
+    test_batch_size = 16
     path_predictions = ''
 
-    models, iterators = create_list_objects(args.names)
-    predict(models, iterators, path_predictions, save_predictions=False)
+    models, iterators = create_list_objects(args.names, test_batch_size)
+    predict(models, iterators, test_batch_size, path_predictions, save_predictions=False)
