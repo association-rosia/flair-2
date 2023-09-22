@@ -17,7 +17,7 @@ from src.constants import get_constants
 cst = get_constants()
 
 
-def create_list_objects(names, test_batch_size):
+def create_list_objects(names, test_batch_size, test_num_workers):
     models = []
     dataloaders = []
 
@@ -25,6 +25,7 @@ def create_list_objects(names, test_batch_size):
         lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
         lightning_model.test_batch_size = test_batch_size
+        lightning_model.test_num_workers = test_num_workers
 
         # load model
         model = lightning_model.model.cuda()
@@ -70,7 +71,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     test_batch_size = 16
+    test_num_workers = 18
     path_predictions = ''
 
-    models, iterators = create_list_objects(args.names, test_batch_size)
+    models, iterators = create_list_objects(args.names, test_batch_size, test_num_workers)
     predict(models, iterators, test_batch_size, path_predictions, save_predictions=False)
