@@ -9,9 +9,6 @@ import argparse
 from src.constants import get_constants
 cst = get_constants()
 
-import logging
-logging.basicConfig(level=logging.ERROR)
-
 parser = argparse.ArgumentParser(description='Script for creating submissions with specified models names')
 parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
 args = parser.parse_args()
@@ -22,8 +19,9 @@ for name in args.names:
     lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
     lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
     lightning_models.append(lightning_model.model)
+    dataloaders.append(lightning_model.test_dataloader())
 
-print(lightning_models)
+print(dataloaders)
 
 # TODO: create test dataloader
 
