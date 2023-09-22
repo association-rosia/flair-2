@@ -78,7 +78,7 @@ if __name__ == '__main__':
     path_predictions = os.path.join(cst.path_submissions, run_names)
     os.makedirs(path_predictions, exist_ok=True)
 
-    test_batch_size = 5
+    test_batch_size = 10
     test_num_workers = 18
 
     models, iterators_1, iterators_2 = create_list_objects(args.names, test_batch_size, test_num_workers)
