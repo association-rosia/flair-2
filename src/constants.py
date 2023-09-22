@@ -23,7 +23,7 @@ class FLAIR2Constants:
 
         # Number of worker threads for data loading
         self.train_num_workers = 18
-        self.test_num_workers = 10  # same as in the baseline
+        self.test_num_workers = 18  # same as in the baseline
 
         # Initialize the device for computation
         self.device = self.init_device()
