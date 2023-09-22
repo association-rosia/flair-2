@@ -48,7 +48,8 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
 
     for batches in tqdm(zip(*iterators), total=len(iterators[0])):
         image_ids = None
-        outputs = torch.zeros((test_batch_size, 13, 512, 512)).cuda()
+        print(batches[0].shape[0])
+        outputs = torch.zeros((batches[0].shape[0], 13, 512, 512)).cuda()
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
