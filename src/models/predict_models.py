@@ -30,7 +30,7 @@ def create_list_objects(names, test_batch_size, test_num_workers):
         lightning_model.test_num_workers = test_num_workers
 
         # load model
-        model = lightning_model.model.cuda()
+        model = lightning_model.model.half().cuda()
         models.append(model)
 
         # load dataloader
@@ -52,8 +52,8 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
-            aerial = aerial.cuda()
-            sen = sen.cuda()
+            aerial = aerial.half().cuda()
+            sen = sen.half().cuda()
 
             output = models[i](aerial=aerial, sen=sen)
             output = output.softmax(dim=1)
