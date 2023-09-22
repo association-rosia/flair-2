@@ -130,7 +130,7 @@ class FLAIR2Submission:
             assemble = 'middle'
             if i == 0:
                 assemble = 'first'
-            elif i == nb_model:
+            elif i == nb_model - 1:
                 assemble = 'last'
                 
             lightning_model = self.load_lightning_model(
