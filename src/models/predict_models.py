@@ -2,6 +2,7 @@ import os
 import sys
 
 import torch
+import numpy as np
 
 sys.path.append(os.curdir)
 
@@ -9,6 +10,7 @@ from src.models.lightning import FLAIR2Lightning
 
 import argparse
 from tqdm import tqdm
+import tifffile as tiff
 
 from src.constants import get_constants
 
@@ -30,24 +32,27 @@ def create_list_objects(names):
     return models, iterators
 
 
-def predict(models, iterators):
+def predict(models, iterators, path_predictions):
     for batches in tqdm(zip(*iterators)):
+        image_ids = None
         outputs = torch.zeros((10, 13, 512, 512)).cuda()
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
+            print(image_ids)
             aerial = aerial.cuda()
             sen = sen.cuda()
 
             output = models[i](aerial=aerial, sen=sen)
             output = output.softmax(dim=1)
             outputs = torch.add(outputs, output)
-            print(outputs.shape)
 
         outputs = outputs.argmax(dim=1)
-        print(outputs.shape)
-
-        break
+        # for pred_label, img_id in zip(outputs, image_ids):
+        #     img = pred_label.numpy(force=True)
+        #     img = img.astype(dtype=np.uint8)
+        #     img_path = os.path.join(path_predictions, f'PRED_{img_id}')
+        #     tiff.imwrite(img_path, img, dtype=np.uint8, compression='LZW')
 
 
 if __name__ == '__main__':
@@ -55,5 +60,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
     args = parser.parse_args()
 
+    path_predictions = ''
+
     models, iterators = create_list_objects(args.names)
-    predict(models, iterators)
+    predict(models, iterators, path_predictions)
