@@ -11,6 +11,8 @@ from src.models.lightning import FLAIR2Lightning
 import argparse
 from tqdm import tqdm
 import tifffile as tiff
+from math import floor
+import shutil
 
 from src.constants import get_constants
 
@@ -70,9 +72,32 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
     args = parser.parse_args()
 
-    test_batch_size = 16
-    test_num_workers = 18
+    run_names = '_'.join(args.names)
+    path_predictions = os.path.join(cst.path_submissions, run_names)
+    os.makedirs(path_predictions, exist_ok=True)
+
+    test_batch_size = 10
+    test_num_workers = 10
     path_predictions = ''
 
     models, iterators = create_list_objects(args.names, test_batch_size, test_num_workers)
+
+    start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+
+    start.record()
     predict(models, iterators, test_batch_size, path_predictions, save_predictions=False)
+    end.record()
+
+    # Waits for everything to finish running
+    torch.cuda.synchronize()
+    inference_time_seconds = start.elapsed_time(end) / 1000.0
+    minutes = floor(inference_time_seconds // 60)
+    seconds = floor(inference_time_seconds % 60)
+    submission_inference_time = f'{minutes}-{seconds}'
+
+    predict(models, iterators, test_batch_size, path_predictions, save_predictions=True)
+
+    name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
+    zip_path_submission = os.path.join(cst.path_submissions, name_submission)
+    shutil.make_archive(zip_path_submission, 'zip', path_predictions)
+    shutil.rmtree(path_predictions)
