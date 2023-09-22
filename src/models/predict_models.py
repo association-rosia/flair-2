@@ -11,10 +11,10 @@ from src.constants import get_constants
 cst = get_constants()
 
 parser = argparse.ArgumentParser(description='Script for creating submissions with specified models names')
-parser.add_argument('-n', '--name', nargs='+', type=str, help='Name of models to use for submissions')
+parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
 args = parser.parse_args()
 
-print(args.name)
+print(args.names)
 
 # TODO: create test dataloader
 
