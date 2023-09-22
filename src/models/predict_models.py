@@ -25,7 +25,9 @@ for name in args.names:
 iterators = [iter(loader) for loader in dataloaders]
 
 for batches in zip(*iterators):
-    print(batches)
+    for i, batch in enumerate(batches):
+        print(batch)
+
     break
 
 
