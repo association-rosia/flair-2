@@ -43,7 +43,7 @@ def create_list_objects(names, test_batch_size, test_num_workers):
 
 
 def predict(models, iterators, test_batch_size, path_predictions, save_predictions):
-    print(f'\nInfernce with save_predictions = {save_predictions}')
+    print(f'\nInference - save_predictions = {save_predictions}')
 
     for batches in tqdm(zip(*iterators), total=len(iterators[0])):
         image_ids = None
@@ -61,6 +61,7 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
         outputs = outputs.argmax(dim=1)
 
         if save_predictions:
+            print('test')
             for pred_label, img_id in zip(outputs, image_ids):
                 img = pred_label.numpy(force=True)
                 img = img.astype(dtype=np.uint8)
