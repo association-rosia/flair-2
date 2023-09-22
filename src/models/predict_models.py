@@ -24,7 +24,7 @@ def create_list_objects(names):
     for name in names:
         lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
-        lightning_model.test_batch_size = 32
+        lightning_model.test_batch_size = 16
 
         # load model
         model = lightning_model.model.cuda()
