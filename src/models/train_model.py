@@ -214,6 +214,7 @@ def init_trainer() -> Trainer:
             accelerator=cst.device,
             limit_train_batches=1,
             limit_val_batches=1,
+            precision='16-mixed'
         )
 
     else:
@@ -222,7 +223,8 @@ def init_trainer() -> Trainer:
             max_epochs=wandb.config.max_epochs,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback],  # , early_stopping_callback],
-            accelerator=cst.device
+            accelerator=cst.device,
+            precision='16-mixed'
         )
 
     return trainer
