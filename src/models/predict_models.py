@@ -32,18 +32,17 @@ def create_list_objects(names):
 
 def predict(models, iterators):
     for batches in tqdm(zip(*iterators)):
-        outputs = torch.Tensor((10, 512, 512))
-        print(outputs.dtype)
+        outputs = torch.zeros((10, 512, 512))
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
             aerial = aerial.cuda()
             sen = sen.cuda()
 
-            outputs = models[i](aerial=aerial, sen=sen)
-            print(outputs.dtype)
-            outputs = outputs.softmax(dim=1)
-            outputs = outputs.argmax(dim=1)
+            output = models[i](aerial=aerial, sen=sen)
+            output = output.softmax(dim=1)
+
+        outputs = outputs.argmax(dim=1)
 
         break
 
