@@ -37,9 +37,10 @@ def create_list_objects(names, test_batch_size, test_num_workers):
         dataloader = lightning_model.test_dataloader()
         dataloaders.append(dataloader)
 
-    iterators = [iter(loader) for loader in dataloaders]
+    iterators_1 = [iter(loader) for loader in dataloaders]
+    iterators_2 = [iter(loader) for loader in dataloaders]
 
-    return models, iterators
+    return models, iterators_1, iterators_2
 
 
 def predict(models, iterators, test_batch_size, path_predictions, save_predictions):
@@ -82,12 +83,12 @@ if __name__ == '__main__':
     test_num_workers = 10
     path_predictions = ''
 
-    models, iterators = create_list_objects(args.names, test_batch_size, test_num_workers)
+    models, iterators_1, iterators_2 = create_list_objects(args.names, test_batch_size, test_num_workers)
 
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, iterators, test_batch_size, path_predictions, save_predictions=False)
+    predict(models, iterators_1, test_batch_size, path_predictions, save_predictions=False)
     end.record()
 
     # Waits for everything to finish running
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    predict(models, iterators, test_batch_size, path_predictions, save_predictions=True)
+    predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
