@@ -222,13 +222,7 @@ class FLAIR2Lightning(pl.LightningModule):
 
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
         outputs = outputs.softmax(dim=1)
-        # outputs = outputs.argmax(dim=1)
-
-        # * Challenge rule: set the data type of the image files as Byte (uint8)
-        # * with values ranging from 0 to 12
-
-        # ! Do not uncomment the following line, read the comment above.
-        # pred_labels += 1
+        outputs = outputs.argmax(dim=1)
 
         for pred_label, img_id in zip(outputs, image_ids):
             img = pred_label.numpy(force=True)
