@@ -26,7 +26,8 @@ iterators = [iter(loader) for loader in dataloaders]
 
 for batches in zip(*iterators):
     for i, batch in enumerate(batches):
-        print(batch)
+        image_ids, aerial, sen, _ = batch
+        print(image_ids)
 
     break
 
