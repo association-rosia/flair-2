@@ -39,7 +39,7 @@ def predict(models, iterators, path_predictions, save_predictions):
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
-            print(image_ids)
+            # print(image_ids)
             aerial = aerial.cuda()
             sen = sen.cuda()
 
