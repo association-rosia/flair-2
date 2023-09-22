@@ -1,6 +1,9 @@
 from src.data.make_dataset import FLAIR2Dataset
 from torch.utils.data import DataLoader
 
+import sys
+sys.path.append('.')
+
 import argparse
 
 from src.constants import get_constants
