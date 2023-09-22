@@ -62,7 +62,6 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
         outputs = outputs.argmax(dim=1)
 
         if save_predictions:
-            print('test')
             for pred_label, img_id in zip(outputs, image_ids):
                 img = pred_label.numpy(force=True)
                 img = img.astype(dtype=np.uint8)
@@ -81,7 +80,6 @@ if __name__ == '__main__':
 
     test_batch_size = 10
     test_num_workers = 10
-    path_predictions = ''
 
     models, iterators_1, iterators_2 = create_list_objects(args.names, test_batch_size, test_num_workers)
 
