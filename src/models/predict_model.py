@@ -5,6 +5,7 @@ import sys
 from time import time
 
 import torch
+from torch.cuda import Event
 
 sys.path.append('.')
 
@@ -101,12 +102,17 @@ class FLAIR2Submission:
         path_run = self.update_variables(run_name)
         lightning_model = self.load_lightning_model(path_run, run_name)
 
-        start = time()
-        self.trainer.test(model=lightning_model)
-        end = time()
+        start, end = Event(enable_timing=True), Event(enable_timing=True)
 
+        start.record()
+        self.trainer.test(model=lightning_model)
+        end.record()
+
+        torch.cuda.synchronize()
+
+        inference_time_seconds = start.elapsed_time(end) / 1000.0
         # 4 seconds is the gap between the displayed time by PL and the calculated time by the librairy "time"
-        inference_time_seconds = end - start - 4
+        # inference_time_seconds = end - start - 4
         minutes = floor(inference_time_seconds // 60)
         seconds = floor(inference_time_seconds % 60)
         submission_inference_time = f'{minutes}-{seconds}'
