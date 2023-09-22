@@ -32,7 +32,7 @@ def create_list_objects(names):
 
 def predict(models, iterators):
     for batches in tqdm(zip(*iterators)):
-        outputs = torch.zeros((10, 13, 512, 512))
+        outputs = torch.zeros((10, 13, 512, 512)).cuda()
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
