@@ -19,9 +19,12 @@ from src.constants import get_constants
 cst = get_constants()
 
 
-def create_list_objects(names, test_batch_size, test_num_workers):
+def create_list_objects(names, weights, test_batch_size, test_num_workers):
     models = []
     dataloaders = []
+
+    if not weights:
+        weights = [1 for _ in names]
 
     for name in names:
         lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
@@ -40,10 +43,10 @@ def create_list_objects(names, test_batch_size, test_num_workers):
     iterators_1 = [iter(loader) for loader in dataloaders]
     iterators_2 = [iter(loader) for loader in dataloaders]
 
-    return models, iterators_1, iterators_2
+    return models, weights, iterators_1, iterators_2
 
 
-def predict(models, iterators, test_batch_size, path_predictions, save_predictions):
+def predict(models, weights, iterators, path_predictions, save_predictions):
     print(f'\nInference - save_predictions = {save_predictions}')
 
     for batches in tqdm(zip(*iterators), total=len(iterators[0])):
@@ -57,6 +60,7 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
 
             output = models[i](aerial=aerial, sen=sen)
             output = output.softmax(dim=1)
+            output = weights[i] * output
             outputs = torch.add(outputs, output)
 
         outputs = outputs.argmax(dim=1)
@@ -72,6 +76,7 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script for creating submissions with specified models names')
     parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
+    parser.add_argument('-n', '--weights', nargs='+', type=str, help='Name of models to use for submissions')
     args = parser.parse_args()
 
     run_names = '_'.join(args.names)
@@ -81,12 +86,15 @@ if __name__ == '__main__':
     test_batch_size = 10
     test_num_workers = 18
 
-    models, iterators_1, iterators_2 = create_list_objects(args.names, test_batch_size, test_num_workers)
+    models, weights, iterators_1, iterators_2 = create_list_objects(args.names,
+                                                                    args.weights,
+                                                                    test_batch_size,
+                                                                    test_num_workers)
 
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, iterators_1, test_batch_size, path_predictions, save_predictions=False)
+    predict(models, weights, iterators_1, path_predictions, save_predictions=True)
     end.record()
 
     # Waits for everything to finish running
@@ -96,7 +104,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
+    # predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
