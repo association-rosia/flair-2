@@ -43,13 +43,14 @@ def create_list_objects(names, test_batch_size, test_num_workers):
 
 
 def predict(models, iterators, test_batch_size, path_predictions, save_predictions):
+    print(f'\nInfernce with save_predictions = {save_predictions}')
+
     for batches in tqdm(zip(*iterators), total=len(iterators[0])):
         image_ids = None
         outputs = torch.zeros((test_batch_size, 13, 512, 512)).cuda()
 
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
-            # print(image_ids)
             aerial = aerial.cuda()
             sen = sen.cuda()
 
