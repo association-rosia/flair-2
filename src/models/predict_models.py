@@ -76,7 +76,7 @@ def predict(models, weights, iterators, path_predictions, save_predictions):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script for creating submissions with specified models names')
     parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
-    parser.add_argument('-n', '--weights', nargs='+', type=str, help='Name of models to use for submissions')
+    parser.add_argument('-w', '--weights', nargs='+', type=str, help='Weights of models to use for submissions')
     args = parser.parse_args()
 
     run_names = '_'.join(args.names)
