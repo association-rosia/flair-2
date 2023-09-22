@@ -48,7 +48,6 @@ def predict(models, iterators, test_batch_size, path_predictions, save_predictio
 
     for batches in tqdm(zip(*iterators), total=len(iterators[0])):
         image_ids = None
-        print(len(batches[0][0]))
         outputs = torch.zeros((len(batches[0][0]), 13, 512, 512)).cuda()
 
         for i, batch in enumerate(batches):
