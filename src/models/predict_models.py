@@ -1,11 +1,14 @@
 import os
 import sys
 
+import torch
+
 sys.path.append(os.curdir)
 
 from src.models.lightning import FLAIR2Lightning
 
 import argparse
+from tqdm import tqdm
 
 from src.constants import get_constants
 
@@ -28,7 +31,11 @@ def create_list_objects(names):
 
 
 def predict(models, iterators):
-    for batches in zip(*iterators):
+    for batches in tqdm(zip(*iterators)):
+        outputs = torch.Tensor(batches[0][1].shape)
+
+        print(outputs.shape)
+
         for i, batch in enumerate(batches):
             image_ids, aerial, sen, _ = batch
             aerial = aerial.cuda()
