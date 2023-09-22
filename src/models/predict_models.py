@@ -14,7 +14,11 @@ parser = argparse.ArgumentParser(description='Script for creating submissions wi
 parser.add_argument('-n', '--names', nargs='+', type=str, help='Name of models to use for submissions')
 args = parser.parse_args()
 
-print(args.names)
+models = []
+dataloaders = []
+for name in args.names:
+    print(name)
+
 
 # TODO: create test dataloader
 
