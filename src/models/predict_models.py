@@ -1,8 +1,9 @@
 from src.data.make_dataset import FLAIR2Dataset
 from torch.utils.data import DataLoader
 
+import os
 import sys
-sys.path.append('.')
+sys.path.append(os.curdir)
 
 import argparse
 
