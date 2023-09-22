@@ -41,8 +41,11 @@ def predict(models, iterators):
 
             output = models[i](aerial=aerial, sen=sen)
             output = output.softmax(dim=1)
+            outputs = torch.add(outputs, output)
+            print(outputs.shape)
 
         outputs = outputs.argmax(dim=1)
+        print(outputs.shape)
 
         break
 
