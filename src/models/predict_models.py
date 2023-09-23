@@ -82,7 +82,8 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--weights', nargs='+', type=str, help='Weights of models to use for submissions')
     args = parser.parse_args()
 
-    run_names = '_'.join(args.names)
+    run_names = [name.split('-')[0] for name in args.names]  # Bugfix: OSError: [Errno 36] File name too long
+    run_names = '_'.join(run_names)
     path_predictions = os.path.join(cst.path_submissions, run_names)
     os.makedirs(path_predictions, exist_ok=True)
 
