@@ -18,6 +18,8 @@ from src.constants import get_constants
 
 cst = get_constants()
 
+torch.set_float32_matmul_precision('medium')
+
 
 def create_list_objects(names, weights, test_batch_size, test_num_workers):
     models = []
@@ -95,7 +97,7 @@ if __name__ == '__main__':
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, weights, iterators_1, path_predictions, save_predictions=True)
+    predict(models, weights, iterators_1, path_predictions, save_predictions=False)
     end.record()
 
     # Waits for everything to finish running
@@ -104,6 +106,8 @@ if __name__ == '__main__':
     minutes = floor(inference_time_seconds // 60)
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
+
+    print(cst.baseline_inference_time, submission_inference_time)
 
     # predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
 

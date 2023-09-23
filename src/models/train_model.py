@@ -25,7 +25,7 @@ cst = get_constants()
 
 import src.data.select_log_image as sli
 
-torch.set_float32_matmul_precision('high')
+torch.set_float32_matmul_precision('medium')
 
 
 def main():
@@ -36,15 +36,14 @@ def main():
     init_wandb()
 
     # Set torch seed
-    torch.manual_seed(wandb.config.seed)
+    # torch.manual_seed(wandb.config.seed)
 
     # Load labels and image lists
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
     list_images_train = get_list_images(cst.path_data_train)
 
-    list_images_train, list_images_val = train_test_split(list_images_train,
-                                                          test_size=0.01,
-                                                          random_state=wandb.config.seed)
+    list_images_train, list_images_val = train_test_split(list_images_train, test_size=0.01)
+    # random_state=wandb.config.seed)
 
     list_images_test = get_list_images(cst.path_data_test)
 
