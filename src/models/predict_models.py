@@ -87,7 +87,7 @@ if __name__ == '__main__':
     os.makedirs(path_predictions, exist_ok=True)
 
     test_batch_size = 10
-    test_num_workers = 8
+    test_num_workers = 5
 
     models, weights, iterators_1, iterators_2 = create_list_objects(args.names,
                                                                     args.weights,
