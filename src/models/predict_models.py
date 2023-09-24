@@ -98,7 +98,7 @@ if __name__ == '__main__':
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, weights, iterators_1, path_predictions, save_predictions=False)
+    predict(models, weights, iterators_1, path_predictions, save_predictions=True)
     end.record()
 
     # Waits for everything to finish running
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
+    # predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
