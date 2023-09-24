@@ -223,6 +223,7 @@ def init_trainer() -> Trainer:
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback],  # , early_stopping_callback],
             accelerator=cst.device,
+            gpus=4,
             precision='16-mixed'
         )
 
