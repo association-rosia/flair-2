@@ -51,7 +51,7 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
             sen_size=40,
             sen_temp_size=6,
             sen_temp_reduc='median',
-            sen_list_bands=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            sen_list_bands=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
             prob_cover=10,
             use_augmentation=True,
             use_tta=False,
