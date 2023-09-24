@@ -3,6 +3,9 @@ import sys
 
 import torch
 import numpy as np
+from torch.utils.data import DataLoader
+
+from src.data.make_dataset import FLAIR2Dataset, get_list_images
 
 sys.path.append(os.curdir)
 
@@ -39,10 +42,32 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
         models.append(model)
 
         # load dataloader
-        dataloader = lightning_model.test_dataloader()
-        dataloaders.append(dataloader)
+        # dataloader = lightning_model.test_dataloader()
+        list_images_test = get_list_images(cst.path_data_test)
 
-        print(len(dataloader))
+        dataset_test = FLAIR2Dataset(
+            list_images=list_images_test,
+            aerial_list_bands=['R', 'G', 'B'],
+            sen_size=40,
+            sen_temp_size=6,
+            sen_temp_reduc='median',
+            sen_list_bands=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            prob_cover=10,
+            use_augmentation=True,
+            use_tta=False,
+            is_val=False,
+            is_test=True,
+        )
+
+        dataloader = DataLoader(
+            dataset=dataset_test,
+            batch_size=test_batch_size,
+            num_workers=test_num_workers,
+            shuffle=False,
+            drop_last=False,
+        )
+
+        dataloaders.append(dataloader)
 
     iterators_1 = [iter(loader) for loader in dataloaders]
     iterators_2 = [iter(loader) for loader in dataloaders]
