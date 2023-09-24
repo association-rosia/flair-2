@@ -1,13 +1,13 @@
 import os
 import sys
 
+sys.path.append(os.curdir)
+
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
 
 from src.data.make_dataset import FLAIR2Dataset, get_list_images
-
-sys.path.append(os.curdir)
 
 from src.models.lightning import FLAIR2Lightning
 
