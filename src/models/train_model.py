@@ -222,9 +222,9 @@ def init_trainer() -> Trainer:
             max_epochs=wandb.config.max_epochs,
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback],  # , early_stopping_callback],
-            gpus=4,
-            accelerator='ddp',
-            # accelerator=cst.device,
+            accelerator=cst.device,
+            devices=4,
+            strategy='ddp',
             precision='16-mixed'
         )
 
