@@ -38,6 +38,8 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
         model = lightning_model.model.half().cuda()
         models.append(model)
 
+        print(model)
+
         # load dataloader
         dataloader = lightning_model.test_dataloader()
         dataloaders.append(dataloader)
