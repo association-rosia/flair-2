@@ -20,7 +20,7 @@ parameters:
 
   train_batch_size:
     distribution: constant
-    value: 32
+    value: 16
 
   arch_lib:
     distribution: constant
@@ -28,7 +28,7 @@ parameters:
 
   arch:
     distribution: constant
-    value: 'nvidia/segformer-b2-finetuned-ade-512-512'
+    value: 'nvidia/segformer-b5-finetuned-ade-640-640'
 
   max_epochs:
     distribution: constant
