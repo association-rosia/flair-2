@@ -26,7 +26,6 @@ torch.set_float32_matmul_precision('medium')
 
 def create_list_objects(names, weights, test_batch_size, test_num_workers):
     models = []
-    dataloaders = []
 
     if not weights:
         weights = [1 for _ in names]
@@ -41,55 +40,47 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
         model = lightning_model.model.half().cuda()
         models.append(model)
 
-        # load dataloader
-        # dataloader = lightning_model.test_dataloader()
-        list_images_test = get_list_images(cst.path_data_test)
+    # load dataloader
+    # dataloader = lightning_model.test_dataloader()
+    list_images_test = get_list_images(cst.path_data_test)
 
-        dataset_test = FLAIR2Dataset(
-            list_images=list_images_test,
-            aerial_list_bands=['R', 'G', 'B'],
-            sen_size=40,
-            sen_temp_size=6,
-            sen_temp_reduc='median',
-            sen_list_bands=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
-            prob_cover=10,
-            use_augmentation=True,
-            use_tta=False,
-            is_val=False,
-            is_test=True,
-        )
+    dataset_test = FLAIR2Dataset(
+        list_images=list_images_test,
+        aerial_list_bands=['R', 'G', 'B'],
+        sen_size=40,
+        sen_temp_size=6,
+        sen_temp_reduc='median',
+        sen_list_bands=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
+        prob_cover=10,
+        use_augmentation=True,
+        use_tta=False,
+        is_val=False,
+        is_test=True,
+    )
 
-        dataloader = DataLoader(
-            dataset=dataset_test,
-            batch_size=test_batch_size,
-            num_workers=test_num_workers,
-            shuffle=False,
-            drop_last=False,
-        )
+    dataloader = DataLoader(
+        dataset=dataset_test,
+        batch_size=test_batch_size,
+        num_workers=test_num_workers,
+        shuffle=False,
+        drop_last=False,
+    )
 
-        dataloaders.append(dataloader)
-
-    iterators_1 = [iter(loader) for loader in dataloaders]
-    iterators_2 = [iter(loader) for loader in dataloaders]
-
-    return models, weights, iterators_1, iterators_2
+    return models, weights, dataloader
 
 
-def predict(models, weights, iterators, path_predictions, save_predictions):
+def predict(models, weights, dataloader, path_predictions, save_predictions):
     print(f'\nInference - save_predictions = {save_predictions}')
 
-    for batches in tqdm(zip(*iterators), total=len(iterators[0])):
-        image_ids = None
-        outputs = torch.zeros((len(batches[0][0]), 13, 512, 512)).cuda()
+    for batch in tqdm(dataloader, total=len(dataloader)):
+        outputs = torch.zeros((len(batch[0]), 13, 512, 512)).cuda()
+        image_ids, aerial, sen, _ = batch
+        aerial = aerial.half().cuda()
+        sen = sen.half().cuda()
 
-        for i, batch in enumerate(batches):
-            image_ids, aerial, sen, _ = batch
-            aerial = aerial.half().cuda()
-            sen = sen.half().cuda()
-
-            output = models[i](aerial=aerial, sen=sen)
+        for i, model in enumerate(models):
+            output = model(aerial=aerial, sen=sen)
             output = output.softmax(dim=1)
-
             output = torch.mul(float(weights[i]), output)
             outputs = torch.add(outputs, output)
 
@@ -117,15 +108,15 @@ if __name__ == '__main__':
     test_batch_size = 8
     test_num_workers = 10
 
-    models, weights, iterators_1, iterators_2 = create_list_objects(args.names,
-                                                                    args.weights,
-                                                                    test_batch_size,
-                                                                    test_num_workers)
+    models, weights, dataloader = create_list_objects(args.names,
+                                                      args.weights,
+                                                      test_batch_size,
+                                                      test_num_workers)
 
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, weights, iterators_1, path_predictions, save_predictions=False)
+    predict(models, weights, dataloader, path_predictions, save_predictions=False)
     end.record()
 
     # Waits for everything to finish running
@@ -135,7 +126,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    predict(models, weights, iterators_2, path_predictions, save_predictions=True)
+    predict(models, weights, dataloader, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
