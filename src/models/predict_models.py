@@ -135,7 +135,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    predict(models, iterators_2, test_batch_size, path_predictions, save_predictions=True)
+    predict(models, weights, iterators_2, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
