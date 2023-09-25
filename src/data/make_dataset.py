@@ -35,6 +35,7 @@ class FLAIR2Dataset(Dataset):
             prob_cover: int,
             use_augmentation: bool,
             use_tta: bool,
+            one_vs_all: int,
             is_test: bool,
     ):
         """
@@ -52,6 +53,7 @@ class FLAIR2Dataset(Dataset):
         self.list_images = list_images
         self.use_augmentation = use_augmentation
         self.use_tta = use_tta
+        self.one_vs_all = one_vs_all
 
         self.aerial_band2idx = cst.aerial_band2idx
         aerial_band = self.aerial_band2idx.keys()
@@ -530,8 +532,13 @@ class FLAIR2Dataset(Dataset):
                 angle=config_augmentation['angle'],
             )
         labels = labels.squeeze(0)
-
-        return torch.where(labels < 13, labels, 12)
+        
+        if self.one_vs_all:
+            labels = torch.where(labels == self.one_vs_all, 0, 1)
+        else:
+            labels = torch.where(labels < 13, labels, 12)
+        
+        return labels
 
     @staticmethod
     def data_augmentation(
@@ -610,7 +617,7 @@ class FLAIR2Dataset(Dataset):
 
         return name_image, aerial, sen, labels
 
-
+        
 def get_list_images(path) -> list[str]:
     """
     Get a list of image paths from a directory.
@@ -633,7 +640,7 @@ if __name__ == '__main__':
     path_data = cst.path_data_train
     list_images = get_list_images(path_data)
 
-    dataset = FLAIR2Dataset(
+    dataset = FLAIR2DatasetOneVsAll(
         list_images=list_images,
         aerial_list_bands=['R', 'G', 'B'],
         sen_size=40,
@@ -644,6 +651,7 @@ if __name__ == '__main__':
         use_augmentation=True,
         use_tta=False,
         is_test=False,
+        target_class=2
     )
 
     dataloader = DataLoader(
@@ -653,7 +661,7 @@ if __name__ == '__main__':
     )
 
     image_id, aerial, sen, labels = dataset[0]
-    print(image_id, aerial.shape, sen.shape, labels.shape)
+    print(image_id, aerial.shape, sen.shape, labels)
 
     for image_id, aerial, sen, labels in dataloader:
         print(image_id, aerial.shape, sen.shape, labels.shape)
