@@ -206,6 +206,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
             use_augmentation=self.config.use_augmentation,
             use_tta=self.config.use_tta,
             one_vs_all=self.config.one_vs_all,
+            is_val=False,
             is_test=False,
         )
 
@@ -229,7 +230,8 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
             prob_cover=self.config.prob_cover,
             use_augmentation=self.config.use_augmentation,
             use_tta=self.config.use_tta,
-            is_test=True,
+            is_val=True,
+            is_test=False,
         )
 
         return DataLoader(
@@ -239,26 +241,3 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
             shuffle=False,
             drop_last=True,
         )
-
-    # def test_dataloader(self):
-    #     # Initialize test dataset and data loader
-    #     dataset_test = FLAIR2Dataset(
-    #         list_images=self.config.list_images_test,
-    #         aerial_list_bands=self.config.aerial_list_bands,
-    #         sen_size=self.config.sen_size,
-    #         sen_temp_size=self.config.sen_temp_size,
-    #         sen_temp_reduc=self.config.sen_temp_reduc,
-    #         sen_list_bands=self.config.sen_list_bands,
-    #         prob_cover=self.config.prob_cover,
-    #         use_augmentation=self.config.use_augmentation,
-    #         use_tta=self.config.use_tta,
-    #         is_test=True,
-    #     )
-
-    #     return DataLoader(
-    #         dataset=dataset_test,
-    #         batch_size=self.config.test_batch_size,
-    #         num_workers=cst.test_num_workers,
-    #         shuffle=False,
-    #         drop_last=False,
-    #     )
