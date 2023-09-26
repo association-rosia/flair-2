@@ -1,16 +1,12 @@
 import os
-import shutil
-from time import time
 import json
 
 import numpy as np
 import pytorch_lightning as pl
-import tifffile as tiff
 import torch
 import torch.nn as nn
 import wandb
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 from torchmetrics import MetricCollection
@@ -79,7 +75,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
 
         # init metrics for evaluation
         self.metrics = MetricCollection({
-                'val/miou': BinaryJaccardIndex()
+                'val/iou': BinaryJaccardIndex()
             })
         
         self.inverse_normalize = self.init_inverse_normalize(self.config.aerial_list_bands)

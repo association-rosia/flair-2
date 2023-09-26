@@ -30,7 +30,7 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
     if not weights:
         weights = [1 for _ in names]
 
-    for name in names:
+    for i, name in enumerate(names):
         lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
         lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
         lightning_model.test_batch_size = test_batch_size
@@ -38,7 +38,8 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
 
         # load model
         model = lightning_model.model.half().cuda()
-        models.append(model)
+        one_vs_all = lightning_model.config.one_vs_all
+        models.append((weights[i], model, one_vs_all))
 
     # load dataloader
     # dataloader = lightning_model.test_dataloader()
@@ -66,23 +67,26 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
         drop_last=False,
     )
 
-    return models, weights, dataloader
+    return models, dataloader
 
 
-def predict(models, weights, dataloader, path_predictions, save_predictions):
+def predict(models, dataloader, path_predictions, save_predictions):
     print(f'\nInference - save_predictions = {save_predictions}')
 
     for batch in tqdm(dataloader, total=len(dataloader)):
         outputs = torch.zeros((len(batch[0]), 13, 512, 512)).cuda()
+        outputs[:, -1] = 0.5  # init the "other" class to 0.5
+
         image_ids, aerial, sen, _ = batch
         aerial = aerial.half().cuda()
         sen = sen.half().cuda()
 
-        for i, model in enumerate(models):
+        for weight, model, one_vs_all in models:
             output = model(aerial=aerial, sen=sen)
+            output = torch.unsqueeze(output, dim=1)
             output = output.softmax(dim=1)
-            output = torch.mul(float(weights[i]), output)
-            outputs = torch.add(outputs, output)
+            output = torch.mul(float(weight), output)
+            outputs[:, one_vs_all] = output
 
         outputs = outputs.argmax(dim=1)
 
@@ -108,15 +112,15 @@ if __name__ == '__main__':
     test_batch_size = 10
     test_num_workers = 10
 
-    models, weights, dataloader = create_list_objects(args.names,
-                                                      args.weights,
-                                                      test_batch_size,
-                                                      test_num_workers)
+    models, dataloader = create_list_objects(args.names,
+                                             args.weights,
+                                             test_batch_size,
+                                             test_num_workers)
 
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, weights, dataloader, path_predictions, save_predictions=True)
+    predict(models, dataloader, path_predictions, save_predictions=True)
     end.record()
 
     # Waits for everything to finish running
@@ -126,7 +130,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    # predict(models, weights, dataloader, path_predictions, save_predictions=True)
+    # predict(models, dataloader, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
