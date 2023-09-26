@@ -22,11 +22,15 @@ _, list_images_val = train_test_split(
 
 dataset_val = FLAIR2Dataset(
     list_images=list_images_val,
+    aerial_list_bands=['R', 'G', 'B'],
     sen_size=40,
-    sen_temp_size=3,
+    sen_temp_size=6,
     sen_temp_reduc='median',
     sen_list_bands=['2', '3', '4', '5', '6', '7', '8', '8a', '11', '12'],
     prob_cover=10,
+    use_augmentation=True,
+    use_tta=False,
+    is_val=True,
     is_test=False,
 )
 
