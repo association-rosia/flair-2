@@ -150,7 +150,6 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
         outputs = self.forward(inputs={'aerial': aerial, 'sen': sen})
 
         labels = labels.float()
-        print(outputs.shape, labels.shape)
         loss = self.criterion(outputs, labels)
 
         self.log('val/loss', loss, on_step=True, on_epoch=True)
