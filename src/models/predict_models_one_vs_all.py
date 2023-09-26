@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from src.data.make_dataset import FLAIR2Dataset, get_list_images
 
-from src.models.lightning import FLAIR2Lightning
+from src.models.lightning_one_vs_all import FLAIR2LightningOneVsAll
 
 import argparse
 from tqdm import tqdm
@@ -32,7 +32,7 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
 
     for i, name in enumerate(names):
         lightning_ckpt = os.path.join(cst.path_models, f'{name}.ckpt')
-        lightning_model = FLAIR2Lightning.load_from_checkpoint(lightning_ckpt)
+        lightning_model = FLAIR2LightningOneVsAll.load_from_checkpoint(lightning_ckpt)
         lightning_model.test_batch_size = test_batch_size
         lightning_model.test_num_workers = test_num_workers
 
