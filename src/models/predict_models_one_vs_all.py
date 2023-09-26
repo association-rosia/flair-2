@@ -88,7 +88,7 @@ def predict(models, dataloader, path_predictions, save_predictions):
             # output = torch.unsqueeze(output, dim=1)
             output = output.softmax(dim=1)
             output = torch.mul(float(weight), output)
-            outputs[:, one_vs_all] = output
+            outputs[:, one_vs_all] = torch.squeeze(output)
 
         outputs = outputs.argmax(dim=1)
 
