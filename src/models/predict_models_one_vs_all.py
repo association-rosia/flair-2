@@ -84,7 +84,8 @@ def predict(models, dataloader, path_predictions, save_predictions):
 
         for weight, model, one_vs_all in models:
             output = model(aerial=aerial, sen=sen)
-            output = torch.unsqueeze(output, dim=1)
+            # don't need to unsqeeze because done in Lightning and not int the model directly
+            # output = torch.unsqueeze(output, dim=1)
             output = output.softmax(dim=1)
             output = torch.mul(float(weight), output)
             outputs[:, one_vs_all] = output
