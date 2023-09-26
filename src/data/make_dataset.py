@@ -534,7 +534,7 @@ class FLAIR2Dataset(Dataset):
         labels = labels.squeeze(0)
         
         if self.one_vs_all:
-            labels = torch.where(labels == self.one_vs_all, 0, 1)
+            labels = torch.where(labels == self.one_vs_all, 1, 0)
         else:
             labels = torch.where(labels < 13, labels, 12)
         
