@@ -59,4 +59,4 @@ if __name__ == '__main__':
 
     print('Save the sorted results list to a JSON file')
     with open('../../data/results.json', 'w') as json_file:
-        json.dump(results[:50], json_file)
+        json.dump(results[:10], json_file)

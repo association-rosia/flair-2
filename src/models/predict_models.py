@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     print(f'>>>>>>> inference_time_seconds = {inference_time_seconds}')
 
-    predict(models, weights, dataloader, path_predictions, save_predictions=True)
+    # predict(models, weights, dataloader, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
     zip_path_submission = os.path.join(cst.path_submissions, name_submission)
