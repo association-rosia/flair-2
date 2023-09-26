@@ -17,6 +17,8 @@ from sklearn.model_selection import train_test_split
 from src.data.make_dataset import get_list_images
 
 from src.models.lightning import FLAIR2Lightning
+from src.models.lightning_one_vs_all import FLAIR2LightningOneVsAll
+from src.models.config_model import FLAIR2ConfigModel
 from pytorch_lightning import Trainer, callbacks, loggers
 
 from src.constants import get_constants
@@ -40,36 +42,47 @@ def main():
 
     # Load labels and image lists
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
-    list_images_train = get_list_images(cst.path_data_train)
-
-    list_images_train, list_images_val = train_test_split(list_images_train,
-                                                          test_size=0.01,
-                                                          random_state=wandb.config.seed)
-
+    classes = df['Class']
+    
+    list_images_train, list_images_val = init_train_val_images()
     list_images_test = get_list_images(cst.path_data_test)
 
-    # Initialize FLAIR-2 Lightning model
-    lightning_model = FLAIR2Lightning(
-        arch_lib=wandb.config.arch_lib,
-        arch=wandb.config.arch,
-        encoder_name=wandb.config.encoder_name,
-        classes=df['Class'],
-        learning_rate=wandb.config.learning_rate,
-        class_weights=wandb.config.class_weights,
-        list_images_train=list_images_train,
-        list_images_val=list_images_val,
-        list_images_test=list_images_test,
-        aerial_list_bands=wandb.config.aerial_list_bands,
-        sen_size=wandb.config.sen_size,
-        sen_temp_size=wandb.config.sen_temp_size,
-        sen_temp_reduc=wandb.config.sen_temp_reduc,
-        sen_list_bands=wandb.config.sen_list_bands,
-        prob_cover=wandb.config.prob_cover,
-        use_augmentation=wandb.config.use_augmentation,
-        use_tta=wandb.config.use_tta,
-        train_batch_size=wandb.config.train_batch_size,
-        test_batch_size=wandb.config.test_batch_size,
-    )
+    if not wandb.config.one_vs_all:
+        # Initialize FLAIR-2 Lightning model
+        lightning_model = FLAIR2Lightning(
+            arch_lib=wandb.config.arch_lib,
+            arch=wandb.config.arch,
+            encoder_name=wandb.config.encoder_name,
+            classes=classes,
+            learning_rate=wandb.config.learning_rate,
+            class_weights=wandb.config.class_weights,
+            list_images_train=list_images_train,
+            list_images_val=list_images_val,
+            list_images_test=list_images_test,
+            aerial_list_bands=wandb.config.aerial_list_bands,
+            sen_size=wandb.config.sen_size,
+            sen_temp_size=wandb.config.sen_temp_size,
+            sen_temp_reduc=wandb.config.sen_temp_reduc,
+            sen_list_bands=wandb.config.sen_list_bands,
+            prob_cover=wandb.config.prob_cover,
+            use_augmentation=wandb.config.use_augmentation,
+            use_tta=wandb.config.use_tta,
+            train_batch_size=wandb.config.train_batch_size,
+            test_batch_size=wandb.config.test_batch_size,
+        )
+    else:        
+        config = FLAIR2ConfigModel(
+            **wandb.config,
+            classes=classes,
+            list_images_train=list_images_train,
+            list_images_val=list_images_val,
+            list_images_test=list_images_test,
+        )
+        
+        lightning_model = FLAIR2LightningOneVsAll(
+            config=config,
+        )
+        
 
     # Init the PyTorch Lightning Trainer
     trainer = init_trainer()
@@ -90,6 +103,22 @@ def main():
 
     # Finish the WandB run
     wandb.finish()
+    
+    
+def init_train_val_images():
+    list_images = get_list_images(cst.path_data_train)
+    
+    if wandb.config.one_vs_all:
+        df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
+        df = df[df[wandb.config.one_vs_all] > 0]
+        
+        list_images = [image for image in list_images if os.path.basename(image) in df['label']]
+    
+    list_images_train, list_images_val = train_test_split(list_images,
+                                                          test_size=0.01,
+                                                          random_state=wandb.config.seed)
+
+    return list_images_train, list_images_val
 
 
 def find_optimal_tta_limit(lightning_model, trainer):
@@ -163,6 +192,7 @@ def init_wandb():
     parser.add_argument('--tta-limit', type=int, default=None, help='TTA limit used')
     parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
     parser.add_argument('--max_epochs', type=int, default=30, help='Maximum number of epochs for training')
+    parser.add_argument('--one_vs_all', type=int, default=None, help='Target to use in one vs all training. None mean normal training.')
     parser.add_argument('--dry', action='store_true', default=False, help='Enable or disable dry mode pipeline')
 
     # Parse the arguments
