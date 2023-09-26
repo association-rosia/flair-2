@@ -35,6 +35,7 @@ class FLAIR2Dataset(Dataset):
             prob_cover: int,
             use_augmentation: bool,
             use_tta: bool,
+            is_val: bool,
             one_vs_all: int,
             is_test: bool,
     ):
@@ -85,6 +86,7 @@ class FLAIR2Dataset(Dataset):
         if prob_cover <= 0:
             raise ValueError(f'prob_cover is an integer between 1 and 100, found {prob_cover}')
         self.prob_cover = prob_cover
+        self.is_val = is_val
         self.is_test = is_test
 
         self.path = cst.path_data_train if not self.is_test else cst.path_data_test
@@ -470,7 +472,7 @@ class FLAIR2Dataset(Dataset):
         sen_data = self.sen_temporal_reduction(sen_data, idx_temporal)
         sen_data = sen_data / 10_000
 
-        if use_augmentation and not self.use_tta and not self.is_test:
+        if use_augmentation and not self.use_tta and not self.is_test and not self.is_val:
             sen_data = self.data_augmentation(
                 sen_data,
                 hflip=config_augmentation['hflip'],
@@ -499,7 +501,7 @@ class FLAIR2Dataset(Dataset):
         aerial = aerial[:, :, aerial_idx_band]
         aerial = F.to_tensor(aerial)
 
-        if self.use_augmentation and not self.use_tta and not self.is_test:
+        if self.use_augmentation and not self.use_tta and not self.is_test and not self.is_val:
             aerial = self.data_augmentation(
                 aerial,
                 **config_augmentation,
@@ -523,7 +525,7 @@ class FLAIR2Dataset(Dataset):
         labels = labels - 1
 
         labels = labels.unsqueeze(0)
-        if self.use_augmentation and not self.use_tta and not self.is_test:
+        if self.use_augmentation and not self.use_tta and not self.is_test and not self.is_val:
             labels = self.data_augmentation(
                 labels,
                 hflip=config_augmentation['hflip'],
@@ -650,6 +652,7 @@ if __name__ == '__main__':
         prob_cover=10,
         use_augmentation=True,
         use_tta=False,
+        is_val=False,
         is_test=False,
         target_class=2
     )

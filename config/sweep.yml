@@ -9,9 +9,10 @@ command:
 method: grid
 
 parameters:
+
   seed:
-    distribution: constant
-    value: 42
+    distribution: categorical
+    values: [1, 2, 3, 4, 5, 6]
 
   learning_rate:
     distribution: constant
@@ -19,28 +20,23 @@ parameters:
 
   train_batch_size:
     distribution: constant
-    value: 16
+    value: 32
 
   arch_lib:
     distribution: constant
     value: 'custom'
 
   arch:
-    distribution: categorical
-    values: ['nvidia/segformer-b0-finetuned-ade-512-512',
-             'nvidia/segformer-b1-finetuned-ade-512-512',
-             'nvidia/segformer-b2-finetuned-ade-512-512',
-             'nvidia/segformer-b3-finetuned-ade-512-512',
-             'nvidia/segformer-b4-finetuned-ade-512-512',
-             'nvidia/segformer-b5-finetuned-ade-640-640']
+    distribution: constant
+    value: 'nvidia/segformer-b3-finetuned-ade-512-512'
 
   max_epochs:
     distribution: constant
-    value: 10
+    value: 8
 
   sen_temp_size:
     distribution: constant
-    value: 4
+    value: 6
 
   aerial_list_bands:
     distribution: constant
