@@ -47,7 +47,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
         self.log_image_idx = None
-        num_classes = 2 if self.config.one_vs_all else len(self.config.classes)
+        num_classes = 1 if self.config.one_vs_all else len(self.config.classes)
 
         if self.config.arch_lib == 'custom':
             self.model = MultiModalSegformer.from_pretrained(
@@ -105,7 +105,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
             x = self.model(inputs=inputs, step=self.step, batch_size=self.config.train_batch_size, limit=self.tta_limit)
         else:
             x = self.model(**inputs)
-        return x
+        return x.squeeze(dim=1)
 
     def on_train_epoch_start(self) -> None:
         self.step = 'training'
