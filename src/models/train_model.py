@@ -255,8 +255,8 @@ def init_trainer() -> Trainer:
             logger=loggers.WandbLogger(),
             callbacks=[checkpoint_callback],  # , early_stopping_callback],
             accelerator=cst.device,
-            devices=4,
-            strategy='ddp',
+            # devices=4,
+            # strategy='ddp',
             precision='16-mixed'
         )
 
