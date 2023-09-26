@@ -75,7 +75,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
 
         # init metrics for evaluation
         self.metrics = MetricCollection({
-                'val/iou': BinaryJaccardIndex()
+                'val/miou': BinaryJaccardIndex()
             })
         
         self.inverse_normalize = self.init_inverse_normalize(self.config.aerial_list_bands)
