@@ -230,6 +230,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
             prob_cover=self.config.prob_cover,
             use_augmentation=self.config.use_augmentation,
             use_tta=self.config.use_tta,
+            one_vs_all=self.config.one_vs_all,
             is_val=True,
             is_test=False,
         )
