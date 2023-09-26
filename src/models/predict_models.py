@@ -126,6 +126,8 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
+    print(f'>>>>>>> inference_time_seconds = {inference_time_seconds}')
+
     predict(models, weights, dataloader, path_predictions, save_predictions=True)
 
     name_submission = f'{run_names}_{cst.baseline_inference_time}_{submission_inference_time}'
