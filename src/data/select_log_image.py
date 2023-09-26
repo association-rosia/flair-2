@@ -17,7 +17,7 @@ cst = get_constants()
 import pandas as pd
 
 
-def main(list_images_val):
+def main(list_images_val, one_vs_all):
     dataset = FLAIR2Dataset(
         list_images=list_images_val,
         aerial_list_bands=['R', 'G', 'B'],
@@ -30,6 +30,7 @@ def main(list_images_val):
         use_tta=False,
         is_val=True,
         is_test=False,
+        one_vs_all=one_vs_all,
     )
 
     dataloader = DataLoader(

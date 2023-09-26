@@ -88,7 +88,7 @@ def main():
     trainer = init_trainer()
 
     # Select image use for W&B logging
-    log_image_idx = sli.main(list_images_val)
+    log_image_idx = sli.main(list_images_val, wandb.config.one_vs_all)
     lightning_model.log_image_idx = log_image_idx
 
     if wandb.config.use_augmentation and wandb.config.use_tta:
