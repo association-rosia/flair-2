@@ -111,8 +111,8 @@ def init_train_val_images():
     if wandb.config.one_vs_all:
         df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
         df = df[df[str(wandb.config.one_vs_all)] > 0]
-        
-        list_images = [image for image in list_images if os.path.basename(image) in df['label']]
+        list_msk = df['label'].tolist()
+        list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
     
     list_images_train, list_images_val = train_test_split(list_images,
                                                           test_size=0.01,
