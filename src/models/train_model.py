@@ -116,9 +116,7 @@ def init_train_val_images():
     #     list_msk = df['label'].tolist()
     #     list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
 
-    list_images_train, list_images_val = train_test_split(list_images,
-                                                          test_size=0.01,
-                                                          random_state=wandb.config.seed)
+    list_images_train, list_images_val = train_test_split(list_images, test_size=0.01)
 
     return list_images_train, list_images_val
 

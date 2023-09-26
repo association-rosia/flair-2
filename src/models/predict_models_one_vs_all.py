@@ -76,7 +76,7 @@ def predict(models, dataloader, path_predictions, save_predictions):
 
     for batch in tqdm(dataloader, total=len(dataloader)):
         outputs = torch.zeros((len(batch[0]), 13, 512, 512)).cuda()
-        outputs[:, -1] = 0.75  # init the "other" class to 0.5
+        outputs[:, -1] = 0.25  # init the "other" class to 0.5
 
         image_ids, aerial, sen, _ = batch
         aerial = aerial.half().cuda()
