@@ -71,7 +71,7 @@ def main():
             test_batch_size=wandb.config.test_batch_size,
         )
     else:
-        pos_weight = df.iloc[wandb.config.one_vs_all]['Freq.-test (%)'] / 100.0
+        pos_weight = 1 / (df.iloc[wandb.config.one_vs_all]['Freq.-test (%)'] / 100.0)
 
         config = FLAIR2ConfigModel(
             **wandb.config,
