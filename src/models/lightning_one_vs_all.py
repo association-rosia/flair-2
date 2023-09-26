@@ -130,8 +130,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
         image = image * 255.0
         image = image.astype(np.uint8)
 
-        mask_pred = mask_pred.softmax(dim=0)
-        mask_pred = mask_pred.argmax(dim=0)
+        mask_pred = torch.where(mask_pred > 0.5, 1, 0)
         mask_pred = mask_pred.numpy(force=True)
         mask_pred = mask_pred.astype(np.uint8)
 
