@@ -47,7 +47,7 @@ def main():
     list_images_train, list_images_val = init_train_val_images()
     list_images_test = get_list_images(cst.path_data_test)
 
-    if not wandb.config.one_vs_all:
+    if wandb.config.one_vs_all is None:  # did not work if one_vs_all = 0
         # Initialize FLAIR-2 Lightning model
         lightning_model = FLAIR2Lightning(
             arch_lib=wandb.config.arch_lib,
