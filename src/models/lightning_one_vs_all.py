@@ -43,7 +43,6 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
         self.log_image_idx = None
-        # num_classes = 1 if self.config.one_vs_all else len(self.config.classes)
 
         if self.config.arch_lib == 'custom':
             self.model = MultiModalSegformer.from_pretrained(
