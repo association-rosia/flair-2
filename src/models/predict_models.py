@@ -116,7 +116,7 @@ if __name__ == '__main__':
     start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
 
     start.record()
-    predict(models, weights, dataloader, path_predictions, save_predictions=False)
+    predict(models, weights, dataloader, path_predictions, save_predictions=True)
     end.record()
 
     # Waits for everything to finish running
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     seconds = floor(inference_time_seconds % 60)
     submission_inference_time = f'{minutes}-{seconds}'
 
-    print(f'>>>>>>> inference_time_seconds = {inference_time_seconds}')
+    # print(f'>>>>>>> inference_time_seconds = {inference_time_seconds}')
 
     # predict(models, weights, dataloader, path_predictions, save_predictions=True)
 

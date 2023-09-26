@@ -10,10 +10,10 @@ CLASSES = ['building', 'pervious surface', 'impervious surface', 'bare soil', 'w
 df = pd.read_csv('../../data/results.csv')
 sample_list = list(df['model '])
 list_combinations = list()
-change_type_cols = ['weight'] + CLASSES
-df[change_type_cols] = df[change_type_cols].infer_objects()
+# change_type_cols = ['weight'] + CLASSES
+# df[change_type_cols] = df[change_type_cols].infer_objects()
 
-for change_type_col in change_type_cols:
+for change_type_col in CLASSES:
     df[change_type_col] = df[change_type_col].str.replace(',', '.', regex=True)
     df[change_type_col] = df[change_type_col].astype(float)
 
@@ -25,8 +25,16 @@ def process_combination(chunk, results_list):
     for models in tqdm(chunk):
         models = list(models)
         filtered_df = df.loc[df['model '].isin(models)]
-        if filtered_df['weight'].sum() <= 1:
-            result = {'models': models, 'score': filtered_df[CLASSES].max(axis=0).mean()}
+        if filtered_df['weight'].sum() <= 14 * 60 + 52:
+            score_max = filtered_df[CLASSES].max(axis=0).mean()
+            score_mean = filtered_df[CLASSES].mean(axis=0).mean()
+
+            result = {
+                'models': models,
+                'score_max': score_max,
+                'score_mean': score_mean,
+                'score': (score_max + score_mean) / 2
+            }
             results_list.append(result)
 
 
