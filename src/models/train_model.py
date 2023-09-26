@@ -43,7 +43,7 @@ def main():
     # Load labels and image lists
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
     classes = df['Class']
-    
+
     list_images_train, list_images_val = init_train_val_images()
     list_images_test = get_list_images(cst.path_data_test)
 
@@ -81,11 +81,10 @@ def main():
             list_images_val=list_images_val,
             list_images_test=list_images_test,
         )
-        
+
         lightning_model = FLAIR2LightningOneVsAll(
             config=config,
         )
-        
 
     # Init the PyTorch Lightning Trainer
     trainer = init_trainer()
@@ -106,17 +105,17 @@ def main():
 
     # Finish the WandB run
     wandb.finish()
-    
-    
+
+
 def init_train_val_images():
     list_images = get_list_images(cst.path_data_train)
-    
-    if wandb.config.one_vs_all:
-        df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
-        df = df[df[str(wandb.config.one_vs_all)] > 0]
-        list_msk = df['label'].tolist()
-        list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
-    
+
+    # if wandb.config.one_vs_all:
+    #     df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
+    #     df = df[df[str(wandb.config.one_vs_all)] > 0]
+    #     list_msk = df['label'].tolist()
+    #     list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
+
     list_images_train, list_images_val = train_test_split(list_images,
                                                           test_size=0.01,
                                                           random_state=wandb.config.seed)
@@ -195,7 +194,8 @@ def init_wandb():
     parser.add_argument('--tta-limit', type=int, default=None, help='TTA limit used')
     parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
     parser.add_argument('--max_epochs', type=int, default=30, help='Maximum number of epochs for training')
-    parser.add_argument('--one_vs_all', type=int, default=None, help='Target to use in one vs all training. None mean normal training.')
+    parser.add_argument('--one_vs_all', type=int, default=None,
+                        help='Target to use in one vs all training. None mean normal training.')
     parser.add_argument('--dry', action='store_true', default=False, help='Enable or disable dry mode pipeline')
 
     # Parse the arguments
