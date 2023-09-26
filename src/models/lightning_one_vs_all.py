@@ -39,7 +39,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
         # Initialize hyperparameters and configurations
         self.config = config
         self.class_labels = {key: label for key, label in enumerate(self.config.classes)}
-        self.criterion = nn.BCEWithLogitsLoss()
+        self.criterion = nn.BCEWithLogitsLoss(pos_weight=self.config.pos_weight)
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
         self.log_image_idx = None

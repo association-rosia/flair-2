@@ -73,6 +73,8 @@ def main():
     else:
         pos_weight = df.iloc[wandb.config.one_vs_all]['Freq.-test (%)'] / 100.0
 
+        print(">>>>>>", pos_weight)
+
         config = FLAIR2ConfigModel(
             **wandb.config,
             pos_weight=pos_weight,
