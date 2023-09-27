@@ -259,7 +259,6 @@ class FLAIR2Dataset(Dataset):
         if not os.path.exists(path_sen_metadata):
             sen_metadata = []
         else:
-            print('found!!!!')
             with open(path_sen_metadata, 'r') as f:
                 sen_metadata = json.load(f)
 
