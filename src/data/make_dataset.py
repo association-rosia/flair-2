@@ -257,10 +257,9 @@ class FLAIR2Dataset(Dataset):
             list: Loaded sentinel metadata.
         """
         if not os.path.exists(path_sen_metadata):
-            print('if not os.path.exists(path_sen_metadata):')
             sen_metadata = []
         else:
-            print('with open(path_sen_metadata, r')
+            print('found!!!!')
             with open(path_sen_metadata, 'r') as f:
                 sen_metadata = json.load(f)
 
@@ -285,13 +284,8 @@ class FLAIR2Dataset(Dataset):
         Returns:
             T.Compose: Sentinel image normalization transform.
         """
-        path_sen_metadata = os.path.join(os.getcwd(), cst.path_data, 'sen_pixels_metadata.json')
-
-        print()
-        print(os.getcwd())
-        print(path_sen_metadata)
+        path_sen_metadata = os.path.join(cst.path_data, 'sen_pixels_metadata.json')
         sen_metadata = self.load_sen_metadata(path_sen_metadata)
-        print()
 
         band_mean = None
         band_std = None
