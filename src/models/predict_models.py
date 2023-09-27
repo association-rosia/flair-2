@@ -54,6 +54,7 @@ def create_list_objects(names, weights, test_batch_size, test_num_workers):
         prob_cover=10,
         use_augmentation=True,
         use_tta=False,
+        one_vs_all=None,
         is_val=False,
         is_test=True,
     )
