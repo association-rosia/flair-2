@@ -71,11 +71,11 @@ def main():
             test_batch_size=wandb.config.test_batch_size,
         )
     else:
-        pos_weight = 1 / (df.iloc[wandb.config.one_vs_all]['Freq.-test (%)'] / 100.0)
+        # pos_weight = 1 / (df.iloc[wandb.config.one_vs_all]['Freq.-test (%)'] / 100.0)
 
         config = FLAIR2ConfigModel(
             **wandb.config,
-            pos_weight=pos_weight,
+            # pos_weight=pos_weight,
             classes=classes,
             list_images_train=list_images_train,
             list_images_val=list_images_val,
@@ -110,11 +110,11 @@ def main():
 def init_train_val_images():
     list_images = get_list_images(cst.path_data_train)
 
-    # if wandb.config.one_vs_all:
-    #     df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
-    #     df = df[df[str(wandb.config.one_vs_all)] > 0]
-    #     list_msk = df['label'].tolist()
-    #     list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
+    if wandb.config.one_vs_all is not None:
+        df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
+        df = df[df[str(wandb.config.one_vs_all)] > 0]
+        list_msk = df['label'].tolist()
+        list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
 
     list_images_train, list_images_val = train_test_split(list_images, test_size=0.01)
 
