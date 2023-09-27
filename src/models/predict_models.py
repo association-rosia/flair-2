@@ -106,7 +106,7 @@ if __name__ == '__main__':
     path_predictions = os.path.join(cst.path_submissions, run_names)
     os.makedirs(path_predictions, exist_ok=True)
 
-    test_batch_size = 8
+    test_batch_size = 4
     test_num_workers = 10
 
     models, weights, dataloader = create_list_objects(args.names,
