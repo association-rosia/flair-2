@@ -1,16 +1,12 @@
 import os
-import shutil
-from time import time
 import json
 
 import numpy as np
 import pytorch_lightning as pl
-import tifffile as tiff
 import torch
 import torch.nn as nn
 import wandb
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 from torchmetrics import MetricCollection
@@ -43,16 +39,16 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
         # Initialize hyperparameters and configurations
         self.config = config
         self.class_labels = {key: label for key, label in enumerate(self.config.classes)}
+        # self.criterion = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([self.config.pos_weight]))
         self.criterion = nn.BCEWithLogitsLoss()
         self.tta_limit = 1  # init TTA to mim value possible
         self.path_predictions = None
         self.log_image_idx = None
-        num_classes = 1 if self.config.one_vs_all else len(self.config.classes)
 
         if self.config.arch_lib == 'custom':
             self.model = MultiModalSegformer.from_pretrained(
                 pretrained_model_name_or_path=self.config.arch,
-                num_labels=num_classes,
+                num_labels=1,
                 num_channels=len(self.config.aerial_list_bands),
                 ignore_mismatched_sizes=True
             )
@@ -63,7 +59,7 @@ class FLAIR2LightningOneVsAll(pl.LightningModule):
                 arch=self.config.arch,
                 encoder_name=self.config.encoder_name,
                 num_channels=len(self.config.aerial_list_bands),
-                num_classes=num_classes
+                num_classes=1
             )
 
         if self.config.use_tta:

@@ -6,6 +6,7 @@ class FLAIR2ConfigModel():
         arch_lib: str,
         arch: str,
         encoder_name: str,
+        # pos_weight: float,
         classes: list,
         learning_rate: float,
         class_weights: list,
@@ -30,6 +31,7 @@ class FLAIR2ConfigModel():
         self.arch_lib = arch_lib
         self.arch = arch
         self.encoder_name = encoder_name
+        # self.pos_weight = pos_weight
         self.classes = classes
         self.learning_rate = learning_rate
         self.class_weights = class_weights

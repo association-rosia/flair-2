@@ -43,11 +43,11 @@ def main():
     # Load labels and image lists
     df = pd.read_csv(os.path.join(cst.path_data, 'labels-statistics-12.csv'))
     classes = df['Class']
-    
+
     list_images_train, list_images_val = init_train_val_images()
     list_images_test = get_list_images(cst.path_data_test)
 
-    if not wandb.config.one_vs_all:
+    if wandb.config.one_vs_all is None:  # did not work if one_vs_all = 0
         # Initialize FLAIR-2 Lightning model
         lightning_model = FLAIR2Lightning(
             arch_lib=wandb.config.arch_lib,
@@ -70,25 +70,27 @@ def main():
             train_batch_size=wandb.config.train_batch_size,
             test_batch_size=wandb.config.test_batch_size,
         )
-    else:        
+    else:
+        # pos_weight = 1 / (df.iloc[wandb.config.one_vs_all]['Freq.-test (%)'] / 100.0)
+
         config = FLAIR2ConfigModel(
             **wandb.config,
+            # pos_weight=pos_weight,
             classes=classes,
             list_images_train=list_images_train,
             list_images_val=list_images_val,
             list_images_test=list_images_test,
         )
-        
+
         lightning_model = FLAIR2LightningOneVsAll(
             config=config,
         )
-        
 
     # Init the PyTorch Lightning Trainer
     trainer = init_trainer()
 
     # Select image use for W&B logging
-    log_image_idx = sli.main(list_images_val, wandb.config.one_vs_all)
+    log_image_idx = 0  # sli.main(list_images_val, wandb.config.one_vs_all)
     lightning_model.log_image_idx = log_image_idx
 
     if wandb.config.use_augmentation and wandb.config.use_tta:
@@ -103,20 +105,18 @@ def main():
 
     # Finish the WandB run
     wandb.finish()
-    
-    
+
+
 def init_train_val_images():
     list_images = get_list_images(cst.path_data_train)
-    
-    if wandb.config.one_vs_all:
+
+    if wandb.config.one_vs_all is not None:
         df = pd.read_csv(os.path.join(cst.path_data, 'labels_metadata.csv'))
         df = df[df[str(wandb.config.one_vs_all)] > 0]
         list_msk = df['label'].tolist()
         list_images = [image for image in list_images if os.path.basename(image).replace('IMG', 'MSK') in list_msk]
-    
-    list_images_train, list_images_val = train_test_split(list_images,
-                                                          test_size=0.01,
-                                                          random_state=wandb.config.seed)
+
+    list_images_train, list_images_val = train_test_split(list_images, test_size=0.01)
 
     return list_images_train, list_images_val
 
@@ -192,7 +192,8 @@ def init_wandb():
     parser.add_argument('--tta-limit', type=int, default=None, help='TTA limit used')
     parser.add_argument('--seed', type=int, default=42, help='Seed for random initialization')
     parser.add_argument('--max_epochs', type=int, default=30, help='Maximum number of epochs for training')
-    parser.add_argument('--one_vs_all', type=int, default=None, help='Target to use in one vs all training. None mean normal training.')
+    parser.add_argument('--one_vs_all', type=int, default=None,
+                        help='Target to use in one vs all training. None mean normal training.')
     parser.add_argument('--dry', action='store_true', default=False, help='Enable or disable dry mode pipeline')
 
     # Parse the arguments

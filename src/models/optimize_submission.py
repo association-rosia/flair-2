@@ -25,17 +25,17 @@ def process_combination(chunk, results_list):
     for models in tqdm(chunk):
         models = list(models)
         filtered_df = df.loc[df['model '].isin(models)]
-        if filtered_df['weight'].sum() <= 14 * 60 + 52:
-            score_max = filtered_df[CLASSES].max(axis=0).mean()
-            score_mean = filtered_df[CLASSES].mean(axis=0).mean()
+        # if filtered_df['weight'].sum() <= 14 * 60 + 52:
+        score_max = filtered_df[CLASSES].max(axis=0).mean()
+        score_mean = filtered_df[CLASSES].mean(axis=0).mean()
 
-            result = {
-                'models': models,
-                'score_max': score_max,
-                'score_mean': score_mean,
-                'score': (score_max + score_mean) / 2
-            }
-            results_list.append(result)
+        result = {
+            'models': models,
+            'score_max': score_max,
+            'score_mean': score_mean,
+            'score': (score_max + score_mean) / 2
+        }
+        results_list.append(result)
 
 
 if __name__ == '__main__':
