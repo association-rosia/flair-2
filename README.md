@@ -84,7 +84,7 @@ python src/models/predict_model.py -n {model.ckpt}
 
 ## 🖼️ Results example <a name="results-example"></a>
 
-Aerial input image | Multi-class label | Multi-class prediction
+Aerial input image | Multi-class label | Multi-class pred
 :--------------------:|:--------------------:|:--------------------:|
 ![](assets/aerial.png) | ![](assets/label.png) | ![](assets/pred.png)
 
