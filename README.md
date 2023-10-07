@@ -6,13 +6,15 @@ This project was made possible by our compute partners [2CRSI](https://2crsi.com
 and [NVIDIA](https://www.nvidia.com/).
 
 ## 📋 Table of content
- 1. [🏁 Getting started](#start)
- 2. [⚙️ Train a model](#train)
- 3. [📝 Create a submission](#models)
- 4. [🔬 References](#references)
- 5. [📝 Citing](#citing)
- 6. [🛡️ License](#license)
- 7. [👨🏻‍💻 Contributors](#contributors)
+1. [🏁 Getting started](#start)
+2. [⚙️ Train a model](#train)
+3. [📝 Create a submission](#submission)
+4. [🖼️ Results example](#results-example)
+5. [🏛️ Multi-resolution and multi-temporal model architecture](#model-architecture)
+6. [🔬 References](#references)
+7. [📝 Citing](#citing)
+8. [🛡️ License](#license)
+9. [👨🏻‍💻 Contributors](#contributors)
 
 ## 🏁 Getting started <a name="start"></a>
 
@@ -79,6 +81,14 @@ conda activate flair-2-env
 ```bash
 python src/models/predict_model.py -n {model.ckpt}
 ```
+
+## 🖼️ Results example <a name="results-example"></a>
+
+Aerial input image | Multi-class label | Multi-class prediction
+:--------------------:|:--------------------:|:--------------------:|
+![](assets/aerial.png) | ![](assets/label.png) | ![](assets/pred.png)
+
+## 🏛️ Multi-resolution and multi-temporal model architecture <a name="model-architecture"></a>
 
 ## 🔬 References <a name="references"></a>
 
