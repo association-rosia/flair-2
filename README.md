@@ -51,22 +51,7 @@ conda activate flair-2-env
 3 - Launch the model training in background:
 
 ```bash
-nohup python src/models/train_model.py \
-    --arch DeepLabV3Plus \
-    --encoder_name tu-tf_efficientnetv2_s \
-    --learning_rate 0.001 \
-    --aerial_list_bands R G B NIR DSM \
-    --sen_size 40 \
-    --sen_temp_size 3 \
-    --sen_temp_reduc median \
-    --sen_list_bands 2 3 4 5 6 7 8 8a 11 12 \
-    --prob_cover 10 \
-    --batch_size 26 \
-    --use_augmentation True \
-    --class_weights 0.07451054458054185 0.07123414669165881 0.06501057431176234 0.10243128536707254 0.0751622868386753 0.060451925970421205 0.057084409075513015 0.0712831075581589 0.08115403779097626 0.05767359681290979 0.05792606455080904 0.0952665140613815 0.1308115063901194 \
-    --seed 42 \
-    --dry False \
- </dev/null &>/dev/null &
+nohup python src/models/train_model.py <hyperparams args> </dev/null &>/dev/null &
 ```
 
 (Bonus) - Kill the background process:
