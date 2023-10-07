@@ -6,15 +6,23 @@ This project was made possible by our compute partners [2CRSI](https://2crsi.com
 and [NVIDIA](https://www.nvidia.com/).
 
 ## 📋 Table of content
-1. [🏁 Getting started](#start)
-2. [⚙️ Train a model](#train)
-3. [📝 Create a submission](#submission)
-4. [🖼️ Results example](#results-example)
-5. [🏛️ Multi-resolution and multi-temporal model architecture](#model-architecture)
+1. [🖼️ Results example](#results-example)
+2. [🏛️ Model architecture](#model-architecture)
+3. [🏁 Getting started](#start)
+4. [⚙️ Train a model](#train)
+5. [📝 Create a submission](#submission)
 6. [🔬 References](#references)
 7. [📝 Citing](#citing)
 8. [🛡️ License](#license)
 9. [👨🏻‍💻 Contributors](#contributors)
+
+## 🖼️ Results example <a name="results-example"></a>
+
+Aerial input image | Multi-class label | Multi-class pred
+:--------------------:|:--------------------:|:--------------------:|
+![](assets/aerial.png) | ![](assets/label.png) | ![](assets/pred.png)
+
+## 🏛️ Model architecture <a name="model-architecture"></a>
 
 ## 🏁 Getting started <a name="start"></a>
 
@@ -81,14 +89,6 @@ conda activate flair-2-env
 ```bash
 python src/models/predict_model.py -n {model.ckpt}
 ```
-
-## 🖼️ Results example <a name="results-example"></a>
-
-Aerial input image | Multi-class label | Multi-class pred
-:--------------------:|:--------------------:|:--------------------:|
-![](assets/aerial.png) | ![](assets/label.png) | ![](assets/pred.png)
-
-## 🏛️ Multi-resolution and multi-temporal model architecture <a name="model-architecture"></a>
 
 ## 🔬 References <a name="references"></a>
 
