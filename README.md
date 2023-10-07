@@ -24,8 +24,9 @@ Aerial input image | Multi-class label | Multi-class pred
 
 ## 🏛️ Model architecture <a name="model-architecture"></a>
 
-## 🏁 Getting started <a name="start"></a>
 <img src="assets/model-architecture.jpg">
+
+## 🏁 Getting started <a name="start"></a>
 
 1 - Create the conda environment:
 
