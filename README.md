@@ -6,7 +6,7 @@ This project was made possible by our compute partners [2CRSI](https://2crsi.com
 and [NVIDIA](https://www.nvidia.com/).
 
 ## 📋 Table of content
-1. [🖼️ Results example](#results-example)
+1. [🖼️ Result example](#result-example)
 2. [🏛️ Model architecture](#model-architecture)
 3. [🏁 Getting started](#start)
 4. [⚙️ Train a model](#train)
@@ -16,7 +16,7 @@ and [NVIDIA](https://www.nvidia.com/).
 8. [🛡️ License](#license)
 9. [👨🏻‍💻 Contributors](#contributors)
 
-## 🖼️ Results example <a name="results-example"></a>
+## 🖼️ Result example <a name="result-example"></a>
 
 Aerial input image | Multi-class label | Multi-class pred
 :--------------------:|:--------------------:|:--------------------:|
@@ -25,6 +25,7 @@ Aerial input image | Multi-class label | Multi-class pred
 ## 🏛️ Model architecture <a name="model-architecture"></a>
 
 ## 🏁 Getting started <a name="start"></a>
+<img src="assets/model-architecture.jpg">
 
 1 - Create the conda environment:
 
