@@ -5,17 +5,6 @@
 This project was made possible by our compute partners [2CRSI](https://2crsi.com/)
 and [NVIDIA](https://www.nvidia.com/).
 
-## 📋 Table of content
-1. [🖼️ Result example](#result-example)
-2. [🏛️ Model architecture](#model-architecture)
-3. [🏁 Getting started](#start)
-4. [⚙️ Train a model](#train)
-5. [📝 Create a submission](#submission)
-6. [🔬 References](#references)
-7. [📝 Citing](#citing)
-8. [🛡️ License](#license)
-9. [👨🏻‍💻 Contributors](#contributors)
-
 ## 🖼️ Result example <a name="result-example"></a>
 
 Aerial input image | Multi-class label | Multi-class pred
@@ -94,11 +83,6 @@ python src/models/predict_model.py -n {model.ckpt}
 
 ## 🔬 References <a name="references"></a>
 
-## 📝 Citing <a name="citing"></a>
-
-## 🛡️ License <a name="license"></a>
-
-Project is distributed under [MIT License](https://github.com/association-rosia/flair-2/blob/main/LICENSE)
 
 ## 👨🏻‍💻 Contributors <a name="contributors"></a>
 
