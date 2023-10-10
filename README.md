@@ -11,6 +11,8 @@ Aerial input image | Multi-class label | Multi-class pred
 :--------------------:|:--------------------:|:--------------------:|
 ![](assets/aerial.png) | ![](assets/label.png) | ![](assets/pred.png)
 
+View more results on [WandB project](https://wandb.ai/association-rosia/flair-2)
+
 ## 🏛️ Model architecture <a name="model-architecture"></a>
 
 <img src="assets/model-architecture.jpg">
