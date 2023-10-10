@@ -5,7 +5,9 @@ authors:
   given-names: "Louis"
 - family-names: "URGELL"
   given-names: "Baptiste"
-title: "Data Challenge FLAIR #2 by RosIA"
+title: "GitHub repository"
+publisher: "Github"
+year: "2023"
 version: 1.0
 date-released: 2023-10-9
 url: "https://github.com/association-rosia/flair-2"
