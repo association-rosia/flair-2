@@ -93,6 +93,23 @@ Iakubovskii, Pavel. Segmentation Models Pytorch. GitHub, 2019, https://github.co
 
 Xie, Enze, et al. « SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers ». arXiv.Org, 31 mai 2021, https://arxiv.org/abs/2105.15203v3.
 
+## 📝 Citing
+
+```
+@misc{RebergaUrgell:2023,
+  Author = {Louis Reberga and Baptiste Urgell},
+  Title = {Flair #2},
+  Year = {2023},
+  Publisher = {GitHub},
+  Journal = {GitHub repository},
+  Howpublished = {\url{https://github.com/association-rosia/flair-2}}
+}
+```
+
+## 🛡️ License
+
+Project is distributed under [MIT License](https://github.com/association-rosia/flair-2/blob/main/LICENSE)
+
 ## 👨🏻‍💻 Contributors <a name="contributors"></a>
 
 Louis
