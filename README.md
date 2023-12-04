@@ -5,7 +5,16 @@
 This project was made possible by our compute partners [2CRSI](https://2crsi.com/)
 and [NVIDIA](https://www.nvidia.com/).
 
-## 🖼️ Result example <a name="result-example"></a>
+## 🏆 Challenge ranking
+The score of the challenge was the mIoU.  
+Our solution was the 8th one (out of 30 teams) with a mIoU equal to 0.62610 🎉.
+
+The podium:  
+🥇 strakajk - 0.64130  
+🥈 Breizhchess - 0.63550  
+🥉 qwerty64 - 0.63510  
+
+## 🖼️ Result examples <a name="result-example"></a>
 
 Aerial input image | Multi-class label | Multi-class pred
 :--------------------:|:--------------------:|:--------------------:|
@@ -17,73 +26,21 @@ View more results on the [WandB project](https://wandb.ai/association-rosia/flai
 
 <img src="assets/model-architecture.jpg">
 
-## 🏁 Getting started <a name="start"></a>
+## #️⃣ Command lines
 
-1 - Create the conda environment:
-
-```bash
-conda env create -f environment.yml
-```
-
-2 - Activate the conda environment:
+### Launch a training
 
 ```bash
-conda activate flair-2-env
+python src/models/train_model.py <hyperparams args>
 ```
 
-3 - Install PyTorch and CUDA libraries:
-
-```bash
-conda install pytorch torchvision pytorch-cuda=11.8 -c pytorch -c nvidia
-```
-
-## ⚙️ Train a model <a name="train"></a>
-
-1 - Move to the project folder:
-
-```bash
-cd flair-2
-```
-
-2 - Activate the conda environment:
-
-```bash
-conda activate flair-2-env
-```
-
-3 - Launch the model training in background:
-
-```bash
-nohup python src/models/train_model.py <hyperparams args> </dev/null &>/dev/null &
-```
-
-(Bonus) - Kill the background process:
-
-```bash
-pkill -f 'python src/models/train_model.py'
-```
-
-## 📝 Create a submission <a name="submission"></a>
-
-1 - Move to the project folder:
-
-```bash
-cd flair-2
-```
-
-3 - Activate the conda environment:
-
-```bash
-conda activate flair-2-env
-```
-
-4 - Launch the model inference:
+### Create a submission
 
 ```bash
 python src/models/predict_model.py -n {model.ckpt}
 ```
 
-## 🔬 References <a name="references"></a>
+## 🔬 References
 
 Chen, Liang-Chieh, et al. « Rethinking Atrous Convolution for Semantic Image Segmentation ». arXiv.Org, 17 juin 2017, https://arxiv.org/abs/1706.05587v3.
 
