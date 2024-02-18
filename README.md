@@ -56,7 +56,7 @@ Xie, Enze, et al. « SegFormer: Simple and Efficient Design for Semantic Segmen
 ```
 @misc{RebergaUrgell:2023,
   Author = {Louis Reberga and Baptiste Urgell},
-  Title = {Flair #2},
+  Title = {FLAIR #2},
   Year = {2023},
   Publisher = {GitHub},
   Journal = {GitHub repository},
