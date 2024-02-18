@@ -15,7 +15,7 @@ The podium:
 🥈 Breizhchess - 0.63550  
 🥉 qwerty64 - 0.63510  
 
-## 🖼️ Result examples <a name="result-example"></a>
+## 🖼️ Result example
 
 Aerial input image | Multi-class label | Multi-class pred
 :--------------------:|:--------------------:|:--------------------:|
@@ -23,7 +23,7 @@ Aerial input image | Multi-class label | Multi-class pred
 
 View more results on the [WandB project](https://wandb.ai/association-rosia/flair-2).
 
-## 🏛️ Model architecture <a name="model-architecture"></a>
+## 🏛️ Model architecture
 
 <img src="assets/model-architecture.jpg">
 
