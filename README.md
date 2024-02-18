@@ -43,13 +43,13 @@ python src/models/predict_model.py -n {model.ckpt}
 
 ## 🔬 References
 
-Chen, Liang-Chieh, et al. « Rethinking Atrous Convolution for Semantic Image Segmentation ». arXiv.Org, 17 juin 2017, https://arxiv.org/abs/1706.05587v3.
+Chen, L. C., Papandreou, G., Schroff, F., & Adam, H. (2017). Rethinking atrous convolution for semantic image segmentation. arXiv preprint arXiv:1706.05587.
 
-Garioud, Anatol, et al. « FLAIR #2: Textural and Temporal Information for Semantic Segmentation from Multi-Source Optical Imagery ». arXiv.Org, 23 mai 2023, https://doi.org/10.13140/RG.2.2.30938.93128/1.
+Garioud, A., De Wit, A., Poupée, M., Valette, M., Giordano, S., & Wattrelos, B. (2023). FLAIR# 2: textural and temporal information for semantic segmentation from multi-source optical imagery. arXiv preprint arXiv:2305.14467.
+
+Xie, E., Wang, W., Yu, Z., Anandkumar, A., Alvarez, J. M., & Luo, P. (2021). SegFormer: Simple and efficient design for semantic segmentation with transformers. Advances in Neural Information Processing Systems, 34, 12077-12090.
 
 Iakubovskii, Pavel. Segmentation Models Pytorch. GitHub, 2019, https://github.com/qubvel/segmentation_models.pytorch.
-
-Xie, Enze, et al. « SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers ». arXiv.Org, 31 mai 2021, https://arxiv.org/abs/2105.15203v3.
 
 ## 📝 Citing
 
