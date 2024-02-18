@@ -49,8 +49,6 @@ Garioud, A., De Wit, A., Poupée, M., Valette, M., Giordano, S., & Wattrelos, B.
 
 Xie, E., Wang, W., Yu, Z., Anandkumar, A., Alvarez, J. M., & Luo, P. (2021). SegFormer: Simple and efficient design for semantic segmentation with transformers. Advances in Neural Information Processing Systems, 34, 12077-12090.
 
-Iakubovskii, Pavel. Segmentation Models Pytorch. GitHub, 2019, https://github.com/qubvel/segmentation_models.pytorch.
-
 ## 📝 Citing
 
 ```
