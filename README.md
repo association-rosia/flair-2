@@ -1,6 +1,6 @@
 # 🛰️ FLAIR #2 - Semantic segmentation from Earth Observation data
 
-<img src="assets/bandeau.jpg">
+<img src="assets/flair-2.png">
 
 The challenge involves a semantic segmentation task focusing on land cover description using multimodal remote sensing earth observation data. Participants will explore heterogeneous data fusion methods in a real-world scenario. Upon registration, access is granted to a dataset containing 70,000+ aerial imagery patches with pixel-based annotations and 50,000 Sentinel-2 satellite acquisitions.
 
