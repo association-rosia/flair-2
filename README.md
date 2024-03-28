@@ -4,7 +4,7 @@
 
 The challenge involves a semantic segmentation task focusing on land cover description using multimodal remote sensing earth observation data. Participants will explore heterogeneous data fusion methods in a real-world scenario. Upon registration, access is granted to a dataset containing 70,000+ aerial imagery patches with pixel-based annotations and 50,000 Sentinel-2 satellite acquisitions.
 
-This project was made possible by our compute partners [2CRSI](https://2crsi.com/) and [NVIDIA](https://www.nvidia.com/).
+This project was made possible by our compute partners [2CRSi](https://2crsi.com/) and [NVIDIA](https://www.nvidia.com/).
 
 ## 🏆 Challenge ranking
 The score of the challenge was the mIoU.  
