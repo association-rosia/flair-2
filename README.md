@@ -1,4 +1,4 @@
-# 🛰️ FLAIR #2 - Semantic segmentation from Earth Observation data
+# 🛰️ FLAIR #2
 
 <img src="assets/flair-2.png">
 
